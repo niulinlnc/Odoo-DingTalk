@@ -4,14 +4,15 @@ import hashlib
 import json
 import logging
 import time
+import hmac
+from urllib.parse import quote
 import requests
-import random
 from requests import ReadTimeout
 from odoo import http, _
 from odoo.addons.web.controllers.main import ensure_db, Home
 from odoo.http import request
-from urllib.parse import quote
-import hmac
+
+
 import odoo
 
 _logger = logging.getLogger(__name__)
