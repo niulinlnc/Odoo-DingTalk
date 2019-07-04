@@ -7,6 +7,7 @@ import requests
 from requests import ReadTimeout
 from odoo import http
 from odoo.http import request
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client
 
 _logger = logging.getLogger(__name__)
 
@@ -62,22 +63,19 @@ class AutoLoginController(http.Controller):
 
     def get_user_info_by_auth_code(self, auth_code):
         """
-        根据返回的临时授权码获取用户信息
+        根据返回的免登授权码获取用户信息
         :param auth_code:
         :return:
         """
-        url = request.env['ali.dindin.system.conf'].sudo().search([('key', '=', 'get_userid')]).value
-        token = request.env['ali.dindin.system.conf'].sudo().search([('key', '=', 'token')]).value
-        url = "{}?access_token={}&code={}".format(url, token, auth_code)
         try:
-            result = requests.get(url=url, timeout=5)
-            result = json.loads(result.text)
+            client = get_client(self)
+            result = client.user.getuserinfo(auth_code)
+            logging.info(">>>获取用户信息返回结果:{}".format(result))
+
             if result.get('errcode') != 0:
                 return {'state': False, 'msg': "钉钉接口错误:{}".format(result.get('errmsg'))}
             else:
                 return {'state': True, 'userid': result.get('userid')}
-        except ReadTimeout:
-            return {'state': False, 'msg': "免登超时,请重试!"}
         except Exception as e:
             return {'state': False, 'msg': "登录失败,异常信息:{}".format(str(e))}
 

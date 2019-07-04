@@ -48,7 +48,5 @@ class DinDinBlackboard(models.TransientModel):
             url = self.env['ali.dindin.system.conf'].search([('key', '=', 'get_manage_version_info')]).value
             result = requests.get(url=url, timeout=2)
             return result.text
-        except ReadTimeout:
-            return {"本地网络链接超时!"}
         except Exception as e:
-            return {"获取更新公告信息失败!"}
+            return {"获取更新公告信息失败!,详情:{}".format(e)}
