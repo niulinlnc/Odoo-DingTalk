@@ -212,6 +212,7 @@ class GetUserDingDingReportList(models.TransientModel):
                 size = size
                 userid = res.employee_id.din_id if res.employee_id else ''
                 template_name = res.report_type.name if res.report_type else ''
+                logging.info(">>>查询游标返回结果:{}".format(cursor))
                 try:
                     client = get_client(self)
                     result = client.report.list(start_time, end_time, cursor=cursor, size=size, template_name=template_name, userid=userid)
@@ -243,11 +244,13 @@ class GetUserDingDingReportList(models.TransientModel):
                             report.write(data)
                         else:
                             self.env['dingding.report.user'].create(data)
-                    if d_res.get('has_more'):
-                        cursor = d_res.get('next_cursor')
+
+                    if result.get('has_more'):
+                        cursor = result.get('next_cursor')
                         size = 20
                     else:
                         break
+                    
                 except Exception as e:
                     raise UserError(e)
         action = self.env.ref('dindin_report.dingding_report_user_action').read()[0]
