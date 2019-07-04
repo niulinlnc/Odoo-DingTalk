@@ -6,7 +6,6 @@ import requests
 from odoo import api, fields, models, tools
 from odoo.exceptions import UserError
 from .dingtalk_client import get_client
-from dingtalk.client.api.taobao import TbDingDing
 
 _logger = logging.getLogger(__name__)
 try:

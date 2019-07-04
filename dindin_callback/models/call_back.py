@@ -4,11 +4,10 @@ import logging
 import random
 import string
 import requests
-from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.http import request
-
+from .dingtalk_client import get_client
 
 _logger = logging.getLogger(__name__)
 
@@ -74,29 +73,24 @@ class DinDinCallback(models.Model):
         """
         logging.info(">>>注册事件...")
         for res in self:
-            url = self.env['ali.dindin.system.conf'].search([('key', '=', 'register_call_back')]).value
-            token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
             call_list = list()
             for call in res.call_ids:
                 call_list.append(call.value)
-            data = {
-                'call_back_tag': call_list if call_list else '',
-                'token': res.token if res.token else '',
-                'aes_key': res.aes_key if res.aes_key else '',
-                'url': res.url if res.url else '',
-            }
+            call_back_tags=call_list if call_list else ''
+            token=res.token if res.token else ''
+            aes_key=res.aes_key if res.aes_key else ''
+            url=res.url if res.url else ''
             try:
-                headers = {'Content-Type': 'application/json'}
-                result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data), timeout=5)
-                result = json.loads(result.text)
-                logging.info(result)
+                client = get_client(self)
+                result = client.callback.register_call_back(call_back_tags, token, aes_key, url)
+                logging.info(">>>注册回调事件返回结果:{}".format(result))
                 if result.get('errcode') == 0:
                     self.write({'state': '01'})
                     self.message_post(body=u"注册事件成功")
                 else:
                     raise UserError("注册失败！原因:{}".format(result.get('errmsg')))
-            except ReadTimeout:
-                raise UserError("网络连接超时")
+            except Exception as e:
+                raise UserError(e)
         logging.info(">>>注册事件End...")
 
     @api.multi
@@ -106,30 +100,26 @@ class DinDinCallback(models.Model):
         :return:
         """
         for res in self:
-            url = self.env['ali.dindin.system.conf'].search([('key', '=', 'update_call_back')]).value
-            token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
             call_list = list()
             for call in res.call_ids:
                 call_list.append(call.value)
-            data = {
-                'call_back_tag': call_list if call_list else '',
-                'token': res.token if res.token else '',
-                'aes_key': res.aes_key if res.aes_key else '',
-                'url': res.url if res.url else '',
-            }
+            call_back_tags=call_list if call_list else ''
+            token=res.token if res.token else ''
+            aes_key=res.aes_key if res.aes_key else ''
+            url=res.url if res.url else ''
             try:
-                headers = {'Content-Type': 'application/json'}
-                result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data),
-                                       timeout=30)
-                result = json.loads(result.text)
+                client = get_client(self)
+                result = client.callback.update_call_back(call_back_tags, token, aes_key, url)
+                logging.info(">>>更新回调事件返回结果:{}".format(result))
+
                 logging.info(result)
                 if result.get('errcode') == 0:
                     self.write({'state': '01'})
                     self.message_post(body=u"更新事件成功")
                 else:
                     raise UserError("更新失败！原因:{}".format(result.get('errmsg')))
-            except ReadTimeout:
-                raise UserError("网络连接超时")
+            except Exception as e:
+                raise UserError(e)
 
     @api.multi
     def unlink(self):
@@ -145,22 +135,16 @@ class DinDinCallback(models.Model):
     @api.model
     def delete_call_back(self, call_token):
         logging.info(">>>删除事件...")
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'delete_call_back')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
-        data = {
-            'access_token': call_token,
-        }
         try:
-            result = requests.get(url="{}{}".format(url, token), params=data, timeout=5)
-            result = json.loads(result.text)
-            logging.info(result)
+            client = get_client(self)
+            result = client.callback.delete_call_back()
+            logging.info(">>>删除回调事件返回结果:{}".format(result))
             if result.get('errcode') == 0:
                 logging.info("已删除token为{}的回调事件".format(call_token))
             else:
                 pass
-                # raise UserError("删除事件失败！原因:{}".format(result.get('errmsg')))
-        except ReadTimeout:
-            raise UserError("网络连接超时")
+        except Exception as e:
+            raise UserError(e)
         logging.info(">>>删除事件End...")
 
     @api.model
@@ -169,12 +153,10 @@ class DinDinCallback(models.Model):
         获取所有回调列表
         :return:
         """
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'get_call_back')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
         try:
-            result = requests.get(url="{}{}".format(url, token), timeout=5)
-            result = json.loads(result.text)
-            logging.info("获取所有回调列表结果:{}".format(result))
+            client = get_client(self)
+            result = client.callback.get_call_back()
+            logging.info(">>>获取所有回调事件返回结果:{}".format(result))
             if result.get('errcode') != 0:
                 return {'state': False, 'msg': result.get('errmsg')}
             else:
@@ -197,5 +179,5 @@ class DinDinCallback(models.Model):
                 else:
                     self.env['dindin.users.callback'].create(data)
                 return {'state': True}
-        except ReadTimeout:
-            return {'state': False, 'msg': '网络连接超时'}
+        except Exception as e:
+                raise UserError(e)
