@@ -7,7 +7,7 @@ import requests
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.http import request
-from .dingtalk_client import get_client
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client
 
 _logger = logging.getLogger(__name__)
 
@@ -76,10 +76,10 @@ class DinDinCallback(models.Model):
             call_list = list()
             for call in res.call_ids:
                 call_list.append(call.value)
-            call_back_tags=call_list if call_list else ''
-            token=res.token if res.token else ''
-            aes_key=res.aes_key if res.aes_key else ''
-            url=res.url if res.url else ''
+            call_back_tags = call_list if call_list else ''
+            token = res.token if res.token else ''
+            aes_key = res.aes_key if res.aes_key else ''
+            url = res.url if res.url else ''
             try:
                 client = get_client(self)
                 result = client.callback.register_call_back(call_back_tags, token, aes_key, url)
@@ -103,16 +103,14 @@ class DinDinCallback(models.Model):
             call_list = list()
             for call in res.call_ids:
                 call_list.append(call.value)
-            call_back_tags=call_list if call_list else ''
-            token=res.token if res.token else ''
-            aes_key=res.aes_key if res.aes_key else ''
-            url=res.url if res.url else ''
+            call_back_tags = call_list if call_list else ''
+            token = res.token if res.token else ''
+            aes_key = res.aes_key if res.aes_key else ''
+            url = res.url if res.url else ''
             try:
                 client = get_client(self)
                 result = client.callback.update_call_back(call_back_tags, token, aes_key, url)
                 logging.info(">>>更新回调事件返回结果:{}".format(result))
-
-                logging.info(result)
                 if result.get('errcode') == 0:
                     self.write({'state': '01'})
                     self.message_post(body=u"更新事件成功")
@@ -180,4 +178,4 @@ class DinDinCallback(models.Model):
                     self.env['dindin.users.callback'].create(data)
                 return {'state': True}
         except Exception as e:
-                raise UserError(e)
+            raise UserError(e)

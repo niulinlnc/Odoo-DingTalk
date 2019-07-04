@@ -179,15 +179,15 @@ class HrEmployee(models.Model):
                 raise UserError(e)
 
     # 从钉钉手动获取用户详情（更新或新建）
-    @api.model
+    @api.multi
     def syn_employee_from_dingding(self, userid):
         """
         从钉钉获取用户详情
         通讯录回调事件时触发更新或新增
         :return:
         """
-        client = get_client(self)
         try:
+            client = get_client(self)
             result = client.user.get(userid)
             if result.get('errcode') == 0:
                 data = {

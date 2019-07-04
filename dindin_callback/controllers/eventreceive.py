@@ -31,14 +31,16 @@ class CallBack(Home, http.Controller):
         event_type = msg.get('EventType')
         # --------通讯录------
         if event_type == 'user_add_org' or event_type == 'user_modify_org' or event_type == 'user_leave_org':
+            UserId = msg.get('UserId')
             if event_type == 'user_leave_org':
-                UserId = msg.get('UserId')
                 for user_id in UserId:
                     emp = request.env['hr.employee'].sudo().search([('din_id', '=', user_id)])
                     emp.sudo().write({'active': False})
+                    logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
             else:
                 for user_id in UserId:
                     request.env['hr.employee'].sudo().syn_employee_from_dingding(user_id)
+                    logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
         elif event_type == 'org_dept_create' or event_type == 'org_dept_modify' or event_type == 'org_dept_remove':
             DeptId = msg.get('DeptId')
             if event_type == 'org_dept_remove':
