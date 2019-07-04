@@ -64,10 +64,10 @@ class DingDingSynchronous(models.TransientModel):
                 else:
                     # 从钉钉同步部门时，排除同步隐藏的部门
                     dep = client.department.get(res.get('id'))
-                    if not dep.get('deptHiding'):
+                    if dep.get('deptHiding') == False:
                         self.env['hr.department'].create(data)
                     else:
-                        if not self.env['ir.config_parameter'].sudo().get_param('din_unsynchronized_hidden_departments'): 
+                        if self.env['ir.config_parameter'].sudo().get_param('din_unsynchronized_hidden_departments') == False: 
                             self.env['hr.department'].create(data)
             return True
         except Exception as e:
