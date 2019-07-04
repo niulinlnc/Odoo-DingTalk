@@ -96,7 +96,22 @@ class DingDingSynchronous(models.TransientModel):
 
     @api.model
     def get_dingding_employees(self, department, offset=0, size=100, s_avatar=None):
+        """
+        获取部门成员（详情）
 
+        :param department: 获取的部门id
+        :param offset: 偏移量
+        :param size: 表分页大小，最大100
+        :param order: 排序规则
+                      entry_asc     代表按照进入部门的时间升序
+                      entry_desc    代表按照进入部门的时间降序
+                      modify_asc    代表按照部门信息修改时间升序
+                      modify_desc   代表按照部门信息修改时间降序
+                      custom        代表用户定义排序
+        :param lang: 通讯录语言(默认zh_CN另外支持en_US)
+        :param s_avatar: 是否获取钉钉头像
+        :return:
+        """
         try:
             client = get_client(self)
             result = client.user.list(department[0].din_id, offset, size, order='custom')

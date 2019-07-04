@@ -37,7 +37,8 @@ class CallBack(Home, http.Controller):
                     emp = request.env['hr.employee'].sudo().search([('din_id', '=', user_id)])
                     emp.sudo().write({'active': False})
             else:
-                request.env['dingding.bash.data.synchronous'].sudo().synchronous_dingding_employee()
+                for user_id in UserId:
+                    request.env['hr.employee'].sudo().syn_employee_from_dingding(user_id)
         elif event_type == 'org_dept_create' or event_type == 'org_dept_modify' or event_type == 'org_dept_remove':
             DeptId = msg.get('DeptId')
             if event_type == 'org_dept_remove':
