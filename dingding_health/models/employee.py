@@ -6,6 +6,8 @@ import requests
 import time
 from requests import ReadTimeout
 from odoo import api, fields, models
+from odoo.exceptions import UserError
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client
 
 _logger = logging.getLogger(__name__)
 
@@ -23,29 +25,27 @@ class HrEmployee(models.Model):
         :return:
         """
         if self.env['ir.config_parameter'].sudo().get_param('dingding_health.auto_user_health_info'):
-            url = self.env['ali.dindin.system.conf'].search([('key', '=', 'get_health_list')]).value
-            token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
             for res in self:
                 if res.din_id:
                     today = datetime.date.today()
                     formatted_today = today.strftime('%Y%m%d')
-                    data = {
-                        'type': 0,
-                        'object_id': res.din_id,
-                        'stat_dates': formatted_today,
-                    }
-                    headers = {'Content-Type': 'application/json'}
+
+                    _type = 0
+                    object_id = res.din_id
+                    stat_dates = formatted_today
+
                     try:
-                        result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data), timeout=1)
-                        result = json.loads(result.text)
-                        logging.info(result)
+                        client = get_client(self)
+                        result = client.health.stepinfo_list(_type, object_id, stat_dates)
+                        logging.info(">>>获取员工在今日的步数返回结果:{}".format(result))
+
                         if result.get('errcode') == 0:
                             for stepinfo_list in result.get('stepinfo_list'):
                                 res.update({'dd_step_count': stepinfo_list['step_count']})
                         else:
                             res.update({'dd_step_count': 0})
-                    except ReadTimeout:
-                        logging.info(">>>获取运动数据超时！")
+                    except Exception as e:
+                        raise UserError(e)
                 else:
                     res.update({'dd_step_count': 0})
 
@@ -53,26 +53,22 @@ class HrEmployee(models.Model):
     def get_user_health_state(self):
         """
         获取员工钉钉运动开启状态
-        :return:
+        :param userid: 用户id
         """
         for res in self:
-            url = self.env['ali.dindin.system.conf'].search([('key', '=', 'get_user_health_status')]).value
-            token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
             if res.din_id:
-                data = {'userid': res.din_id}
-                headers = {'Content-Type': 'application/json'}
+                userid = res.din_id
                 try:
-                    result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data),
-                                           timeout=1)
-                    result = json.loads(result.text)
-                    logging.info(result)
+                    client = get_client(self)
+                    result = client.health.stepinfo_getuserstatus(userid)
+                    logging.info(">>>获取员工在今日的步数返回结果:{}".format(result))
                     if result.get('errcode') == 0:
                         if result['status']:
                             res.update({'health_state': 'open'})
                         else:
                             res.update({'health_state': 'close'})
-                except ReadTimeout:
-                    logging.info(">>>获取运动状态超时！")
+                except Exception as e:
+                        raise UserError(e)
 
     @api.model
     def get_time_stamp(self, time_num):
