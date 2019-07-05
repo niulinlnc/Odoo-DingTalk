@@ -68,8 +68,34 @@ class DinDinCalendarEvent(models.Model):
         }
         try:
             client = get_client(self)
-            result = client.tbdingding.dingtalk_oapi_calendar_create(create_vo)
+            result = client.calendar.create(create_vo)
             logging.info(">>>创建日程返回结果:{}".format(result))
             return result.get('dingtalk_calendar_id')
+        except Exception as e:
+            raise UserError(e)
+
+
+    # 重写删除方法
+    @api.multi
+    def unlink(self):
+        for res in self:
+            calendar_id = res.dingtalk_calendar_id
+            userid = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)]).din_id
+            super(DinDinCalendarEvent, self).unlink()
+            self.delete_dindin_calendar(userid, calendar_id)
+            return True
+
+    @api.model
+    def delete_dindin_calendar(self, userid, calendar_id):
+        """
+        日程删除
+
+        :param userid: 员工id
+        :param calendar_id: 日程id
+        """
+        try:
+            client = get_client(self)
+            result = client.calendar.delete(userid=userid, calendar_id=calendar_id)
+            logging.info(">>>删除日程返回结果:{}".format(result))
         except Exception as e:
             raise UserError(e)
