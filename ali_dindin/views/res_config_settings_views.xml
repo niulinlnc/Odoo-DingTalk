@@ -305,6 +305,17 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="auto_del_calendar_event"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="auto_del_calendar_event"/>
+                                <div class="text-muted">
+                                    删除Odoo日历时自动删除钉钉日程(该API暂未开放)
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </xpath>

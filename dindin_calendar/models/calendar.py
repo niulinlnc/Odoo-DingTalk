@@ -80,10 +80,11 @@ class DinDinCalendarEvent(models.Model):
     def unlink(self):
         for res in self:
             calendar_id = res.dingtalk_calendar_id
-            userid = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)]).din_id
-            super(DinDinCalendarEvent, self).unlink()
-            self.delete_dindin_calendar(userid, calendar_id)
-            return True
+            userid = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)]).din_id   
+            auto_del_calendar_event = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.auto_del_calendar_event')
+            if auto_del_calendar_event:
+                self.delete_dindin_calendar(userid, calendar_id)
+        return super(DinDinCalendarEvent, self).unlink()
 
     @api.model
     def delete_dindin_calendar(self, userid, calendar_id):
