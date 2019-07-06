@@ -5,6 +5,7 @@ import requests
 from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client
 
 _logger = logging.getLogger(__name__)
 
@@ -52,25 +53,27 @@ class GetDingDingHrmList(models.TransientModel):
     @api.multi
     def get_hrm_list(self):
         """
-        获取钉钉员工花名册
-        :return:
+        批量获取员工花名册字段信息
+        智能人事业务，企业/ISV根据员工id批量访问员工花名册信息
+
+        :param userid_list: 员工id列表
+        :param field_filter_list: 需要获取的花名册字段信息
         """
         logging.info(">>>获取钉钉员工花名册start")
         if len(self.emp_ids) > 20:
             raise UserError("钉钉仅支持批量查询小于等于20个员工!")
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'hrm_list')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
+
         user_str = ''
         for user in self.emp_ids:
             if user_str == '':
                 user_str = user_str + "{}".format(user.din_id)
             else:
                 user_str = user_str + ",{}".format(user.din_id)
-        data = {'userid_list': user_str}
+        userid_list = user_str
         try:
-            headers = {'Content-Type': 'application/json'}
-            result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data), timeout=5)
-            result = json.loads(result.text)
+            client = get_client(self)
+            result = client.employeerm.list(userid_list, field_filter_list=())
+            logging.info(">>>批量获取员工花名册返回结果{}".format(result))
             if result.get('errcode') == 0:
                 for res in result.get('result'):
                     line_list = list()
@@ -98,8 +101,8 @@ class GetDingDingHrmList(models.TransientModel):
                             })
             else:
                 raise UserError("获取失败,原因:{}\r\n或许您没有开通智能人事功能，请登录钉钉安装智能人事应用!".format(result.get('errmsg')))
-        except ReadTimeout:
-            raise UserError("网络连接超时")
+        except Exception as e:
+            raise UserError(e)
         logging.info(">>>获取钉钉员工花名册end")
         action = self.env.ref('dingding_hrm.dingding_hrm_list_action')
         action_dict = action.read()[0]

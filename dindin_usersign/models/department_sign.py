@@ -8,6 +8,7 @@ import requests
 from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client
 
 _logger = logging.getLogger(__name__)
 
@@ -27,24 +28,32 @@ class DinDinDepartmentSign(models.Model):
 
     @api.multi
     def find_department_sign(self):
-        """获取部门签到记录"""
+        """
+        获得签到数据
+
+        :param department_id: 部门id（1 表示根部门）
+        :param start_time: 开始时间
+        :param end_time: 结束时间
+        :param offset: 偏移量
+        :param size: 分页大小
+        :param order_asc: 是否正序排列
+        :return:
+        """
         logging.info(">>>获取部门用户签到记录...")
         for res in self:
             res.line_ids = False
-            url = self.env['ali.dindin.system.conf'].search([('key', '=', 'get_dept_checkin')]).value
-            token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
             start_time = datetime.datetime.strptime("{}.42".format(str(res.start_time)), "%Y-%m-%d %H:%M:%S.%f").timetuple()
             end_time = datetime.datetime.strptime("{}.42".format(str(res.end_time)), "%Y-%m-%d %H:%M:%S.%f").timetuple()
-            data = {
-                'department_id': res.department_id.din_id,
-                'start_time': "{}000".format(int(time.mktime(start_time))),
-                'end_time': "{}000".format(int(time.mktime(end_time))),
-            }
+            start_time = "{}000".format(int(time.mktime(start_time)))
+            end_time = "{}000".format(int(time.mktime(end_time)))
             if res.is_root:
-                data.update({'department_id': '1'})
+                department_id = '1'
+            else:
+                department_id = res.department_id.din_id
             try:
-                result = requests.get(url="{}{}".format(url, token), params=data, timeout=20)
-                result = json.loads(result.text)
+                client = get_client(self)
+                result = client.checkin.record(department_id, start_time, end_time, offset=0, size=100, order_asc=True)
+                logging.info(">>>获得签到数据返回结果{}".format(result))
                 if result.get('errcode') == 0:
                     line_list = list()
                     for data in result.get('data'):
@@ -61,8 +70,8 @@ class DinDinDepartmentSign(models.Model):
                             'avatar': data.get('avatar'),
                         })
                     res.line_ids = line_list
-            except ReadTimeout:
-                raise UserError("获取部门签到记录网络连接超时")
+            except Exception as e:
+                raise UserError(e)
 
     @api.model
     def get_time_stamp(self, timeNum):

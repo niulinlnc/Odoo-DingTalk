@@ -6,6 +6,7 @@ import requests
 from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client
 
 _logger = logging.getLogger(__name__)
 
@@ -54,25 +55,25 @@ class GetDingDingHrmDimissionList(models.TransientModel):
     @api.multi
     def get_hrm_dimission_list(self):
         """
-        获取离职员工信息
-        :return:
+        批量获取员工离职信息
+        根据传入的staffId列表，批量查询员工的离职信息
+
+        :param userid_list: 员工id
         """
         logging.info(">>>获取钉钉获取离职员工信息start")
         if len(self.emp_ids) > 50:
             raise UserError("钉钉仅支持批量查询小于等于50个员工!")
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'hrm_listdimission')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
         user_str = ''
         for user in self.emp_ids:
             if user_str == '':
                 user_str = user_str + "{}".format(user.din_id)
             else:
                 user_str = user_str + ",{}".format(user.din_id)
-        data = {'userid_list': user_str}
+        userid_list = user_str
         try:
-            headers = {'Content-Type': 'application/json'}
-            result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data), timeout=5)
-            result = json.loads(result.text)
+            client = get_client(self)
+            result = client.employeerm.listdimission(userid_list)
+            logging.info(">>>批量获取员工离职信息返回结果{}".format(result))
             if result.get('errcode') == 0:
                 if len(result.get('result')) < 1:
                     raise UserError("选择的员工未离职!")
@@ -105,8 +106,8 @@ class GetDingDingHrmDimissionList(models.TransientModel):
                             self.env['dingding.hrm.dimission.list'].create(data)
             else:
                 raise UserError("获取失败,原因:{}\r\n或许您没有开通智能人事功能，请登录钉钉安装智能人事应用!".format(result.get('errmsg')))
-        except ReadTimeout:
-            raise UserError("网络连接超时")
+        except Exception as e:
+            raise UserError(e)
         logging.info(">>>获取获取离职员工信息end")
         action = self.env.ref('dingding_hrm.dingding_hrm_dimission_list_action')
         action_dict = action.read()[0]

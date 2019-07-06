@@ -7,6 +7,7 @@ import requests
 from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client
 
 _logger = logging.getLogger(__name__)
 
@@ -26,12 +27,19 @@ class DinDinUsersSign(models.Model):
 
     @api.multi
     def find_users_sign(self):
-        """获取用户签到记录"""
+        """
+        获取多个用户的签到记录 (如果是取1个人的数据，时间范围最大到10天，如果是取多个人的数据，时间范围最大1天。)
+
+        :param userid_list: 需要查询的用户列表
+        :param start_time: 起始时间
+        :param end_time: 截止时间
+        :param offset: 偏移量
+        :param size: 分页大小
+        :return:
+        """
         logging.info(">>>获取用户签到记录...")
         for res in self:
             res.line_ids = False
-            url = self.env['ali.dindin.system.conf'].search([('key', '=', 'get_user_checkin')]).value
-            token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
             start_time = datetime.datetime.strptime("{}.42".format(str(res.start_time)),
                                                     "%Y-%m-%d %H:%M:%S.%f").timetuple()
             end_time = datetime.datetime.strptime("{}.42".format(str(res.end_time)), "%Y-%m-%d %H:%M:%S.%f").timetuple()
@@ -41,16 +49,16 @@ class DinDinUsersSign(models.Model):
                     user_str = user_str + "{}".format(user.din_id)
                 else:
                     user_str = user_str + ",{}".format(user.din_id)
-            data = {
-                'userid_list': user_str,
-                'start_time': "{}000".format(int(time.mktime(start_time))),
-                'end_time': "{}000".format(int(time.mktime(end_time))),
-                'cursor': 0,
-                'size': 100,
-            }
+
+            userid_list = user_str
+            start_time = "{}000".format(int(time.mktime(start_time)))
+            end_time = "{}000".format(int(time.mktime(end_time)))
+            cursor = 0
+            size = 100
             try:
-                result = requests.get(url="{}{}".format(url, token), params=data, timeout=20)
-                result = json.loads(result.text)
+                client = get_client(self)
+                result = client.checkin.record_get(userid_list, start_time, end_time, offset=cursor, size=size)
+                logging.info(">>>获取多个用户的签到记录结果{}".format(result))
                 if result.get('errcode') == 0:
                     line_list = list()
                     r_result = result.get('result')
@@ -68,8 +76,8 @@ class DinDinUsersSign(models.Model):
                     res.line_ids = line_list
                 else:
                     raise UserError("获取失败,原因:{}，\r\n如果是取1个人的数据，时间范围最大到10天，\r\n如果是取多个人的数据，时间范围最大1天。".format(result.get('errmsg')))
-            except ReadTimeout:
-                raise UserError("获取用户签到记录网络连接超时")
+            except Exception as e:
+                raise UserError(e)
 
     @api.model
     def get_time_stamp(self, timeNum):

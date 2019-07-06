@@ -13,7 +13,7 @@
     'auto_install': False,
     'data': [
         'security/ir.model.access.csv',
-        'data/system_conf.xml',
+        # 'data/system_conf.xml',
         'data/config.xml',
         'views/config.xml',
         'views/assets.xml',

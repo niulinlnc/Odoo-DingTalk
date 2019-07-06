@@ -50,115 +50,86 @@ class DinDinWorkRecord(models.Model):
         res['context'] = {'default_res_model': 'dindin.work.record', 'default_res_id': self.id}
         return res
 
-    # @api.multi
-    # def send_record(self):
-    #     """
-    #     新增待办事项
-
-    #     :param userid: 用户id
-    #     :param create_time: 待办时间。Unix时间戳
-    #     :param title: 标题
-    #     :param url: 待办跳转url
-    #     :param form_item_dict: 表单列表 OrderedDict((('标题1', '内容1'),('标题2', '内容2')))
-    #     :param originator_user_id: manager7078
-    #     :param source_name: 待办来源名称
-    #     """
-    #     self.ensure_one()
-
-    #     formItemList = ()
-    #     for line in self.line_ids:
-    #         formItemList = formItemList + ((line.title, line.content))     
-
-    #     userid = self.emp_id.din_id
-    #     create_time = self.record_time
-    #     title = self.name
-    #     url = self.record_url if self.record_url else ''
-
-    #     try:
-    #         client = get_client(self)
-    #         result = client.workrecord.add(userid, create_time, title, url, formItemList, originator_user_id='', source_name='')
-    #         logging.info(">>>新增待办事项返回结果{}".format(result))
-    #         if result.get('errcode') == 0:
-    #             self.write({'state': '01', 'record_id': result.get('record_id')})
-    #         else:
-    #             raise UserError('发送待办事项失败，详情为:{}'.format(result.get('errmsg')))
-    #     except Exception as e:
-    #         raise UserError(e)
-    #     self.send_message_to_emp()
-    #     self.message_post(body=u"待办事项已推送到钉钉!", message_type='notification')
-
     @api.multi
     def send_record(self):
-        """发送待办事项函数"""
+        """
+        新增待办事项
+
+        :param userid: 用户id
+        :param create_time: 待办时间。Unix时间戳
+        :param title: 标题
+        :param url: 待办跳转url
+        :param form_item_dict: 表单列表 OrderedDict((('标题1', '内容1'),('标题2', '内容2')))
+        :param originator_user_id: manager7078
+        :param source_name: 待办来源名称
+        """
         self.ensure_one()
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'workrecord_add')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
-        formItemList = list()
+
+        formItemList = ()
         for line in self.line_ids:
-            formItemList.append({
-                'title': line.title,
-                'content': line.content
-            })
-        c_time = int(time.mktime(time.strptime(str(self.record_time), "%Y-%m-%d %H:%M:%S")))
-        data = {
-            'userid': self.emp_id.din_id,
-            'create_time': c_time,
-            'title': self.name,
-            'url': self.record_url if self.record_url else '',
-            'formItemList': formItemList,
-        }
-        headers = {'Content-Type': 'application/json'}
+            formItemList = formItemList + ((line.title, line.content))     
+
+        userid = self.emp_id.din_id
+        create_time = self.record_time
+        title = self.name
+        url = self.record_url if self.record_url else ''
+
         try:
-            result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data), timeout=30)
-            result = json.loads(result.text)
-            logging.info(">>>发送待办事项返回结果{}".format(result))
+            client = get_client(self)
+            result = client.workrecord.add(userid, create_time, title, url, formItemList, originator_user_id='', source_name='')
+            logging.info(">>>新增待办事项返回结果{}".format(result))
             if result.get('errcode') == 0:
                 self.write({'state': '01', 'record_id': result.get('record_id')})
             else:
                 raise UserError('发送待办事项失败，详情为:{}'.format(result.get('errmsg')))
-        except ReadTimeout:
-            raise UserError("网络连接超时！")
+        except Exception as e:
+            raise UserError(e)
         self.send_message_to_emp()
         self.message_post(body=u"待办事项已推送到钉钉!", message_type='notification')
 
     @api.multi
     def send_message_to_emp(self):
+        """
+        发送企业通知消息
+
+        :param agentid: 企业应用id，这个值代表以哪个应用的名义发送消息
+        :param msg_body: BodyBase 消息体
+        :param touser_list: 员工id列表
+        :param toparty_list: 部门id列表
+        :return:
+        """
         self.ensure_one()
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'send_work_message')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
         msg_list = list()
         for line in self.line_ids:
             msg_list.append({'key': "{}: ".format(line.title), 'value': line.content})
-        data = {
-            'agent_id': self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid'),
-            'userid_list': self.emp_id.din_id,
-            'msg': {
-                "msgtype": "oa",
-                "oa": {
-                    "message_url": self.record_url,
-                    "head": {
-                        "text": self.name
-                    },
-                    "body": {
-                        "title": self.name,
-                        "form": msg_list,
-                        "file_count": self.attachment_number,
-                        "author": self.env.user.name
-                    }
+        
+        agentid = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid')
+        userid_list = self.emp_id.din_id
+        msg_body = {
+            "msgtype": "oa",
+            "oa": {
+                "message_url": self.record_url,
+                "head": {
+                    "text": self.name
+                },
+                "body": {
+                    "title": self.name,
+                    "form": msg_list,
+                    "file_count": self.attachment_number,
+                    "author": self.env.user.name
                 }
             }
         }
-        headers = {'Content-Type': 'application/json'}
         try:
-            result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data), timeout=2)
-            result = json.loads(result.text)
-            logging.info(">>>发送待办消息结果：{}".format(result))
+            client = get_client(self)
+            result = client.message.send(agentid, msg_body, touser_list=userid_list, toparty_list=())
+            logging.info(">>>发送待办消息返回结果{}".format(result))
             if result.get('errcode') == 0:
                 return result.get('task_id')
             else:
                 logging.info('发送消息失败，详情为:{}'.format(result.get('errmsg')))
-        except ReadTimeout:
-            return False
+        except Exception as e:
+            raise UserError(e)
 
     @api.model
     def get_workrecord(self):
@@ -204,49 +175,51 @@ class DinDinWorkRecord(models.Model):
 
     @api.model
     def get_workrecord_url(self, user_id, offset, limit):
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'workrecord_getbyuserid')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
-        data = {
-            'userid': user_id,
-            'offset': offset,
-            'limit': limit,
-            'status': 0,
-        }
-        headers = {'Content-Type': 'application/json'}
+        """
+        获取用户的待办事项
+
+        :param userid: 用户唯一ID
+        :param offset: 分页游标，从0开始，如返回结果中has_more为true，则表示还有数据，offset再传上一次的offset+limit
+        :param limit: 分页大小，最多50
+        :param status: 待办事项状态，0表示未完成，1表示完成
+        """
+        userid = user_id
+        offset = offset
+        limit = limit
+        status = 0
         try:
-            result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data), timeout=30)
-            result = json.loads(result.text)
-            logging.info(">>>{}".format(result))
+            client = get_client(self)
+            result = client.workrecord.getbyuserid(userid, status, offset=offset, limit=limit)
+            logging.info(">>>获取用户待办事项返回结果{}".format(result))
             if result.get('errcode') == 0:
                 return result.get('records')
-        except ReadTimeout:
-            logging.info("获取所有用户的待办事项网络连接超时")
+        except Exception as e:
+            raise UserError(e)
 
     @api.multi
     def record_update(self):
-        """待办更新"""
+        """
+        更新待办事项状态
+
+        :param userid: 用户id
+        :param record_id: 待办事项唯一id
+        """
         for res in self:
             logging.info("待办更新")
-            url = self.env['ali.dindin.system.conf'].search([('key', '=', 'workrecord_update')]).value
-            token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
-            data = {
-                'userid': res.emp_id.din_id,
-                'record_id': res.record_id,
-            }
-            headers = {'Content-Type': 'application/json'}
+            userid = res.emp_id.din_id
+            record_id = res.record_id
             try:
-                result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data),
-                                       timeout=30)
-                result = json.loads(result.text)
-                logging.info(">>>{}".format(result))
+                client = get_client(self)
+                result = client.workrecord.update(userid, record_id)
+                logging.info(">>>更新待办事项返回结果{}".format(result))
                 if result.get('errcode') == 0:
                     if result.get('result'):
                         res.message_post(body=u"待办状态已更新!", message_type='notification')
                         res.write({'record_state': '01'})
                     else:
                         res.message_post(body=u"待办状态更新失败!", message_type='notification')
-            except ReadTimeout:
-                logging.info("获取所有用户的待办事项网络连接超时")
+            except Exception as e:
+                raise UserError(e)
 
     @api.model
     def get_record_number(self):
@@ -337,23 +310,26 @@ class GetUserDingDingWorkRecord(models.TransientModel):
 
     @api.model
     def get_workrecord_url(self, user_id, offset, limit):
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'workrecord_getbyuserid')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
-        data = {
-            'userid': user_id,
-            'offset': offset,
-            'limit': limit,
-            'status': 0,
-        }
-        headers = {'Content-Type': 'application/json'}
+        """
+        获取用户的待办事项
+
+        :param userid: 用户唯一ID
+        :param offset: 分页游标，从0开始，如返回结果中has_more为true，则表示还有数据，offset再传上一次的offset+limit
+        :param limit: 分页大小，最多50
+        :param status: 待办事项状态，0表示未完成，1表示完成
+        """
+        userid = user_id
+        offset = offset
+        limit = limit
+        status = 0
         try:
-            result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data), timeout=30)
-            result = json.loads(result.text)
-            logging.info(">>>{}".format(result))
+            client = get_client(self)
+            result = client.workrecord.getbyuserid(userid, status, offset=offset, limit=limit)
+            logging.info(">>>获取用户待办事项返回结果{}".format(result))
             if result.get('errcode') == 0:
                 return result.get('records')
-        except ReadTimeout:
-            logging.info("获取所有用户的待办事项网络连接超时")
+        except Exception as e:
+            raise UserError(e)
 
     @api.model
     def get_time_stamp(self, timeNum):

@@ -6,6 +6,7 @@ from requests import ReadTimeout
 from odoo import api, fields, models, tools
 from odoo.exceptions import UserError
 from odoo.modules import get_module_resource
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client
 import base64
 
 _logger = logging.getLogger(__name__)
@@ -52,30 +53,24 @@ class AddDingDingEmployee(models.Model):
     @api.multi
     def add_employee(self):
         """
-        添加待入职员工
-        :return:
+        智能人事添加企业待入职员工
+
+        :param param: 添加待入职入参
         """
         self.ensure_one()
         logging.info(">>>添加待入职员工start")
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'hrm_addpreentry')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
         if not self.dept_id.din_id:
             raise UserError("所选部门在钉钉中不存在!")
         user = self.env['hr.employee'].search([('user_id', '=', self.env.user.id)])
-        data = {
-            'param': {
-                'name': self.name,
-                'mobile': self.mobile,
-                'pre_entry_time': str(self.pre_entry_time),
-                'op_userid': user[0].din_id if user else '',
-                'extend_info': {'depts': self.dept_id.din_id}
-            }
-        }
+        name = self.name
+        mobile = self.mobile
+        pre_entry_time = str(self.pre_entry_time)
+        op_userid = user[0].din_id if user else ''
+        extend_info = {'depts': self.dept_id.din_id}
         try:
-            headers = {'Content-Type': 'application/json'}
-            result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data), timeout=2)
-            result = json.loads(result.text)
-            logging.info("添加待入职员工结果:{}".format(result))
+            client = get_client(self)
+            result = client.employeerm.addpreentry(name, mobile, pre_entry_time=pre_entry_time, op_userid=op_userid, extend_info=extend_info)
+            logging.info(">>>添加待入职员工返回结果{}".format(result))
             if result.get('errcode') == 0:
                 self.write({
                     'user_id': result.get('userid'),
@@ -83,8 +78,8 @@ class AddDingDingEmployee(models.Model):
                 })
             else:
                 raise UserError("添加失败,原因:{}!".format(result.get('errmsg')))
-        except ReadTimeout:
-            raise UserError("网络连接超时")
+        except Exception as e:
+            raise UserError(e)
         logging.info(">>>添加待入职员工end")
 
     @api.multi

@@ -14,7 +14,7 @@
     'data': [
         'security/hrm_group.xml',
         'security/ir.model.access.csv',
-        'data/system_conf.xml',
+        # 'data/system_conf.xml',
         'views/menu.xml',
         'views/assets.xml',
         'views/hrm_list.xml',

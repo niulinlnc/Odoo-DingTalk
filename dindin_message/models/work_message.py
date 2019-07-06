@@ -5,6 +5,7 @@ import requests
 from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client
 
 _logger = logging.getLogger(__name__)
 
@@ -208,49 +209,40 @@ class DinDinWorkMessage(models.Model):
                 raise UserError("需要发送的消息体msg参数格式不正确！")
         else:
             raise UserError("需要发送的消息体不存在！")
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'send_work_message')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
-        data = {
-            'agent_id': self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid'),  # 应用id
-            'msg': msg if msg else {}
-        }
+        agent_id = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid')  # 应用id
+        msg = msg if msg else {}
         if toall:
-            data.update({'to_all_user': 'true'})
+            to_all_user = 'true'
         else:
             if userstr:
-                data.update({'userid_list': userstr})
+                userid_list = userstr
             else:
-                data.update({'dept_id_list': deptstr})
-        headers = {'Content-Type': 'application/json'}
+                dept_id_list = deptstr
         try:
-            result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data), timeout=30)
-            result = json.loads(result.text)
+            client = get_client(self)
+            result = client.message.asyncsend(self, msg, agent_id, userid_list=userid_list, dept_id_list=dept_id_list, to_all_user=to_all_user)
             logging.info(">>>发送工作消息返回结果{}".format(result))
             if result.get('errcode') == 0:
                 return result.get('task_id')
             else:
                 raise UserError('发送消息失败，详情为:{}'.format(result.get('errmsg')))
-        except ReadTimeout:
-            raise UserError("网络连接超时！")
+        except Exception as e:
+            raise UserError(e)
 
     @api.multi
     def search_message_state(self):
         """
-        查询消息进度
+        获取异步发送企业会话消息的发送进度
+
+        :param agent_id: 发送消息时使用的微应用的id
+        :param task_id: 发送消息时钉钉返回的任务id
         :return:
         """
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'search_work_message')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
-        data = {
-            'agent_id': self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid'),  # 应用id
-            'task_id': self.task_id
-        }
-        headers = {'Content-Type': 'application/json'}
-        logging.info(data)
+        agent_id = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid')  # 应用id
+        task_id = self.task_id
         try:
-            result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data),
-                                   timeout=30)
-            result = json.loads(result.text)
+            client = get_client(self)
+            result = client.message.getsendprogress(agent_id, task_id)
             logging.info(">>>查询工作消息状态返回结果{}".format(result))
             if result.get('errcode') == 0:
                 progress = result.get('progress')
@@ -258,24 +250,24 @@ class DinDinWorkMessage(models.Model):
                 self.message_post(body=u"查询消息进度成功，返回值:{}!".format(result), message_type='notification')
             else:
                 raise UserError('查询工作消息状态，详情为:{}'.format(result.get('errmsg')))
-        except ReadTimeout:
-            raise UserError("网络连接超时！")
+        except Exception as e:
+            raise UserError(e)
 
     @api.multi
     def search_message_result(self):
-        """查询工作通知消息的发送结果"""
+        """
+        获取异步向企业会话发送消息的结果
+
+        :param agent_id: 微应用的agentid
+        :param task_id: 异步任务的id
+        :return:
+        """
         logging.info(">>>开始查询工作通知消息的发送结果")
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'work_message_result')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
-        data = {
-            'agent_id': self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid'),  # 应用id
-            'task_id': self.task_id
-        }
-        headers = {'Content-Type': 'application/json'}
+        agent_id = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid')  # 应用id
+        task_id = self.task_id
         try:
-            result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data),
-                                   timeout=30)
-            result = json.loads(result.text)
+            client = get_client(self)
+            result = client.message.getsendresult(agent_id=agent_id, task_id=task_id)
             logging.info(">>>查询工作消息状态返回结果{}".format(result))
             if result.get('errcode') == 0:
                 send_result = result.get('send_result')
@@ -302,8 +294,8 @@ class DinDinWorkMessage(models.Model):
                 self.message_post(body=u"查询工作通知消息的发送结果成功", message_type='notification')
             else:
                 raise UserError('查询工作通知消息的发送结果失败，详情为:{}'.format(result.get('errmsg')))
-        except ReadTimeout:
-            raise UserError("网络连接超时！")
+        except Exception as e:
+            raise UserError(e)
 
 
 class DinDinWorkMessageUserList(models.Model):

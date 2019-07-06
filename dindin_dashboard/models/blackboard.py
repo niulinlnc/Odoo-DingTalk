@@ -24,7 +24,7 @@ class DinDinBlackboard(models.TransientModel):
         if emp:
             try:
                 client = get_client(self)
-                result = client.tbdingding.dingtalk_oapi_blackboard_listtopten(emp.din_id)
+                result = client.blackboard.listtopten(emp.din_id)
                 logging.info(">>>获取公告返回结果:{}".format(result))
                 if result.get('errcode') == 0:
                     line_list = list()

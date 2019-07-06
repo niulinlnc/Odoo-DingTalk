@@ -6,6 +6,8 @@ import time
 import requests
 from requests import ReadTimeout
 from odoo import api, fields, models
+from odoo.exceptions import UserError
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client
 
 _logger = logging.getLogger(__name__)
 
@@ -39,26 +41,28 @@ class DinDinSignList(models.Model):
     @api.model
     def get_signs_by_user(self, userid, signtime):
         """
-        根据用户和签到日期获取签到信息
-        :param userid:
-        :param signtime:
+        获取多个用户的签到记录 (如果是取1个人的数据，时间范围最大到10天，如果是取多个人的数据，时间范围最大1天。)
+
+        :param userid_list: 需要查询的用户列表
+        :param start_time: 起始时间
+        :param end_time: 截止时间
+        :param offset: 偏移量
+        :param size: 分页大小
         :return:
         """
         start_time = int(signtime) - 1002
         end_time = int(signtime) + 1002
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'get_user_checkin')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
-        data = {
-            'userid_list': userid,
-            'start_time': str(start_time),
-            'end_time': str(end_time),
-            'cursor': 0,
-            'size': 100,
-        }
+
+        userid_list = userid
+        start_time = str(start_time)
+        end_time = str(end_time)
+        cursor = 0
+        size = 100
+
         try:
-            result = requests.get(url="{}{}".format(url, token), params=data, timeout=5)
-            result = json.loads(result.text)
-            logging.info("获取用户签到结果:{}".format(result))
+            client = get_client(self)
+            result = client.checkin.record_get(userid_list, start_time, end_time, offset=cursor, size=size)
+            logging.info(">>>获取多个用户的签到记录结果{}".format(result))
             if result.get('errcode') == 0:
                 r_result = result.get('result')
                 for data in r_result.get('page_list'):
@@ -75,5 +79,5 @@ class DinDinSignList(models.Model):
                     })
             else:
                 logging.info(">>>获取用户签到记录失败,原因:{}".format(result.get('errmsg')))
-        except ReadTimeout:
-            logging.info(">>>获取用户签到记录网络连接超时")
+        except Exception as e:
+            raise UserError(e)
