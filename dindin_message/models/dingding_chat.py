@@ -374,10 +374,7 @@ class DingDingSendChatMessage(models.TransientModel):
             client = get_client(self)
             result = client.chat.send(chatid, msg)
             logging.info(">>>发送群消息返回结果{}".format(result))
-            if result.get('errcode') == 0:
-                ding_chat.message_post(body="消息已成功发送!".format(self.message), message_type='notification')
-            else:
-                raise UserError('操作失败，详情为:{}'.format(result.get('errmsg')))
+            ding_chat.message_post(body="消息已成功发送!".format(self.message), message_type='notification')
         except Exception as e:
             raise UserError(e)
 
@@ -449,35 +446,31 @@ class DingDingChatList(models.TransientModel):
                 client = get_client(self)
                 result = client.chat.get(chatid)
                 logging.info(">>>获取群会话返回结果{}".format(result))
-                if result.get('errcode') == 0:
-                    chat_info = result.get('chat_info')
-                    employee = self.env['hr.employee'].sudo().search([('din_id', '=', chat_info.get('owner'))])
-                    if not employee:
-                        raise UserError("返回的群管理员在Odoo系统中不存在!")
-                    user_list = list()
-                    for userlist in chat_info.get('useridlist'):
-                        user = self.env['hr.employee'].sudo().search([('din_id', '=', userlist)])
-                        if user:
-                            user_list.append(user[0].id)
-                    data = {
-                        'chat_id': chat_info.get('chatid'),
-                        'chat_icon': chat_info.get('icon'),
-                        'name': chat_info.get('name'),
-                        'employee_id': employee[0].id,
-                        'show_history_type': chat_info.get('showHistoryType'),
-                        'searchable': chat_info.get('searchable'),
-                        'validation_type': chat_info.get('validationType'),
-                        'mention_all_authority': chat_info.get('mentionAllAuthority'),
-                        'management_ype': chat_info.get('managementType'),
-                        'useridlist': [(6, 0, user_list)],
-                        'state': 'normal'
-                    }
-                    chat = self.env['dingding.chat'].sudo().search([('chat_id', '=', res.chat_id)])
-                    if chat:
-                        chat.write(data)
-                    else:
-                        self.env['dingding.chat'].sudo().create(data)
+                employee = self.env['hr.employee'].sudo().search([('din_id', '=', result.get('owner'))])
+                if not employee:
+                    raise UserError("返回的群管理员在Odoo系统中不存在!")
+                user_list = list()
+                for userlist in result.get('useridlist'):
+                    user = self.env['hr.employee'].sudo().search([('din_id', '=', userlist)])
+                    if user:
+                        user_list.append(user[0].id)
+                data = {
+                    'chat_id': result.get('chatid'),
+                    'chat_icon': result.get('icon'),
+                    'name': result.get('name'),
+                    'employee_id': employee[0].id,
+                    'show_history_type': result.get('showHistoryType'),
+                    'searchable': result.get('searchable'),
+                    'validation_type': result.get('validationType'),
+                    'mention_all_authority': result.get('mentionAllAuthority'),
+                    'management_ype': result.get('managementType'),
+                    'useridlist': [(6, 0, user_list)],
+                    'state': 'normal'
+                }
+                chat = self.env['dingding.chat'].sudo().search([('chat_id', '=', res.chat_id)])
+                if chat:
+                    chat.write(data)
                 else:
-                    raise UserError('操作失败:{}'.format(result.get('errmsg')))
+                    self.env['dingding.chat'].sudo().create(data)
             except Exception as e:
                 raise UserError(e)
