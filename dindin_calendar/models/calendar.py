@@ -89,7 +89,7 @@ class DinDinCalendarEvent(models.Model):
     @api.model
     def delete_dindin_calendar(self, userid, calendar_id):
         """
-        日程删除
+        日程删除（该API暂未开放）
 
         :param userid: 员工id
         :param calendar_id: 日程id

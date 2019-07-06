@@ -23,8 +23,6 @@ class ResConfigSettings(models.TransientModel):
     din_unsynchronized_hidden_departments = fields.Boolean(string=u'不同步隐藏部门')
     din_login_appid = fields.Char(string=u'钉钉登录appId')
     din_login_appsecret = fields.Char(string=u'钉钉登录appSecret')
-    auto_calendar_event = fields.Boolean(string=u'自动上传日程')
-    auto_del_calendar_event = fields.Boolean(string=u'自动删除日程')
     
     # 安装钉钉模块
     module_dindin_attendance = fields.Boolean(
@@ -112,8 +110,6 @@ class ResConfigSettings(models.TransientModel):
             din_unsynchronized_hidden_departments=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_unsynchronized_hidden_departments'),
             din_login_appid=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_login_appid'),
             din_login_appsecret=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_login_appsecret'),
-            auto_calendar_event=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.auto_calendar_event'),
-            auto_del_calendar_event=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.auto_del_calendar_event'),
         )
         return res
 
@@ -134,8 +130,6 @@ class ResConfigSettings(models.TransientModel):
         self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_unsynchronized_hidden_departments', self.din_unsynchronized_hidden_departments)
         self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_login_appid', self.din_login_appid)
         self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_login_appsecret', self.din_login_appsecret)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.auto_calendar_event', self.auto_calendar_event)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.auto_del_calendar_event', self.auto_calendar_event)
         data = {
             'name': '钉钉-定时更新token值',
             'active': True,

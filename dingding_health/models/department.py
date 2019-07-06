@@ -27,7 +27,6 @@ class HrDepartment(models.Model):
                 if res.din_id:
                     today = datetime.date.today()
                     formatted_today = today.strftime('%Y%m%d')
-
                     _type = 1
                     object_id = res.din_id
                     stat_dates = formatted_today

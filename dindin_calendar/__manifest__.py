@@ -14,6 +14,7 @@
     'data': [
         # 'security/ir.model.access.csv',
         'data/defaulr_num.xml',
+        'views/res_config_settings.xml',
         'views/calendar.xml',
     ],
     'images':  ['static/description/app1.png', 'static/description/app2.png']

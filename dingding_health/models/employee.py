@@ -29,11 +29,9 @@ class HrEmployee(models.Model):
                 if res.din_id:
                     today = datetime.date.today()
                     formatted_today = today.strftime('%Y%m%d')
-
                     _type = 0
                     object_id = res.din_id
                     stat_dates = formatted_today
-
                     try:
                         client = get_client(self)
                         result = client.health.stepinfo_list(_type, object_id, stat_dates)

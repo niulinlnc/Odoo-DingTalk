@@ -7,6 +7,7 @@ import requests
 from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client
 
 _logger = logging.getLogger(__name__)
 
@@ -48,6 +49,43 @@ class DinDinWorkRecord(models.Model):
         res['domain'] = [('res_model', '=', 'dindin.work.record'), ('res_id', 'in', self.ids)]
         res['context'] = {'default_res_model': 'dindin.work.record', 'default_res_id': self.id}
         return res
+
+    # @api.multi
+    # def send_record(self):
+    #     """
+    #     新增待办事项
+
+    #     :param userid: 用户id
+    #     :param create_time: 待办时间。Unix时间戳
+    #     :param title: 标题
+    #     :param url: 待办跳转url
+    #     :param form_item_dict: 表单列表 OrderedDict((('标题1', '内容1'),('标题2', '内容2')))
+    #     :param originator_user_id: manager7078
+    #     :param source_name: 待办来源名称
+    #     """
+    #     self.ensure_one()
+
+    #     formItemList = ()
+    #     for line in self.line_ids:
+    #         formItemList = formItemList + ((line.title, line.content))     
+
+    #     userid = self.emp_id.din_id
+    #     create_time = self.record_time
+    #     title = self.name
+    #     url = self.record_url if self.record_url else ''
+
+    #     try:
+    #         client = get_client(self)
+    #         result = client.workrecord.add(userid, create_time, title, url, formItemList, originator_user_id='', source_name='')
+    #         logging.info(">>>新增待办事项返回结果{}".format(result))
+    #         if result.get('errcode') == 0:
+    #             self.write({'state': '01', 'record_id': result.get('record_id')})
+    #         else:
+    #             raise UserError('发送待办事项失败，详情为:{}'.format(result.get('errmsg')))
+    #     except Exception as e:
+    #         raise UserError(e)
+    #     self.send_message_to_emp()
+    #     self.message_post(body=u"待办事项已推送到钉钉!", message_type='notification')
 
     @api.multi
     def send_record(self):
