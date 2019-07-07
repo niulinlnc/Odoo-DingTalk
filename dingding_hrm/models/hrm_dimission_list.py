@@ -74,38 +74,37 @@ class GetDingDingHrmDimissionList(models.TransientModel):
             client = get_client(self)
             result = client.employeerm.listdimission(userid_list)
             logging.info(">>>批量获取员工离职信息返回结果{}".format(result))
-            if result.get('errcode') == 0:
-                if len(result.get('result')) < 1:
-                    raise UserError("选择的员工未离职!")
-                for res in result.get('result'):
-                    logging.debug(res)
-                    emp = self.env['hr.employee'].search([('din_id', '=', res.get('userid'))])
-                    if emp:
-                        hrm = self.env['dingding.hrm.dimission.list'].search([('emp_id', '=', emp[0].id)])
-                        handover_userid = self.env['hr.employee'].search([('din_id', '=', res.get('handover_userid'))])
-                        main_dept = self.env['hr.department'].search([('din_id', '=', res.get('main_dept_id'))])
-                        dept_list = list()
-                        for depti in res.get('dept_list'):
-                            hr_dept = self.env['hr.department'].search([('din_id', '=', depti.get('dept_id'))])
-                            if hr_dept:
-                                dept_list.append(hr_dept.id)
-                        data = {
-                            'emp_id': emp[0].id,
-                            'last_work_day': self.get_time_stamp(res.get('last_work_day')),
-                            'department_id': [(6, 0, dept_list)],
-                            'reason_memo': res.get('reason_memo'),
-                            'reason_type': res.get('reason_type'),
-                            'pre_status': res.get('pre_status'),
-                            'handover_userid': handover_userid.id if handover_userid else False,
-                            'status': res.get('status'),
-                            'main_dept_name': main_dept.id if main_dept else False,
-                        }
-                        if hrm:
-                            hrm.write(data)
-                        else:
-                            self.env['dingding.hrm.dimission.list'].create(data)
-            else:
-                raise UserError("获取失败,原因:{}\r\n或许您没有开通智能人事功能，请登录钉钉安装智能人事应用!".format(result.get('errmsg')))
+ 
+            if len(result) < 1:
+                raise UserError("选择的员工未离职!")
+            for res in result.get('result'):
+                logging.debug(res)
+                emp = self.env['hr.employee'].search([('din_id', '=', res.get('userid'))])
+                if emp:
+                    hrm = self.env['dingding.hrm.dimission.list'].search([('emp_id', '=', emp[0].id)])
+                    handover_userid = self.env['hr.employee'].search([('din_id', '=', res.get('handover_userid'))])
+                    main_dept = self.env['hr.department'].search([('din_id', '=', res.get('main_dept_id'))])
+                    dept_list = list()
+                    for depti in res.get('dept_list'):
+                        hr_dept = self.env['hr.department'].search([('din_id', '=', depti.get('dept_id'))])
+                        if hr_dept:
+                            dept_list.append(hr_dept.id)
+                    data = {
+                        'emp_id': emp[0].id,
+                        'last_work_day': self.get_time_stamp(res.get('last_work_day')),
+                        'department_id': [(6, 0, dept_list)],
+                        'reason_memo': res.get('reason_memo'),
+                        'reason_type': res.get('reason_type'),
+                        'pre_status': res.get('pre_status'),
+                        'handover_userid': handover_userid.id if handover_userid else False,
+                        'status': res.get('status'),
+                        'main_dept_name': main_dept.id if main_dept else False,
+                    }
+                    if hrm:
+                        hrm.write(data)
+                    else:
+                        self.env['dingding.hrm.dimission.list'].create(data)
+
         except Exception as e:
             raise UserError(e)
         logging.info(">>>获取获取离职员工信息end")

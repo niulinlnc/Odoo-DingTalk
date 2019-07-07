@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <template id="dindin_calendar" name="DinDin Calendar" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/dindin_calendar/static/src/js/list_calendar.js"></script>
+        </xpath>
+    </template>
+
     <record id="calendar_event_form_form_inherit" model="ir.ui.view">
         <field name="name">calendar.event.form</field>
         <field name="model">calendar.event</field>

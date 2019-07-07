@@ -89,7 +89,7 @@ class DinDinCalendarEvent(models.Model):
     @api.model
     def delete_dindin_calendar(self, userid, calendar_id):
         """
-        日程删除（该API暂未开放）
+        日程删除（该接口暂未开放）
 
         :param userid: 员工id
         :param calendar_id: 日程id
@@ -98,5 +98,38 @@ class DinDinCalendarEvent(models.Model):
             client = get_client(self)
             result = client.calendar.delete(userid=userid, calendar_id=calendar_id)
             logging.info(">>>删除日程返回结果:{}".format(result))
+        except Exception as e:
+            raise UserError(e)
+
+    @api.model
+    def list_dindin_calendar(self):
+        """
+        日程查询（该接口暂未开放）
+
+        :param user_id: 员工ID
+        :param calendar_folder_id: 钉钉日历文件夹的对外id，默认是自己的默认文件夹
+        :param time_min: 查询时间下限
+        :param i_cal_uid: 日程跨域唯一id，用于唯一标识一组关联日程事件
+        :param single_events: 是否需要展开循环日程
+        :param page_token: 查询对应页，值有上一次请求返回的结果里对应nextPageToken
+        :param max_results: 结果返回的最多数量，默认250，最多返回2500
+        :param time_max: 查询时间上限
+        """
+
+        user_id = self.env['hr.employee'].search([('user_id', '=', self.env.user.id)]).din_id
+        calendar_folder_id=''
+        time_min=None
+        i_cal_uid=''
+        single_events=''
+        page_token=''
+        max_results=250
+        time_max=None
+      
+        try:
+            client = get_client(self)
+            result = client.calendar.list(user_id, calendar_folder_id=calendar_folder_id, time_min=time_min, i_cal_uid=i_cal_uid,
+                single_events=single_events, page_token=page_token, max_results=max_results, time_max=time_max)
+            logging.info(">>>查询日程返回结果:{}".format(result))
+            # 测试接口，待完善
         except Exception as e:
             raise UserError(e)

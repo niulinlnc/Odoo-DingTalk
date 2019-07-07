@@ -74,10 +74,10 @@ class GetDingDingHrmList(models.TransientModel):
             client = get_client(self)
             result = client.employeerm.list(userid_list, field_filter_list=())
             logging.info(">>>批量获取员工花名册返回结果{}".format(result))
-            if result.get('errcode') == 0:
-                for res in result.get('result'):
+            if result.get('emp_field_info_v_o'):
+                for res in result.get('emp_field_info_v_o'):
                     line_list = list()
-                    for field_list in res.get('field_list'):
+                    for field_list in res['field_list']['emp_field_v_o']:
                         line_list.append((0, 0, {
                             'group_id': field_list.get('group_id'),
                             'value': field_list.get('value'),
@@ -99,8 +99,7 @@ class GetDingDingHrmList(models.TransientModel):
                                 'department_id': emp[0].department_id.id,
                                 'line_ids': line_list
                             })
-            else:
-                raise UserError("获取失败,原因:{}\r\n或许您没有开通智能人事功能，请登录钉钉安装智能人事应用!".format(result.get('errmsg')))
+
         except Exception as e:
             raise UserError(e)
         logging.info(">>>获取钉钉员工花名册end")

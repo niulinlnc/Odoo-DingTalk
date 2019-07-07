@@ -65,9 +65,13 @@ class DinDinWorkRecord(models.Model):
         """
         self.ensure_one()
 
-        formItemList = {}
-        for line in self.line_ids:
-            formItemList.update({'{}'.format(line.title): line.content}) 
+        
+        if len(self.line_ids) < 1:
+            raise UserError('待办表单列表不能为空!')
+        else:
+            formItemList = {}
+            for line in self.line_ids:
+                formItemList.update({'{}'.format(line.title): line.content}) 
 
         userid = self.emp_id.din_id
         create_time = self.record_time

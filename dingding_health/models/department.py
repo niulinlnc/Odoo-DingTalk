@@ -34,8 +34,8 @@ class HrDepartment(models.Model):
                         client = get_client(self)
                         result = client.health.stepinfo_list(_type, object_id, stat_dates)
                         logging.info(">>>获取部门在今日的步数返回结果:{}".format(result))
-                        if result.get('errcode') == 0:
-                            for stepinfo_list in result.get('stepinfo_list'):
+                        if result['stepinfo_list']:
+                            for stepinfo_list in result['stepinfo_list']['basic_step_info_vo']:
                                 res.update({'dd_step_count': stepinfo_list['step_count']})
                         else:
                             res.update({'dd_step_count': 0})
