@@ -292,12 +292,6 @@ class GetUserDingDingWorkRecord(models.TransientModel):
                         break
                     else:
                         offset = offset + limit
-                # except TypeError:
-                #     logging.info(">>>TypeError: argument of type 'NoneType' is not iterable")
-                #     break
-                # except ValueError:
-                #     logging.info(">>>ValueError：NoneType' is not iterable")
-                #     break
                 except Exception as e:
                     raise UserError(e)
         return True

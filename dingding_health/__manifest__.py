@@ -14,7 +14,6 @@
     'data': [
         'security/health_group.xml',
         'security/ir.model.access.csv',
-        # 'data/system_conf.xml',
         'views/menu.xml',
         'views/res_config_settings.xml',
         'views/employee.xml',

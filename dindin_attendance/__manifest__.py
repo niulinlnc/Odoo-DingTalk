@@ -14,7 +14,6 @@
     'data': [
         'security/ir.model.access.csv',
         'security/dingding_security.xml',
-        # 'data/system_conf.xml',
         'views/asset.xml',
         'views/simplegroups.xml',
         # 'views/attendance_list.xml',
