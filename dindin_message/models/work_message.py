@@ -294,6 +294,34 @@ class DinDinWorkMessage(models.Model):
         except Exception as e:
             raise UserError(e)
 
+    @api.multi
+    def recall_work_message(self):
+        """
+        撤回工作通知消息
+        根据发送工作通知消息的taskId进行消息撤回操作
+        文档地址：https://open-doc.dingtalk.com/docs/api.htm?apiId=43694
+
+        :param agent_id: 发送工作通知的微应用agentId
+        :param msg_task_id: 发送工作通知返回的taskId
+        """
+        for msg in self:
+            agent_id = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid')  # 应用id
+            task_id = msg.task_id
+            try:
+                client = get_client(self)
+                result = client.tbdingding.dingtalk_oapi_message_corpconversation_recall(agent_id, task_id)
+                logging.info(">>>撤回工作消息返回结果{}".format(result))
+                msg.write({'state': '0'})
+                if msg.user_ids:
+                    for user in msg.user_ids:
+                        user.write({'msg_type': '04'})
+                elif msg.dep_ids:
+                    for dept in msg.dep_ids:
+                        dept.write({'msg_type': '04'})
+                else:
+                    msg.message_post(body=u"全体工作通知消息撤回成功，返回值:{}!".format(result), message_type='notification')
+            except Exception as e:
+                raise UserError(e)
 
 class DinDinWorkMessageUserList(models.Model):
     _name = 'dindin.work.message.user.list'
@@ -304,7 +332,8 @@ class DinDinWorkMessageUserList(models.Model):
         ('00', '失败'),
         ('01', '未读'),
         ('02', '已读'),
-        ('03', '未发送')
+        ('03', '未发送'),
+        ('04', '已撤回')
     ]
 
     emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True)
@@ -331,7 +360,8 @@ class DinDinWorkMessageDeptList(models.Model):
         ('00', '失败'),
         ('01', '未读'),
         ('02', '已读'),
-        ('03', '未发')
+        ('03', '未发'),
+        ('04', '撤回')
     ]
 
     dept_id = fields.Many2one(comodel_name='hr.department', string=u'部门', ondelete='cascade', required=True)

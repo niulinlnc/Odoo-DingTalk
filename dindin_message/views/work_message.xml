@@ -145,6 +145,17 @@
         <field name="view_mode">tree,form</field>
     </record>
 
+    <record id='recall_dindin_work_message_action' model='ir.actions.server'>
+        <field name='name'>撤回工作消息</field>
+        <field name="model_id" ref="dindin_message.model_dindin_work_message"/>
+        <field name="binding_model_id" ref="model_dindin_work_message"/>
+        <field name="state">code</field>
+        <field name="code">
+if records:
+    action = records.recall_work_message()
+        </field>
+    </record>
+
     <menuitem name="工作消息"
               id="dindin_message.dindin_work_message_menu"
               parent="ali_dindin.message_menu"
