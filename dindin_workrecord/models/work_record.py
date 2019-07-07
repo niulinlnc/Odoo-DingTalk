@@ -65,23 +65,19 @@ class DinDinWorkRecord(models.Model):
         """
         self.ensure_one()
 
-        formItemList = ()
+        formItemList = {}
         for line in self.line_ids:
-            formItemList = formItemList + ((line.title, line.content))     
+            formItemList.update({'{}'.format(line.title): line.content}) 
 
         userid = self.emp_id.din_id
         create_time = self.record_time
         title = self.name
         url = self.record_url if self.record_url else ''
-
         try:
             client = get_client(self)
             result = client.workrecord.add(userid, create_time, title, url, formItemList, originator_user_id='', source_name='')
             logging.info(">>>新增待办事项返回结果{}".format(result))
-            if result.get('errcode') == 0:
-                self.write({'state': '01', 'record_id': result.get('record_id')})
-            else:
-                raise UserError('发送待办事项失败，详情为:{}'.format(result.get('errmsg')))
+            self.write({'state': '01', 'record_id': result})
         except Exception as e:
             raise UserError(e)
         self.send_message_to_emp()
@@ -96,7 +92,7 @@ class DinDinWorkRecord(models.Model):
         :param msg_body: BodyBase 消息体
         :param touser_list: 员工id列表
         :param toparty_list: 部门id列表
-        :return:
+        :return:message_id
         """
         self.ensure_one()
         msg_list = list()
@@ -104,7 +100,8 @@ class DinDinWorkRecord(models.Model):
             msg_list.append({'key': "{}: ".format(line.title), 'value': line.content})
         
         agentid = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid')
-        userid_list = self.emp_id.din_id
+        userid_list = ()
+        userid_list = userid_list + (self.emp_id.din_id,)
         msg_body = {
             "msgtype": "oa",
             "oa": {
@@ -125,7 +122,7 @@ class DinDinWorkRecord(models.Model):
             result = client.message.send(agentid, msg_body, touser_list=userid_list, toparty_list=())
             logging.info(">>>发送待办消息返回结果{}".format(result))
             if result.get('errcode') == 0:
-                return result.get('task_id')
+                return result.get('message_id')
             else:
                 logging.info('发送消息失败，详情为:{}'.format(result.get('errmsg')))
         except Exception as e:
@@ -143,11 +140,11 @@ class DinDinWorkRecord(models.Model):
                 result = self.get_workrecord_url(emp.get('din_id'), offset, limit)
                 try:
                     if 'list' in result:
-                        for res in result.get('list'):
+                        for res in result['list']['work_record_vo']:
                             record = self.env['dindin.work.record'].search(
                                 [('record_id', '=', res.get('record_id')), ('record_type', '!=', 'out')])
                             rec_line = list()
-                            for res_line in res.get('forms'):
+                            for res_line in res['forms']['form_item_vo']:
                                 rec_line.append(
                                     (0, 0, {'title': res_line.get('title'), 'content': res_line.get('content')}))
                             data = {
@@ -183,16 +180,12 @@ class DinDinWorkRecord(models.Model):
         :param limit: 分页大小，最多50
         :param status: 待办事项状态，0表示未完成，1表示完成
         """
-        userid = user_id
-        offset = offset
-        limit = limit
         status = 0
         try:
             client = get_client(self)
-            result = client.workrecord.getbyuserid(userid, status, offset=offset, limit=limit)
+            result = client.workrecord.getbyuserid(user_id, status, offset=offset, limit=limit)
             logging.info(">>>获取用户待办事项返回结果{}".format(result))
-            if result.get('errcode') == 0:
-                return result.get('records')
+            return result
         except Exception as e:
             raise UserError(e)
 
@@ -210,14 +203,9 @@ class DinDinWorkRecord(models.Model):
             record_id = res.record_id
             try:
                 client = get_client(self)
-                result = client.workrecord.update(userid, record_id)
-                logging.info(">>>更新待办事项返回结果{}".format(result))
-                if result.get('errcode') == 0:
-                    if result.get('result'):
-                        res.message_post(body=u"待办状态已更新!", message_type='notification')
-                        res.write({'record_state': '01'})
-                    else:
-                        res.message_post(body=u"待办状态更新失败!", message_type='notification')
+                client.workrecord.update(userid, record_id)
+                res.message_post(body=u"待办状态已更新!", message_type='notification')
+                res.write({'record_state': '01'})
             except Exception as e:
                 raise UserError(e)
 
@@ -237,11 +225,11 @@ class DinDinWorkRecord(models.Model):
     @api.model
     def get_time_stamp(self, timeNum):
         """
-        将10位时间戳转换为时间
+        将13位时间戳转换为时间
         :param timeNum:
         :return:
         """
-        timeStamp = float(timeNum)
+        timeStamp = float(timeNum/1000)
         timeArray = time.localtime(timeStamp)
         otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
         return otherStyleTime
@@ -278,20 +266,20 @@ class GetUserDingDingWorkRecord(models.TransientModel):
                 result = self.get_workrecord_url(emp.get('din_id'), offset, limit)
                 try:
                     if 'list' in result:
-                        for d_res in result.get('list'):
+                        for res in result['list']['work_record_vo']:
                             record = self.env['dindin.work.record'].search(
-                                [('record_id', '=', d_res.get('record_id')), ('record_type', '!=', 'out')])
+                                [('record_id', '=', res.get('record_id')), ('record_type', '!=', 'out')])
                             rec_line = list()
-                            for res_line in d_res.get('forms'):
+                            for res_line in res['forms']['form_item_vo']:
                                 rec_line.append(
                                     (0, 0, {'title': res_line.get('title'), 'content': res_line.get('content')}))
                             data = {
-                                'name': d_res.get('title'),
+                                'name': res.get('title'),
                                 'emp_id': emp.get('id'),
-                                'record_url': d_res.get('url'),
-                                'record_time': self.get_time_stamp(d_res.get('create_time')),
+                                'record_url': res.get('url'),
+                                'record_time': self.get_time_stamp(res.get('create_time')),
                                 'record_type': 'put',
-                                'record_id': d_res.get('record_id'),
+                                'record_id': res.get('record_id'),
                                 'line_ids': rec_line,
                             }
                             if not record:
@@ -300,12 +288,14 @@ class GetUserDingDingWorkRecord(models.TransientModel):
                         break
                     else:
                         offset = offset + limit
-                except TypeError:
-                    logging.info(">>>TypeError: argument of type 'NoneType' is not iterable")
-                    break
-                except ValueError:
-                    logging.info(">>>ValueError：NoneType' is not iterable")
-                    break
+                # except TypeError:
+                #     logging.info(">>>TypeError: argument of type 'NoneType' is not iterable")
+                #     break
+                # except ValueError:
+                #     logging.info(">>>ValueError：NoneType' is not iterable")
+                #     break
+                except Exception as e:
+                    raise UserError(e)
         return True
 
     @api.model
@@ -318,27 +308,23 @@ class GetUserDingDingWorkRecord(models.TransientModel):
         :param limit: 分页大小，最多50
         :param status: 待办事项状态，0表示未完成，1表示完成
         """
-        userid = user_id
-        offset = offset
-        limit = limit
         status = 0
         try:
             client = get_client(self)
-            result = client.workrecord.getbyuserid(userid, status, offset=offset, limit=limit)
+            result = client.workrecord.getbyuserid(user_id, status, offset=offset, limit=limit)
             logging.info(">>>获取用户待办事项返回结果{}".format(result))
-            if result.get('errcode') == 0:
-                return result.get('records')
+            return result
         except Exception as e:
             raise UserError(e)
 
     @api.model
     def get_time_stamp(self, timeNum):
         """
-        将10位时间戳转换为时间
+        将13位时间戳转换为时间
         :param timeNum:
         :return:
         """
-        timeStamp = float(timeNum)
+        timeStamp = float(timeNum/1000)
         timeArray = time.localtime(timeStamp)
         otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
         return otherStyleTime

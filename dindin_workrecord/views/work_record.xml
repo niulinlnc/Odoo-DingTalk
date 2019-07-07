@@ -152,7 +152,7 @@
 
     <!--待办列表-->
     <record id="dindin_work_get_record_tree_view" model="ir.ui.view">
-        <field name="name">待办列表</field>
+        <field name="name">获取待办列表</field>
         <field name="model">dindin.work.record</field>
         <field name="arch" type="xml">
             <tree default_order="id desc" create="false" edit="false">
@@ -166,10 +166,10 @@
     </record>
 
     <record id="dindin_work_get_record_form_view" model="ir.ui.view">
-        <field name="name">待办列表</field>
+        <field name="name">获取待办</field>
         <field name="model">dindin.work.record</field>
         <field name="arch" type="xml">
-            <form string="待办列表">
+            <form string="钉钉待办">
                 <header>
                     <button name="record_update" type="object" string="待办更新" class="oe_highlight"
                             attrs="{'invisible': [('record_state', '!=', '00')]}"/>
@@ -229,7 +229,7 @@
     </record>
 
     <record model="ir.ui.view" id="dindin_work_get_record_kanban">
-        <field name="name">待办列表看板</field>
+        <field name="name">获取待办看板</field>
         <field name="model">dindin.work.record</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile" create="false" js_class="dingding_work_record_kanban">
@@ -269,7 +269,7 @@
     </record>
 
     <record id="dindin_work_get_record_action" model="ir.actions.act_window">
-        <field name="name">待办列表</field>
+        <field name="name">获取待办列表</field>
         <field name="res_model">dindin.work.record</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="domain">[('record_type', '=', 'put'), ('record_state', '=', '00')]</field>
@@ -279,7 +279,7 @@
                 (0, 0, {'view_mode': 'form', 'view_id': ref('dindin_workrecord.dindin_work_get_record_form_view')})]"/>
     </record>
 
-    <menuitem name="待办列表"
+    <menuitem name="获取待办列表"
               id="dindin_work_get_record_menu"
               parent="dindin_workrecord.work_record_menu"
               sequence="1"
