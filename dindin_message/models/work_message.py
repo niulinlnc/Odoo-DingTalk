@@ -211,21 +211,21 @@ class DinDinWorkMessage(models.Model):
             raise UserError("需要发送的消息体不存在！")
         agent_id = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid')  # 应用id
         msg = msg if msg else {}
+        to_all_user = 'false'
+        userid_list = ()
+        dept_id_list = ()
         if toall:
             to_all_user = 'true'
         else:
             if userstr:
-                userid_list = userstr
+                userid_list = (userstr,)
             else:
-                dept_id_list = deptstr
+                dept_id_list = (deptstr,)
         try:
             client = get_client(self)
-            result = client.message.asyncsend(self, msg, agent_id, userid_list=userid_list, dept_id_list=dept_id_list, to_all_user=to_all_user)
+            result = client.message.asyncsend(msg, agent_id, userid_list=userid_list, dept_id_list = dept_id_list, to_all_user=to_all_user)
             logging.info(">>>发送工作消息返回结果{}".format(result))
-            if result.get('errcode') == 0:
-                return result.get('task_id')
-            else:
-                raise UserError('发送消息失败，详情为:{}'.format(result.get('errmsg')))
+            return result
         except Exception as e:
             raise UserError(e)
 
@@ -244,12 +244,8 @@ class DinDinWorkMessage(models.Model):
             client = get_client(self)
             result = client.message.getsendprogress(agent_id, task_id)
             logging.info(">>>查询工作消息状态返回结果{}".format(result))
-            if result.get('errcode') == 0:
-                progress = result.get('progress')
-                self.write({'state': str(progress.get('status'))})
-                self.message_post(body=u"查询消息进度成功，返回值:{}!".format(result), message_type='notification')
-            else:
-                raise UserError('查询工作消息状态，详情为:{}'.format(result.get('errmsg')))
+            self.write({'state': str(result.get('status'))})
+            self.message_post(body=u"查询消息进度成功，返回值:{}!".format(result), message_type='notification')
         except Exception as e:
             raise UserError(e)
 
@@ -269,31 +265,32 @@ class DinDinWorkMessage(models.Model):
             client = get_client(self)
             result = client.message.getsendresult(agent_id=agent_id, task_id=task_id)
             logging.info(">>>查询工作消息状态返回结果{}".format(result))
-            if result.get('errcode') == 0:
-                send_result = result.get('send_result')
-                failed_user_id_list = send_result.get('failed_user_id_list')  # 失败的用户列表
-                read_user_id_list = send_result.get('read_user_id_list')  # 已读消息的用户id
-                unread_user_id_list = send_result.get('unread_user_id_list')  # 未读消息的用户id
-                invalid_dept_id_list = send_result.get('invalid_dept_id_list')  # 无效的部门id
+            send_result = result
+            if send_result['failed_user_id_list']:
+                failed_user_id_list = send_result['failed_user_id_list']['string']  # 失败的用户列表
                 for failed in failed_user_id_list:
                     for user in self.user_ids:
                         if user.emp_id.din_id == failed:
                             user.write({'msg_type': '00'})
+            if send_result['read_user_id_list']:
+                read_user_id_list = send_result['read_user_id_list']['string']  # 已读消息的用户id
                 for read in read_user_id_list:
                     for user in self.user_ids:
                         if user.emp_id.din_id == read:
                             user.write({'msg_type': '02'})
+            if send_result['unread_user_id_list']:
+                unread_user_id_list = send_result['unread_user_id_list']['string']  # 未读消息的用户id
                 for unread in unread_user_id_list:
                     for user in self.user_ids:
                         if user.emp_id.din_id == unread:
                             user.write({'msg_type': '01'})
+            if send_result['invalid_dept_id_list']:
+                invalid_dept_id_list = send_result['invalid_dept_id_list']['string']  # 无效的部门id
                 for invalid in invalid_dept_id_list:
                     for dept in self.dep_ids:
                         if dept.dept_id.din_id == invalid:
                             dept.write({'msg_type': '00'})
-                self.message_post(body=u"查询工作通知消息的发送结果成功", message_type='notification')
-            else:
-                raise UserError('查询工作通知消息的发送结果失败，详情为:{}'.format(result.get('errmsg')))
+            self.message_post(body=u"查询工作通知消息的发送结果成功", message_type='notification')
         except Exception as e:
             raise UserError(e)
 
