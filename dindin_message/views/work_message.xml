@@ -26,6 +26,9 @@
                     <button name="send_message" type="object" string="发送消息"
                             states='0' class="oe_highlight"
                             confirm="请确认消息内容,是否需要发送?"/>
+                    <button name="recall_work_message" type="object" string="撤回消息"
+                            states='1,2' class="oe_highlight"
+                            confirm="请确认消息状态,是否需要撤回?"/>
                     <button name="search_message_state" type="object" string="查询进度"
                             states='1' class="oe_highlight"/>
                     <button name="search_message_result" type="object" string="查询消息结果"
