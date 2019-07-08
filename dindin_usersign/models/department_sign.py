@@ -42,10 +42,8 @@ class DinDinDepartmentSign(models.Model):
         logging.info(">>>获取部门用户签到记录...")
         for res in self:
             res.line_ids = False
-            start_time = datetime.datetime.strptime("{}.42".format(str(res.start_time)), "%Y-%m-%d %H:%M:%S.%f").timetuple()
-            end_time = datetime.datetime.strptime("{}.42".format(str(res.end_time)), "%Y-%m-%d %H:%M:%S.%f").timetuple()
-            start_time = "{}000".format(int(time.mktime(start_time)))
-            end_time = "{}000".format(int(time.mktime(end_time)))
+            start_time = res.start_time
+            end_time = res.end_time
             if res.is_root:
                 department_id = '1'
             else:
@@ -54,22 +52,21 @@ class DinDinDepartmentSign(models.Model):
                 client = get_client(self)
                 result = client.checkin.record(department_id, start_time, end_time, offset=0, size=100, order_asc=True)
                 logging.info(">>>获得签到数据返回结果{}".format(result))
-                if result.get('errcode') == 0:
-                    line_list = list()
-                    for data in result.get('data'):
-                        emp = self.env['hr.employee'].sudo().search([('din_id', '=', data.get('userId'))])
-                        timestamp = self.get_time_stamp(data.get('timestamp'))
-                        line_list.append({
-                            'emp_id': emp.id if emp else False,
-                            'timestamp': timestamp,
-                            'place': data.get('place'),
-                            'detailPlace': data.get('detailPlace'),
-                            'remark': data.get('remark'),
-                            'latitude': data.get('latitude'),
-                            'longitude': data.get('longitude'),
-                            'avatar': data.get('avatar'),
-                        })
-                    res.line_ids = line_list
+                line_list = list()
+                for data in result:
+                    emp = self.env['hr.employee'].sudo().search([('din_id', '=', data.get('userId'))])
+                    timestamp = self.get_time_stamp(data.get('timestamp'))
+                    line_list.append({
+                        'emp_id': emp.id if emp else False,
+                        'timestamp': timestamp,
+                        'place': data.get('place'),
+                        'detailPlace': data.get('detailPlace'),
+                        'remark': data.get('remark'),
+                        'latitude': data.get('latitude'),
+                        'longitude': data.get('longitude'),
+                        'avatar': data.get('avatar'),
+                    })
+                res.line_ids = line_list
             except Exception as e:
                 raise UserError(e)
 

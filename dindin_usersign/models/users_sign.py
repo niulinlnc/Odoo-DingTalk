@@ -40,42 +40,32 @@ class DinDinUsersSign(models.Model):
         logging.info(">>>获取用户签到记录...")
         for res in self:
             res.line_ids = False
-            start_time = datetime.datetime.strptime("{}.42".format(str(res.start_time)),
-                                                    "%Y-%m-%d %H:%M:%S.%f").timetuple()
-            end_time = datetime.datetime.strptime("{}.42".format(str(res.end_time)), "%Y-%m-%d %H:%M:%S.%f").timetuple()
-            user_str = ''
+            start_time = res.start_time
+            end_time = res.end_time
+            userid_list = list()
             for user in self.emp_ids:
-                if user_str == '':
-                    user_str = user_str + "{}".format(user.din_id)
-                else:
-                    user_str = user_str + ",{}".format(user.din_id)
-
-            userid_list = user_str
-            start_time = "{}000".format(int(time.mktime(start_time)))
-            end_time = "{}000".format(int(time.mktime(end_time)))
+                userid_list.append(user.din_id)
             cursor = 0
             size = 100
             try:
                 client = get_client(self)
-                result = client.checkin.record_get(userid_list, start_time, end_time, offset=cursor, size=size)
+                result = client.checkin.record_get(userid_list, start_time, end_time, cursor=cursor, size=size)
                 logging.info(">>>获取多个用户的签到记录结果{}".format(result))
-                if result.get('errcode') == 0:
-                    line_list = list()
-                    r_result = result.get('result')
-                    for data in r_result.get('page_list'):
-                        emp = self.env['hr.employee'].sudo().search([('din_id', '=', data.get('userid'))])
-                        line_list.append({
-                            'emp_id': emp.id if emp else False,
-                            'checkin_time': self.get_time_stamp(data.get('checkin_time')),
-                            'place': data.get('place'),
-                            'detail_place': data.get('detail_place'),
-                            'remark': data.get('remark'),
-                            'latitude': data.get('latitude'),
-                            'longitude': data.get('longitude'),
-                        })
-                    res.line_ids = line_list
-                else:
-                    raise UserError("获取失败,原因:{}，\r\n如果是取1个人的数据，时间范围最大到10天，\r\n如果是取多个人的数据，时间范围最大1天。".format(result.get('errmsg')))
+
+                line_list = list()
+                r_result = result.get('result')
+                for data in r_result['page_list']['checkin_record_vo']:
+                    emp = self.env['hr.employee'].sudo().search([('din_id', '=', data.get('userid'))])
+                    line_list.append({
+                        'emp_id': emp.id if emp else False,
+                        'checkin_time': self.get_time_stamp(data.get('checkin_time')),
+                        'place': data.get('place'),
+                        'detail_place': data.get('detail_place'),
+                        'remark': data.get('remark'),
+                        'latitude': data.get('latitude'),
+                        'longitude': data.get('longitude'),
+                    })
+                res.line_ids = line_list
             except Exception as e:
                 raise UserError(e)
 

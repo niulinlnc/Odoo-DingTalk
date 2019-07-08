@@ -63,21 +63,19 @@ class DinDinSignList(models.Model):
             client = get_client(self)
             result = client.checkin.record_get(userid_list, start_time, end_time, offset=cursor, size=size)
             logging.info(">>>获取多个用户的签到记录结果{}".format(result))
-            if result.get('errcode') == 0:
-                r_result = result.get('result')
-                for data in r_result.get('page_list'):
-                    emp = self.env['hr.employee'].sudo().search([('din_id', '=', data.get('userid'))])
-                    self.env['dindin.signs.list'].create({
-                        'emp_id': emp.id if emp else False,
-                        'checkin_time': self.get_time_stamp(data.get('checkin_time')),
-                        'place': data.get('place'),
-                        'visit_user': data.get('visit_user'),
-                        'detail_place': data.get('detail_place'),
-                        'remark': data.get('remark'),
-                        'latitude': data.get('latitude'),
-                        'longitude': data.get('longitude'),
-                    })
-            else:
-                logging.info(">>>获取用户签到记录失败,原因:{}".format(result.get('errmsg')))
+            r_result = result.get('result')
+            for data in r_result['page_list']['checkin_record_vo']:
+                emp = self.env['hr.employee'].sudo().search([('din_id', '=', data.get('userid'))])
+                self.env['dindin.signs.list'].create({
+                    'emp_id': emp.id if emp else False,
+                    'checkin_time': self.get_time_stamp(data.get('checkin_time')),
+                    'place': data.get('place'),
+                    'visit_user': data.get('visit_user'),
+                    'detail_place': data.get('detail_place'),
+                    'remark': data.get('remark'),
+                    'latitude': data.get('latitude'),
+                    'longitude': data.get('longitude'),
+                })
+
         except Exception as e:
             raise UserError(e)
