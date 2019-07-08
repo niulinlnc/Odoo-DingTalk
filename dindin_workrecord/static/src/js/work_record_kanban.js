@@ -1,4 +1,4 @@
-odoo.define('dingding.user.work.record.kanban', function (require) {
+odoo.define('dindin_workrecord.dingding.user.work.record.kanban', function (require) {
     "use strict";
 
     let viewRegistry = require('web.view_registry');
