@@ -35,7 +35,7 @@ class CallBack(Home, http.Controller):
             if event_type == 'user_leave_org':
                 for user_id in UserId:
                     emp = request.env['hr.employee'].sudo().search([('din_id', '=', user_id)])
-                    emp.sudo().write({'active': False})
+                    emp.sudo().write({'work_status': 3})
                     logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
             else:
                 for user_id in UserId:

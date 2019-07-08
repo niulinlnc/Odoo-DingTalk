@@ -223,7 +223,7 @@ class DinDinWorkMessage(models.Model):
                 dept_id_list = (deptstr,)
         try:
             client = get_client(self)
-            result = client.message.asyncsend(msg, agent_id, userid_list=userid_list, dept_id_list = dept_id_list, to_all_user=to_all_user)
+            result = client.message.asyncsend_v2(msg, agent_id, userid_list=userid_list, dept_id_list = dept_id_list, to_all_user=to_all_user)
             logging.info(">>>发送工作消息返回结果{}".format(result))
             return result
         except Exception as e:
@@ -309,7 +309,7 @@ class DinDinWorkMessage(models.Model):
             task_id = msg.task_id
             try:
                 client = get_client(self)
-                result = client.tbdingding.dingtalk_oapi_message_corpconversation_recall(agent_id, task_id)
+                result = client.message.recall(agent_id, task_id)
                 logging.info(">>>撤回工作消息返回结果{}".format(result))
                 msg.write({'state': '0'})
                 if msg.user_ids:

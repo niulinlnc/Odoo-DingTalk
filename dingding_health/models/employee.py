@@ -26,7 +26,7 @@ class HrEmployee(models.Model):
         """
         if self.env['ir.config_parameter'].sudo().get_param('dingding_health.auto_user_health_info'):
             for res in self:
-                if res.din_id:
+                if res.din_id and res.active:
                     today = datetime.date.today()
                     formatted_today = today.strftime('%Y%m%d')
                     _type = 0
@@ -53,7 +53,7 @@ class HrEmployee(models.Model):
         :param userid: 用户id
         """
         for res in self:
-            if res.din_id:
+            if res.din_id and res.active:
                 userid = res.din_id
                 try:
                     client = get_client(self)

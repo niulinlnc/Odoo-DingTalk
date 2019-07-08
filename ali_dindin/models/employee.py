@@ -65,11 +65,8 @@ class HrEmployee(models.Model):
                 client = get_client(self)
                 result = client.user.create(data)
                 logging.info(">>>新增员工返回结果:{}".format(result))
-                if result.get('errcode') == 0:
-                    res.write({'din_id': result.get('userid')})
-                    res.message_post(body=u"钉钉消息：员工信息已上传至钉钉", message_type='notification')
-                else:
-                    raise UserError('上传钉钉系统时发生错误，详情为:{}'.format(result.get('errmsg')))
+                res.write({'din_id': result})
+                res.message_post(body=u"钉钉消息：员工信息已上传至钉钉", message_type='notification')
             except Exception as e:
                 raise UserError(e)
 

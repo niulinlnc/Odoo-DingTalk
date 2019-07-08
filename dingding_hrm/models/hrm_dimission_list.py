@@ -51,6 +51,13 @@ class GetDingDingHrmDimissionList(models.TransientModel):
 
     emp_ids = fields.Many2many(comodel_name='hr.employee', relation='dingding_hrm_dimission_list_and_hr_employee_rel',
                                column1='list_id', column2='emp_id', string=u'员工', required=True)
+    is_all_emp = fields.Boolean(string=u'全部离职员工')
+
+    @api.onchange('is_all_emp')
+    def onchange_all_emp(self):
+        if self.is_all_emp:
+            emps = self.env['hr.employee'].search([('din_id', '!=', ''), ('work_status', '=', '3')])
+            self.emp_ids = [(6, 0, emps.ids)]
 
     @api.multi
     def get_hrm_dimission_list(self):
@@ -63,29 +70,25 @@ class GetDingDingHrmDimissionList(models.TransientModel):
         logging.info(">>>获取钉钉获取离职员工信息start")
         if len(self.emp_ids) > 50:
             raise UserError("钉钉仅支持批量查询小于等于50个员工!")
-        user_str = ''
+        userid_list = ()
         for user in self.emp_ids:
-            if user_str == '':
-                user_str = user_str + "{}".format(user.din_id)
-            else:
-                user_str = user_str + ",{}".format(user.din_id)
-        userid_list = user_str
+            userid_list = userid_list + (user.din_id,)
+        logging.info(">>>批量获取员工列表返回结果{}".format(userid_list))
         try:
             client = get_client(self)
-            result = client.employeerm.listdimission(userid_list)
+            result = client.employeerm.listdimission(userid_list=userid_list)
             logging.info(">>>批量获取员工离职信息返回结果{}".format(result))
  
             if len(result) < 1:
                 raise UserError("选择的员工未离职!")
-            for res in result.get('result'):
-                logging.debug(res)
+            for res in result.get('emp_dimission_info_vo'):
                 emp = self.env['hr.employee'].search([('din_id', '=', res.get('userid'))])
                 if emp:
                     hrm = self.env['dingding.hrm.dimission.list'].search([('emp_id', '=', emp[0].id)])
                     handover_userid = self.env['hr.employee'].search([('din_id', '=', res.get('handover_userid'))])
                     main_dept = self.env['hr.department'].search([('din_id', '=', res.get('main_dept_id'))])
                     dept_list = list()
-                    for depti in res.get('dept_list'):
+                    for depti in res['dept_list']['emp_dept_v_o']:
                         hr_dept = self.env['hr.department'].search([('din_id', '=', depti.get('dept_id'))])
                         if hr_dept:
                             dept_list.append(hr_dept.id)
