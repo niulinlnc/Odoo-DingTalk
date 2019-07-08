@@ -344,7 +344,3 @@ class HrEmployee(models.Model):
         date_stamp = date_stamp * 1000
         return date_stamp
 
-# 未使用，但是不能删除，因为第一个版本创建的视图还存在
-class DinDinSynchronousEmployee(models.TransientModel):
-    _name = 'dindin.synchronous.employee'
-    _description = "同步钉钉部门员工功能模型"

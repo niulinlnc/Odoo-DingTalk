@@ -3,7 +3,7 @@
 
     <t t-name="HealthListView.get_health_button">
         <button type="button" class="btn btn-secondary o_button_get_dingding_health_list">
-            获取钉钉员工运动数据
+            获取钉钉运动数据
         </button>
     </t>
 

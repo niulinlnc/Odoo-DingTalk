@@ -59,14 +59,12 @@ class AddDingDingEmployee(models.Model):
         """
         self.ensure_one()
         logging.info(">>>添加待入职员工start")
-        if not self.dept_id.din_id:
-            raise UserError("所选部门在钉钉中不存在!")
         user = self.env['hr.employee'].search([('user_id', '=', self.env.user.id)])
         name = self.name
         mobile = self.mobile
         pre_entry_time = self.pre_entry_time
         op_userid = user[0].din_id if user else ''
-        extend_info ={'depts': self.dept_id.din_id}
+        extend_info ={'depts': self.dept_id.din_id} if self.dept_id else ''
         try:
             client = get_client(self)
             result = client.employeerm.addpreentry(name, mobile, pre_entry_time=pre_entry_time, op_userid=op_userid, extend_info=extend_info)
