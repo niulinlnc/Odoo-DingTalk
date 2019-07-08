@@ -20,4 +20,7 @@
         'views/department.xml',
         'views/dingding_health.xml',
     ],
+    'qweb': [
+         'static/xml/*.xml',
+    ],
 }
