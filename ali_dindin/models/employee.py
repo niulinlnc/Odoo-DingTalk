@@ -177,7 +177,7 @@ class HrEmployee(models.Model):
 
     # 从钉钉手动获取用户详情（更新或新建）
     @api.multi
-    def syn_employee_from_dingding(self, userid):
+    def syn_employee_from_dingding(self, event_type, userid):
         """
         从钉钉获取用户详情
         通讯录回调事件时触发更新或新增
@@ -222,9 +222,9 @@ class HrEmployee(models.Model):
                     dep_list = self.env['hr.department'].sudo().search([('din_id', 'in', dep_din_ids)])
                     data.update({'department_ids': [(6, 0, dep_list.ids)]})
                 employee = self.env['hr.employee'].sudo().search([('din_id', '=', userid)])
-                if employee:
+                if employee and event_type == 'user_modify_org':
                     employee.sudo().write(data)
-                else:
+                if not employee and event_type == 'user_add_org':
                     self.env['hr.employee'].sudo().create(data)
             else:
                 _logger.info("从钉钉同步员工时发生意外，原因为:{}".format(result.get('errmsg')))

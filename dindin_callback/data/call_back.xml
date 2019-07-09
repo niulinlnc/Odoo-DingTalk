@@ -6,20 +6,20 @@
         <record id="dindin_users_callback_list_user_add_org" model="dindin.users.callback.list">
             <field name="name">通讯录用户增加</field>
             <field name="value">user_add_org</field>
-            <field name="value_type">0001</field>
-            <field name="call_back_url">/callback/eventreceive/user_add_org</field>
+            <field name="value_type">00</field>
+            <field name="call_back_url">/callback/eventreceive</field>
         </record>
         <record id="dindin_users_callback_list_user_modify_org" model="dindin.users.callback.list">
             <field name="name">通讯录用户更改</field>
             <field name="value">user_modify_org</field>
-            <field name="value_type">0002</field>
-            <field name="call_back_url">/callback/eventreceive/user_modify_org</field>
+            <field name="value_type">00</field>
+            <field name="call_back_url">/callback/eventreceive</field>
         </record>
         <record id="dindin_users_callback_listuser_leave_org" model="dindin.users.callback.list">
             <field name="name">通讯录用户离职</field>
             <field name="value">user_leave_org</field>
-            <field name="value_type">0003</field>
-            <field name="call_back_url">/callback/eventreceive/user_leave_org</field>
+            <field name="value_type">00</field>
+            <field name="call_back_url">/callback/eventreceive</field>
         </record>
         <record id="dindin_users_callback_list_org_admin_add" model="dindin.users.callback.list">
             <field name="name">通讯录用户被设为管理员</field>

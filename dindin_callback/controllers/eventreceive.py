@@ -20,59 +20,6 @@ OARESULT = {
 class CallBack(Home, http.Controller):
 
     # 钉钉回调
-
-    @http.route('/callback/eventreceive/user_add_org', type='json', auth='none', methods=['POST'], csrf=False)
-    def callback_users_add(self, **kw):
-        logging.info(">>>钉钉回调事件")
-        json_str = request.jsonrequest
-        call_back, din_corpId = self.get_bash_attr()
-        msg = self.encrypt_result(json_str.get('encrypt'), call_back.aes_key, din_corpId)
-        logging.info(">>>解密消息结果:{}".format(msg))
-        msg = json.loads(msg)
-        event_type = msg.get('EventType')
-        user_id = msg.get('UserId')
-        request.env['hr.employee'].sudo().syn_employee_from_dingding(user_id)
-        request.env['dingding.get.hrm.list'].sudo().hrm_list(user_id)
-        logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
-        # 返回加密结果
-        return self.result_success(call_back.aes_key, call_back.token, din_corpId)
-
-    @http.route('/callback/user_modify_org', type='json', auth='none', methods=['POST'], csrf=False)
-    def callback_users_modify(self, **kw):
-        logging.info(">>>钉钉回调事件")
-        json_str = request.jsonrequest
-        call_back, din_corpId = self.get_bash_attr()
-        msg = self.encrypt_result(json_str.get('encrypt'), call_back.aes_key, din_corpId)
-        logging.info(">>>解密消息结果:{}".format(msg))
-        msg = json.loads(msg)
-        event_type = msg.get('EventType')
-        user_ids = msg.get('UserId')
-        for user_id in user_ids:
-            request.env['hr.employee'].sudo().syn_employee_from_dingding(user_id)
-            request.env['dingding.get.hrm.list'].sudo().hrm_list(user_id)
-            logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
-        # 返回加密结果
-        return self.result_success(call_back.aes_key, call_back.token, din_corpId)
-
-    @http.route('/callback/user_leave_org', type='json', auth='none', methods=['POST'], csrf=False)
-    def callback_users_leave(self, **kw):
-        logging.info(">>>钉钉回调事件")
-        json_str = request.jsonrequest
-        call_back, din_corpId = self.get_bash_attr()
-        msg = self.encrypt_result(json_str.get('encrypt'), call_back.aes_key, din_corpId)
-        logging.info(">>>解密消息结果:{}".format(msg))
-        msg = json.loads(msg)
-        event_type = msg.get('EventType')
-        user_ids = msg.get('UserId')
-        for user_id in user_ids:
-            emp = request.env['hr.employee'].sudo().search([('din_id', '=', user_id)])
-            emp.sudo().write({'work_status': 3}) # 员工标记离职
-            request.env['dingding.get.hrm.dimission.list'].sudo().dimission_list(user_id) # 自动添加到离职花名册中
-            logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))   
-        # 返回加密结果
-        return self.result_success(call_back.aes_key, call_back.token, din_corpId)
-
-
     @http.route('/callback/eventreceive', type='json', auth='none', methods=['POST'], csrf=False)
     def callback_users(self, **kw):
         logging.info(">>>钉钉回调事件")
@@ -82,51 +29,63 @@ class CallBack(Home, http.Controller):
         logging.info(">>>解密消息结果:{}".format(msg))
         msg = json.loads(msg)
         event_type = msg.get('EventType')
+        success = self.result_success(call_back.aes_key, call_back.token, din_corpId)
+        # --------注册时验证------
+        if event_type == 'check_url':
+            return success
         # --------通讯录------
-        # if event_type == 'user_add_org':
-        #     user_ids = msg.get('UserId')
-        #     for user_id in user_ids:
-        #         request.env['hr.employee'].sudo().syn_employee_from_dingding(user_id)
-        #         request.env['dingding.get.hrm.list'].sudo().hrm_list(user_id)
-        #         logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
-        # elif event_type == 'user_modify_org':
-        #     user_ids = msg.get('UserId')
-        #     for user_id in user_ids:
-        #         request.env['hr.employee'].sudo().syn_employee_from_dingding(user_id)
-        #         logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
-        # elif event_type == 'user_leave_org':
-        #     user_ids = msg.get('UserId')
-        #     for user_id in user_ids:
-        #         emp = request.env['hr.employee'].sudo().search([('din_id', '=', user_id)])
-        #         emp.sudo().write({'work_status': 3}) # 员工标记离职
-        #         request.env['dingding.get.hrm.dimission.list'].sudo().dimission_list(user_id) # 自动添加到离职花名册中
-        #         logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))   
-        if event_type == 'org_dept_create' or event_type == 'org_dept_modify' or event_type == 'org_dept_remove':
+        elif event_type == 'user_add_org':
+            user_ids = msg.get('UserId')
+            for user_id in user_ids:
+                request.env['hr.employee'].sudo().syn_employee_from_dingding(event_type, user_id)
+                request.env['dingding.get.hrm.list'].sudo().hrm_list(user_id)
+                logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
+                return success
+        elif event_type == 'user_modify_org':
+            user_ids = msg.get('UserId')
+            for user_id in user_ids:
+                request.env['hr.employee'].sudo().syn_employee_from_dingding(event_type, user_id)
+                logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
+                return success
+        elif event_type == 'user_leave_org':
+            user_ids = msg.get('UserId')
+            for user_id in user_ids:
+                emp = request.env['hr.employee'].sudo().search([('din_id', '=', user_id)])
+                emp.sudo().write({'work_status': 3}) # 员工标记离职
+                request.env['dingding.get.hrm.dimission.list'].sudo().dimission_list(user_id) # 自动添加到离职花名册中
+                logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))  
+                return success      
+        # -----部门-------
+        elif event_type == 'org_dept_remove':
             dept = msg.get('DeptId')
-            if event_type == 'org_dept_remove':
-                hr_depat = request.env['hr.department'].sudo().search([('din_id', '=', dept)])
-                if hr_depat:
-                    hr_depat.sudo().unlink()
-            else:
-                request.env['dingding.bash.data.synchronous'].sudo().synchronous_dingding_department()       
+            hr_depat = request.env['hr.department'].sudo().search([('din_id', '=', dept)])
+            if hr_depat:
+                hr_depat.sudo().unlink()
+                return success
+        elif event_type == 'org_dept_modify' or event_type == 'org_dept_create':
+            request.env['dingding.bash.data.synchronous'].sudo().synchronous_dingding_department()  
+            return success 
         # -----员工角色-------
         elif event_type == 'label_user_change' or event_type == 'label_conf_add' or event_type == 'label_conf_del' \
                 or event_type == 'label_conf_modify':
             logging.info(">>>钉钉回调-员工角色信息发生变更/增加/删除/修改")
+            return success
         # -----审批-----------
         elif event_type == 'bpms_task_change':
             self.bpms_task_change(msg)
+            return success
         elif event_type == 'bpms_instance_change':
             self.bpms_instance_change(msg)
+            return success
         # -----用户签到-----------
         elif event_type == 'check_in':
             request.env['dindin.signs.list'].sudo().get_signs_by_user(msg.get('StaffId'), msg.get('TimeStamp'))
+            return success
         # -------群会话事件----------
         elif event_type == 'chat_add_member' or event_type == 'chat_remove_member' or event_type == 'chat_quit' or \
                 event_type == 'chat_update_owner' or event_type == 'chat_update_title' or event_type == 'chat_disband':
             request.env['dingding.chat'].sudo().process_dingding_chat_onchange(msg)
-        # 返回加密结果
-        return self.result_success(call_back.aes_key, call_back.token, din_corpId)
+            return success
 
     def result_success(self, encode_aes_key, token, din_corpid):
         """
