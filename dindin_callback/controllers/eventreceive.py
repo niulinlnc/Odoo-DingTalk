@@ -33,11 +33,13 @@ class CallBack(Home, http.Controller):
         # --------注册时验证------
         if event_type == 'check_url':
             return success
-        # --------通讯录------
+        # --------通讯录---------
         elif event_type == 'user_add_org':
             user_ids = msg.get('UserId')
             for user_id in user_ids:
+                # 员工同步
                 request.env['hr.employee'].sudo().syn_employee_from_dingding(event_type, user_id)
+                # 自动添加到在职花名册
                 request.env['dingding.get.hrm.list'].sudo().hrm_list(user_id)
                 logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
                 return success
@@ -50,11 +52,18 @@ class CallBack(Home, http.Controller):
         elif event_type == 'user_leave_org':
             user_ids = msg.get('UserId')
             for user_id in user_ids:
+                # 员工标记离职
                 emp = request.env['hr.employee'].sudo().search([('din_id', '=', user_id)])
-                emp.sudo().write({'work_status': 3}) # 员工标记离职
-                request.env['dingding.get.hrm.dimission.list'].sudo().dimission_list(user_id) # 自动添加到离职花名册中
+                if emp:
+                    emp.sudo().write({'work_status': 3}) 
+                    # 自动从在职花名册中删除
+                    hrm = request.env['dingding.hrm.list'].sudo().search([('emp_id', '=', emp.id)])
+                    if hrm:
+                        hrm.sudo().unlink()
+                # 自动添加到离职花名册中
+                request.env['dingding.get.hrm.dimission.list'].sudo().dimission_list(user_id) 
                 logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))  
-                return success      
+                return success
         # -----部门-------
         elif event_type == 'org_dept_remove':
             dept = msg.get('DeptId')
