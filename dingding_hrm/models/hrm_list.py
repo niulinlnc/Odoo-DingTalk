@@ -53,11 +53,8 @@ class GetDingDingHrmList(models.TransientModel):
     @api.multi
     def get_hrm_list(self):
         """
-        批量获取员工花名册字段信息
-        智能人事业务，企业/ISV根据员工id批量访问员工花名册信息
+        批量获取员工花名册
 
-        :param userid_list: 员工id列表
-        :param field_filter_list: 需要获取的花名册字段信息
         """
         logging.info(">>>获取钉钉员工花名册start")
         if len(self.emp_ids) > 20:
@@ -70,6 +67,23 @@ class GetDingDingHrmList(models.TransientModel):
             else:
                 user_str = user_str + ",{}".format(user.din_id)
         userid_list = user_str
+        self.hrm_list(userid_list)
+        action = self.env.ref('dingding_hrm.dingding_hrm_list_action')
+        action_dict = action.read()[0]
+        return action_dict
+
+    @api.model
+    def hrm_list(self, userid_list):
+        """
+        批量获取员工花名册字段信息
+        智能人事业务，企业/ISV根据员工id批量访问员工花名册信息
+
+        :param userid_list: 员工id列表
+        :param field_filter_list: 需要获取的花名册字段信息
+        """
+        logging.info(">>>获取钉钉员工花名册start")
+        if len(userid_list) > 20:
+            raise UserError("钉钉仅支持批量查询小于等于20个员工!")
         try:
             client = get_client(self)
             result = client.employeerm.list(userid_list, field_filter_list=())
@@ -99,10 +113,6 @@ class GetDingDingHrmList(models.TransientModel):
                                 'department_id': emp[0].department_id.id,
                                 'line_ids': line_list
                             })
-
         except Exception as e:
             raise UserError(e)
         logging.info(">>>获取钉钉员工花名册end")
-        action = self.env.ref('dingding_hrm.dingding_hrm_list_action')
-        action_dict = action.read()[0]
-        return action_dict

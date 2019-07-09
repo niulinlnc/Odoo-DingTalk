@@ -63,29 +63,42 @@ class GetDingDingHrmDimissionList(models.TransientModel):
     def get_hrm_dimission_list(self):
         """
         批量获取员工离职信息
+        """
+        logging.info(">>>获取钉钉获取离职员工信息start")
+        userid_list = self.emp_ids
+        if len(userid_list) > 50:
+            raise UserError("钉钉仅支持批量查询小于等于50个员工!")
+        userids = list()
+        for user in userid_list:
+            userids.append(user.din_id)
+        self.dimission_list(userids)
+        action = self.env.ref('dingding_hrm.dingding_hrm_dimission_list_action')
+        action_dict = action.read()[0]
+        return action_dict
+
+
+    @api.model
+    def dimission_list(self, user_ids):
+        """
+        批量获取员工离职信息
         根据传入的staffId列表，批量查询员工的离职信息
 
         :param userid_list: 员工id
         """
         logging.info(">>>获取钉钉获取离职员工信息start")
-        if len(self.emp_ids) > 50:
+        if len(user_ids) > 50:
             raise UserError("钉钉仅支持批量查询小于等于50个员工!")
-        userid_list = ()
-        for user in self.emp_ids:
-            userid_list = userid_list + (user.din_id,)
-        logging.info(">>>批量获取员工列表返回结果{}".format(userid_list))
         try:
             client = get_client(self)
-            result = client.employeerm.listdimission(userid_list=userid_list)
+            result = client.employeerm.listdimission(userid_list=user_ids)
             logging.info(">>>批量获取员工离职信息返回结果{}".format(result))
- 
+
             if len(result) < 1:
                 raise UserError("选择的员工未离职!")
             for res in result.get('emp_dimission_info_vo'):
                 emp = self.env['hr.employee'].search([('din_id', '=', res.get('userid'))])
                 if emp:
                     hrm = self.env['dingding.hrm.dimission.list'].search([('emp_id', '=', emp[0].id)])
-                    handover_userid = self.env['hr.employee'].search([('din_id', '=', res.get('handover_userid'))])
                     main_dept = self.env['hr.department'].search([('din_id', '=', res.get('main_dept_id'))])
                     dept_list = list()
                     for depti in res['dept_list']['emp_dept_v_o']:
@@ -99,21 +112,20 @@ class GetDingDingHrmDimissionList(models.TransientModel):
                         'reason_memo': res.get('reason_memo'),
                         'reason_type': res.get('reason_type'),
                         'pre_status': res.get('pre_status'),
-                        'handover_userid': handover_userid.id if handover_userid else False,
                         'status': res.get('status'),
                         'main_dept_name': main_dept.id if main_dept else False,
                     }
+                    if res.get('handover_userid'):
+                        handover_userid = self.env['hr.employee'].search([('din_id', '=', res.get('handover_userid'))])
+                        data.update({'handover_userid': handover_userid.id})
                     if hrm:
                         hrm.write(data)
                     else:
                         self.env['dingding.hrm.dimission.list'].create(data)
-
         except Exception as e:
             raise UserError(e)
         logging.info(">>>获取获取离职员工信息end")
-        action = self.env.ref('dingding_hrm.dingding_hrm_dimission_list_action')
-        action_dict = action.read()[0]
-        return action_dict
+
 
     @api.model
     def get_time_stamp(self, timeNum):

@@ -20,6 +20,59 @@ OARESULT = {
 class CallBack(Home, http.Controller):
 
     # 钉钉回调
+
+    @http.route('/callback/eventreceive/user_add_org', type='json', auth='none', methods=['POST'], csrf=False)
+    def callback_users_add(self, **kw):
+        logging.info(">>>钉钉回调事件")
+        json_str = request.jsonrequest
+        call_back, din_corpId = self.get_bash_attr()
+        msg = self.encrypt_result(json_str.get('encrypt'), call_back.aes_key, din_corpId)
+        logging.info(">>>解密消息结果:{}".format(msg))
+        msg = json.loads(msg)
+        event_type = msg.get('EventType')
+        user_id = msg.get('UserId')
+        request.env['hr.employee'].sudo().syn_employee_from_dingding(user_id)
+        request.env['dingding.get.hrm.list'].sudo().hrm_list(user_id)
+        logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
+        # 返回加密结果
+        return self.result_success(call_back.aes_key, call_back.token, din_corpId)
+
+    @http.route('/callback/user_modify_org', type='json', auth='none', methods=['POST'], csrf=False)
+    def callback_users_modify(self, **kw):
+        logging.info(">>>钉钉回调事件")
+        json_str = request.jsonrequest
+        call_back, din_corpId = self.get_bash_attr()
+        msg = self.encrypt_result(json_str.get('encrypt'), call_back.aes_key, din_corpId)
+        logging.info(">>>解密消息结果:{}".format(msg))
+        msg = json.loads(msg)
+        event_type = msg.get('EventType')
+        user_ids = msg.get('UserId')
+        for user_id in user_ids:
+            request.env['hr.employee'].sudo().syn_employee_from_dingding(user_id)
+            request.env['dingding.get.hrm.list'].sudo().hrm_list(user_id)
+            logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
+        # 返回加密结果
+        return self.result_success(call_back.aes_key, call_back.token, din_corpId)
+
+    @http.route('/callback/user_leave_org', type='json', auth='none', methods=['POST'], csrf=False)
+    def callback_users_leave(self, **kw):
+        logging.info(">>>钉钉回调事件")
+        json_str = request.jsonrequest
+        call_back, din_corpId = self.get_bash_attr()
+        msg = self.encrypt_result(json_str.get('encrypt'), call_back.aes_key, din_corpId)
+        logging.info(">>>解密消息结果:{}".format(msg))
+        msg = json.loads(msg)
+        event_type = msg.get('EventType')
+        user_ids = msg.get('UserId')
+        for user_id in user_ids:
+            emp = request.env['hr.employee'].sudo().search([('din_id', '=', user_id)])
+            emp.sudo().write({'work_status': 3}) # 员工标记离职
+            request.env['dingding.get.hrm.dimission.list'].sudo().dimission_list(user_id) # 自动添加到离职花名册中
+            logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))   
+        # 返回加密结果
+        return self.result_success(call_back.aes_key, call_back.token, din_corpId)
+
+
     @http.route('/callback/eventreceive', type='json', auth='none', methods=['POST'], csrf=False)
     def callback_users(self, **kw):
         logging.info(">>>钉钉回调事件")
@@ -30,26 +83,32 @@ class CallBack(Home, http.Controller):
         msg = json.loads(msg)
         event_type = msg.get('EventType')
         # --------通讯录------
-        if event_type == 'user_add_org' or event_type == 'user_modify_org' or event_type == 'user_leave_org':
-            UserId = msg.get('UserId')
-            if event_type == 'user_leave_org':
-                for user_id in UserId:
-                    emp = request.env['hr.employee'].sudo().search([('din_id', '=', user_id)])
-                    emp.sudo().write({'work_status': 3})
-                    logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
-            else:
-                for user_id in UserId:
-                    request.env['hr.employee'].sudo().syn_employee_from_dingding(user_id)
-                    logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
-        elif event_type == 'org_dept_create' or event_type == 'org_dept_modify' or event_type == 'org_dept_remove':
-            DeptId = msg.get('DeptId')
+        # if event_type == 'user_add_org':
+        #     user_ids = msg.get('UserId')
+        #     for user_id in user_ids:
+        #         request.env['hr.employee'].sudo().syn_employee_from_dingding(user_id)
+        #         request.env['dingding.get.hrm.list'].sudo().hrm_list(user_id)
+        #         logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
+        # elif event_type == 'user_modify_org':
+        #     user_ids = msg.get('UserId')
+        #     for user_id in user_ids:
+        #         request.env['hr.employee'].sudo().syn_employee_from_dingding(user_id)
+        #         logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
+        # elif event_type == 'user_leave_org':
+        #     user_ids = msg.get('UserId')
+        #     for user_id in user_ids:
+        #         emp = request.env['hr.employee'].sudo().search([('din_id', '=', user_id)])
+        #         emp.sudo().write({'work_status': 3}) # 员工标记离职
+        #         request.env['dingding.get.hrm.dimission.list'].sudo().dimission_list(user_id) # 自动添加到离职花名册中
+        #         logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))   
+        if event_type == 'org_dept_create' or event_type == 'org_dept_modify' or event_type == 'org_dept_remove':
+            dept = msg.get('DeptId')
             if event_type == 'org_dept_remove':
-                for dept in DeptId:
-                    hr_depat = request.env['hr.department'].sudo().search([('din_id', '=', dept)])
-                    if hr_depat:
-                        hr_depat.sudo().unlink()
+                hr_depat = request.env['hr.department'].sudo().search([('din_id', '=', dept)])
+                if hr_depat:
+                    hr_depat.sudo().unlink()
             else:
-                request.env['dingding.bash.data.synchronous'].sudo().synchronous_dingding_department()
+                request.env['dingding.bash.data.synchronous'].sudo().synchronous_dingding_department()       
         # -----员工角色-------
         elif event_type == 'label_user_change' or event_type == 'label_conf_add' or event_type == 'label_conf_del' \
                 or event_type == 'label_conf_modify':
