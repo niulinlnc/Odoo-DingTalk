@@ -83,8 +83,8 @@ class GetDingDingHealthList(models.TransientModel):
             client = get_client(self)
             result = client.health.stepinfo_listbyuserid(userids, stat_dates)
             logging.info(">>>批量获取员工运动数据返回结果{}".format(result))
-            basic_step_info_vo = result['stepinfo_list']['basic_step_info_vo']
-            if basic_step_info_vo:
+            if result['stepinfo_list']:
+                basic_step_info_vo = result['stepinfo_list']['basic_step_info_vo']
                 for stepinfo_list in basic_step_info_vo:
                     data = {
                         'health_count': stepinfo_list['step_count'],
@@ -98,8 +98,6 @@ class GetDingDingHealthList(models.TransientModel):
                             partner.sudo().write(data)
                         else:
                             self.env['dingding.health'].sudo().create(data)
-            else:
-                raise UserError('未开通钉钉运动')
         except Exception as e:
             raise UserError(e)
 
