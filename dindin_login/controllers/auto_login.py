@@ -68,7 +68,7 @@ class AutoLoginController(http.Controller):
         :return:
         """
         try:
-            client = get_client(self)
+            client = get_client(request)
             result = client.user.getuserinfo(auth_code)
             logging.info(">>>获取用户信息返回结果:{}".format(result))
 

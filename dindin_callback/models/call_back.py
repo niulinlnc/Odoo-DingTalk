@@ -142,7 +142,9 @@ class DinDinCallback(models.Model):
             else:
                 pass
         except Exception as e:
-            raise UserError(e)
+            logging.info("Token为{}的回调事件删除异常，详情为:{}".format(call_token,e))
+            self.state == '00'
+            # raise UserError(e)
         logging.info(">>>删除事件End...")
 
     @api.model
