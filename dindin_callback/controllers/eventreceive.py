@@ -16,13 +16,11 @@ OARESULT = {
     'redirect': '转交',
 }
 
-
 class CallBack(Home, http.Controller):
 
     # 钉钉回调
     @http.route('/callback/eventreceive', type='json', auth='none', methods=['POST'], csrf=False)
     def callback_users(self, **kw):
-        logging.info(">>>钉钉回调事件")
         json_str = request.jsonrequest
         call_back, din_corpId = self.get_bash_attr()
         msg = self.encrypt_result(json_str.get('encrypt'), call_back.aes_key, din_corpId)
@@ -32,9 +30,11 @@ class CallBack(Home, http.Controller):
         success = self.result_success(call_back.aes_key, call_back.token, din_corpId)
         # --------注册时验证------
         if event_type == 'check_url':
+            logging.info(">>>钉钉回调事件:回调地址验证")
             return success
         # --------通讯录---------
         elif event_type == 'user_add_org':
+            logging.info(">>>钉钉回调事件:新增员工")
             user_ids = msg.get('UserId')
             for user_id in user_ids:
                 # 员工同步
@@ -44,12 +44,14 @@ class CallBack(Home, http.Controller):
                 logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
                 return success
         elif event_type == 'user_modify_org':
+            logging.info(">>>钉钉回调事件:员工变更")
             user_ids = msg.get('UserId')
             for user_id in user_ids:
                 request.env['hr.employee'].sudo().syn_employee_from_dingding(event_type, user_id)
                 logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(event_type,user_id))
                 return success
         elif event_type == 'user_leave_org':
+            logging.info(">>>钉钉回调事件:员工离职（删除）")
             user_ids = msg.get('UserId')
             for user_id in user_ids:
                 # 员工标记离职
@@ -66,12 +68,14 @@ class CallBack(Home, http.Controller):
                 return success
         # -----部门-------
         elif event_type == 'org_dept_remove':
+            logging.info(">>>钉钉回调事件:部门删除")
             dept = msg.get('DeptId')
             hr_depat = request.env['hr.department'].sudo().search([('din_id', '=', dept)])
             if hr_depat:
                 hr_depat.sudo().unlink()
                 return success
         elif event_type == 'org_dept_modify' or event_type == 'org_dept_create':
+            logging.info(">>>钉钉回调事件:部门创建或变更")
             request.env['dingding.bash.data.synchronous'].sudo().synchronous_dingding_department()  
             return success 
         # -----员工角色-------
@@ -81,18 +85,22 @@ class CallBack(Home, http.Controller):
             return success
         # -----审批-----------
         elif event_type == 'bpms_task_change':
+            logging.info(">>>钉钉回调事件:审批任务开始，结束，转交")
             self.bpms_task_change(msg)
             return success
         elif event_type == 'bpms_instance_change':
+            logging.info(">>>钉钉回调事件:审批实例开始，结束")
             self.bpms_instance_change(msg)
             return success
         # -----用户签到-----------
         elif event_type == 'check_in':
+            logging.info(">>>钉钉回调事件:签到")
             request.env['dindin.signs.list'].sudo().get_signs_by_user(msg.get('StaffId'), msg.get('TimeStamp'))
             return success
         # -------群会话事件----------
         elif event_type == 'chat_add_member' or event_type == 'chat_remove_member' or event_type == 'chat_quit' or \
                 event_type == 'chat_update_owner' or event_type == 'chat_update_title' or event_type == 'chat_disband':
+            logging.info(">>>钉钉回调事件:群会话事件")
             request.env['dingding.chat'].sudo().process_dingding_chat_onchange(msg)
             return success
 
