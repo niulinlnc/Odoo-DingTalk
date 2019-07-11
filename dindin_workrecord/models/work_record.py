@@ -207,9 +207,13 @@ class DinDinWorkRecord(models.Model):
             record_id = res.record_id
             try:
                 client = get_client(self)
-                client.workrecord.update(userid, record_id)
-                res.message_post(body=u"待办状态已更新!", message_type='notification')
-                res.write({'record_state': '01'})
+                result = client.workrecord.update(userid, record_id)
+                logging.info(">>>获更新代办事项返回结果{}".format(result))
+                if result:
+                    res.message_post(body=u"待办状态已更新!", message_type='notification')
+                    res.write({'record_state': '01'})
+                else:
+                    res.message_post(body=u"待办状态更新失败!", message_type='notification')
             except Exception as e:
                 raise UserError(e)
 
