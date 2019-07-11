@@ -220,6 +220,7 @@ class HrEmployee(models.Model):
                 if result.get('department'):
                     dep_din_ids = result.get('department')
                     dep_list = self.env['hr.department'].sudo().search([('din_id', 'in', dep_din_ids)])
+                    data.update({'department_id': dep_list[0].id})
                     data.update({'department_ids': [(6, 0, dep_list.ids)]})
                 employee = self.env['hr.employee'].sudo().search([('din_id', '=', userid)])
                 if employee and event_type == 'user_modify_org':

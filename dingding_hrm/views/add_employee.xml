@@ -71,7 +71,7 @@
         <field name="name">待入职员工</field>
         <field name="model">dingding.add.employee</field>
         <field name="arch" type="xml">
-            <kanban class="o_kanban_mobile" create="true">
+            <kanban class="o_kanban_mobile" create="true" js_class="dindin_get_preentry_kanban">
                 <field name="id"/>
                 <field name="name"/>
                 <field name="mobile"/>

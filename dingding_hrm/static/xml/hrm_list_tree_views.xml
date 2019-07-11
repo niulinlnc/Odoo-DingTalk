@@ -31,4 +31,10 @@
         </t>
     </t>
 
+    <t t-name="GetDingDingPreEntry">
+        <div class="alert alert-info">
+            <p>即将从钉钉中获取待入职人员信息</p>
+        </div>
+	</t>
+
 </templates>

@@ -77,6 +77,25 @@ class AddDingDingEmployee(models.Model):
             raise UserError(e)
         logging.info(">>>添加待入职员工end")
 
+    @api.model
+    def count_pre_entry(self):
+        """
+        智能人事查询公司待入职员工列表,返回待入职总人数
+        智能人事业务，企业/ISV分页查询公司待入职员工id列表
+
+        :param offset: 分页起始值，默认0开始
+        :param size: 分页大小，最大50
+        """
+        try:
+            client = get_client(self)
+            result = client.employeerm.querypreentry(offset=0, size=50)
+            logging.info(">>>查询待入职员工列表返回结果{}".format(result))
+            if result['data_list']['string']:
+                pre_entry_list = result['data_list']['string']
+                return len(pre_entry_list)
+        except Exception as e:
+            raise UserError(e)
+
     @api.multi
     def employees_have_joined(self):
         self.ensure_one()
