@@ -57,7 +57,7 @@ class CallBack(Home, http.Controller):
                 # 员工标记离职
                 emp = request.env['hr.employee'].sudo().search([('din_id', '=', user_id)])
                 if emp:
-                    emp.sudo().write({'work_status': 3}) 
+                    emp.sudo().write({'work_status':'3'}) 
                     # 自动从在职花名册中删除
                     hrm = request.env['dingding.hrm.list'].sudo().search([('emp_id', '=', emp.id)])
                     if hrm:
