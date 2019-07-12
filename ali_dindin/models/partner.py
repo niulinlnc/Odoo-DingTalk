@@ -47,6 +47,7 @@ class ResPartner(models.Model):
         :param share_user_ids: 共享给的员工userId列表
         :return:
         """
+        client = get_client(self)
         for res in self:
             if res.din_userid:
                 raise UserError('钉钉中已存在该联系人,请不要重复上传或使用更新联系人功能！')
@@ -81,7 +82,6 @@ class ResPartner(models.Model):
             share_user_ids = share_emplist
 
             try:
-                client = get_client(self)
                 result = client.extcontact.create(name, follower_user_id, label_ids, mobile,state_code,
                     title=title, share_dept_ids=share_dept_ids, remark=remark, address=address, 
                     company_name=company_name, 
@@ -112,7 +112,7 @@ class ResPartner(models.Model):
         :param share_user_ids: 共享给的员工userId列表
         :return:
         """
-
+        client = get_client(self)
         for res in self:
             # 获取标签
             label_list = list()
@@ -140,7 +140,6 @@ class ResPartner(models.Model):
             share_user_ids = share_emplist if share_emplist else ()
 
             try:
-                client = get_client(self)
                 result = client.extcontact.update(user_id, name, follower_user_id, label_ids, mobile, state_code='86',
                     title=title, share_dept_ids=share_dept_ids, remark=remark, address=address, company_name=company_name, share_user_ids=share_user_ids)
                 logging.info("更新联系人返回结果:{}".format(result))
@@ -161,8 +160,8 @@ class ResPartner(models.Model):
     @api.model
     def delete_din_extcontact(self, din_userid):
         """删除钉钉联系人"""
+        client = get_client(self)
         try:
-            client = get_client(self)
             result = client.extcontact.delete(din_userid)
             logging.info("删除钉钉联系人结果:{}".format(result))
         except Exception as e:
@@ -192,10 +191,10 @@ class ResPartner(models.Model):
         'success': True}
 
         """
+        client = get_client(self)
         for partner in self:
             userid = partner.din_userid
             try:
-                client = get_client(self)
                 result = client.extcontact.get(userid)
                 logging.info(">>>获取外部联系人返回结果:{}".format(result))
                 if result.get('ding_open_errcode') == 0:

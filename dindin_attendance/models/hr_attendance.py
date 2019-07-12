@@ -182,8 +182,8 @@ class HrAttendanceTransient(models.TransientModel):
         :param limit: 表示获取考勤数据的条数，最大不能超过50条
         :return:
         """
+        client = get_client(self)
         try:
-            client = get_client(self)
             result = client.attendance.list(work_date_from, work_date_to, user_ids=user_ids, offset=offset, limit=limit)
             logging.info(">>>获取考勤返回结果{}".format(result))
             if result.get('errcode') == 0:

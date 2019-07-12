@@ -53,6 +53,40 @@
                         </div>
                     </div>
 
+                    <h2>REDIS服务器配置</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <field name="dingtalk_redis_ip" placeholder="请输入Redis服务器IP"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="dingtalk_redis_ip"/>
+                                <div class="text-muted">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <field name="dingtalk_redis_port" placeholder="请输入Redis服务器端口"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="dingtalk_redis_port"/>
+                                <div class="text-muted">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <field name="dingtalk_redis_db" placeholder="请输入Redis服务器数据库"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="dingtalk_redis_db"/>
+                                <div class="text-muted">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                      <h2>钉钉-模块安装</h2>
                     <div class="row mt16 o_settings_container">
 

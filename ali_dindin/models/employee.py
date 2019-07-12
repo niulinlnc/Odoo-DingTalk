@@ -40,6 +40,7 @@ class HrEmployee(models.Model):
     # 上传员工到钉钉
     @api.multi
     def create_ding_employee(self):
+        client = get_client(self)
         for res in self:
             # 获取部门din_id
             department_list = list()
@@ -62,7 +63,6 @@ class HrEmployee(models.Model):
                 'jobnumber': res.din_jobnumber if res.din_jobnumber else '',  # 工号
             }
             try:
-                client = get_client(self)
                 result = client.user.create(data)
                 logging.info(">>>新增员工返回结果:{}".format(result))
                 res.write({'din_id': result})
@@ -74,6 +74,7 @@ class HrEmployee(models.Model):
     @api.multi
     def update_ding_employee(self):
         """修改员工时同步至钉钉"""
+        client = get_client(self)
         for res in self:
             # 获取部门din_id
             department_list = list()
@@ -103,7 +104,6 @@ class HrEmployee(models.Model):
                 hiredDate = time_to_stamp(res.din_hiredDate)
                 data.update({'hiredDate': hiredDate})
             try:
-                client = get_client(self)
                 result = client.user.update(data)
                 if result.get('errcode') == 0:
                     res.message_post(body=u"新的信息已同步更新至钉钉", message_type='notification')
@@ -127,10 +127,10 @@ class HrEmployee(models.Model):
         从钉钉获取用户详情
         :return:
         """
+        client = get_client(self)
         for employee in self:
             userid = employee.din_id
             try:
-                client = get_client(self)
                 result = client.user.get(userid)
                 if result.get('errcode') == 0:
                     data = {
@@ -183,8 +183,8 @@ class HrEmployee(models.Model):
         通讯录回调事件时触发更新或新增
         :return:
         """
+        client = get_client(self)
         try:
-            client = get_client(self)
             result = client.user.get(userid)
             if result.get('errcode') == 0:
                 data = {
@@ -242,10 +242,10 @@ class HrEmployee(models.Model):
         从钉钉获取用户人脸
         :return:
         """
+        client = get_client(self)
         for employee in self:
             userid = employee.din_id
             try:
-                client = get_client(self)
                 result = client.tbdingding.dingtalk_corp_smartdevice_getface(userid)
                 logging.info("获取人脸返回结果:{}".format(result))
             except Exception as e:
@@ -261,13 +261,13 @@ class HrEmployee(models.Model):
 
         :param userid_list: 查询用userid列表
         """
+        client = get_client(self)
         userlist = list()
         for employee in self:
             emp = self.env['hr.employee'].sudo().search([('din_id', '=', employee.din_id)])
             userlist.append(emp.din_id)
         if userlist:
             try:
-                client = get_client(self)
                 result = client.tbdingding.dingtalk_corp_smartdevice_hasface(userlist)
                 logging.info("查询人脸返回结果:{}".format(result))
             except Exception as e:
@@ -287,8 +287,8 @@ class HrEmployee(models.Model):
     @api.model
     def delete_din_employee(self, userid):
         """删除钉钉用户"""
+        client = get_client(self)
         try:
-            client = get_client(self)
             result = client.user.delete(userid)
             logging.info("user_delete:{}".format(result))
         except Exception as e:

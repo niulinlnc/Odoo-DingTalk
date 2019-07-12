@@ -25,6 +25,7 @@ class HrEmployee(models.Model):
         :return:
         """
         if self.env['ir.config_parameter'].sudo().get_param('dingding_health.auto_user_health_info'):
+            client = get_client(self)
             for res in self:
                 if res.din_id and res.active:
                     today = datetime.date.today()
@@ -33,7 +34,6 @@ class HrEmployee(models.Model):
                     object_id = res.din_id
                     stat_dates = formatted_today
                     try:
-                        client = get_client(self)
                         result = client.health.stepinfo_list(_type, object_id, stat_dates)
                         logging.info(">>>获取员工在今日的步数返回结果:{}".format(result))
                         if result['stepinfo_list']:
@@ -84,8 +84,8 @@ class HrEmployee(models.Model):
         获取员工钉钉运动开启状态
         :param userid: 用户id
         """
+        client = get_client(self)
         try:
-            client = get_client(self)
             result = client.health.stepinfo_getuserstatus(userid)
             logging.info(">>>获取id{}钉钉运动开启状态返回结果:{}".format(userid, result))
             return result

@@ -26,8 +26,8 @@ class DinDinApprovalTemplate(models.Model):
     def get_template(self):
         """获取审批模板"""
         logging.info(">>>开始获取审批模板...")
+        client = get_client(self)
         try:
-            client = get_client(self)
             result = client.bpms.process_listbyuserid(userid='')
             logging.info(">>>获取审批模板返回结果{}".format(result))
             d_res = result.get('process_list')
@@ -80,8 +80,8 @@ class DinDinApprovalTemplate(models.Model):
         :param pcode:
         :return:
         """
+        client = get_client(self)
         try:
-            client = get_client(self)
             result = client.bpms.processinstance_get(pid)
             logging.info(">>>获取审批实例详情返回结果{}".format(result))
             if result.get('errcode') == 0:

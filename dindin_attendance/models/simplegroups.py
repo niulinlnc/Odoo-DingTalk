@@ -38,9 +38,9 @@ class DinDinSimpleGroups(models.Model):
         获取企业考勤组列表
         :return:
         """
+        client = get_client(self)
         logging.info(">>>获取考勤组...")
         try:
-            client = get_client(self)
             result = client.attendance.getsimplegroups()
             logging.info(">>>获取考勤组列表返回结果{}".format(result))
 
@@ -80,11 +80,11 @@ class DinDinSimpleGroups(models.Model):
         :param userid: 员工在企业内的UserID，企业用来唯一标识用户的字段。
         :return:
         """
+        client = get_client(self)
         emps = self.env['hr.employee'].sudo().search([('din_id', '!=', '')])
         for emp in emps:
             userid = emp.din_id
-            try:
-                client = get_client(self)
+            try: 
                 result = client.attendance.getusergroup(userid)
                 logging.info(">>>获取考勤组成员返回结果{}".format(result))
                 if result.get('ding_open_errcode') == 0:

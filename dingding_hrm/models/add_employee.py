@@ -57,6 +57,7 @@ class AddDingDingEmployee(models.Model):
 
         :param param: 添加待入职入参
         """
+        client = get_client(self)
         self.ensure_one()
         logging.info(">>>添加待入职员工start")
         user = self.env['hr.employee'].search([('user_id', '=', self.env.user.id)])
@@ -66,7 +67,6 @@ class AddDingDingEmployee(models.Model):
         op_userid = user[0].din_id if user else ''
         extend_info ={'depts': self.dept_id.din_id} if self.dept_id else ''
         try:
-            client = get_client(self)
             result = client.employeerm.addpreentry(name, mobile, pre_entry_time=pre_entry_time, op_userid=op_userid, extend_info=extend_info)
             logging.info(">>>添加待入职员工返回结果{}".format(result))
             self.write({
@@ -86,8 +86,8 @@ class AddDingDingEmployee(models.Model):
         :param offset: 分页起始值，默认0开始
         :param size: 分页大小，最大50
         """
+        client = get_client(self)
         try:
-            client = get_client(self)
             result = client.employeerm.querypreentry(offset=0, size=50)
             logging.info(">>>查询待入职员工列表返回结果{}".format(result))
             if result['data_list']['string']:

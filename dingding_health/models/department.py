@@ -23,6 +23,7 @@ class HrDepartment(models.Model):
         :return:
         """
         if self.env['ir.config_parameter'].sudo().get_param('dingding_health.auto_dept_health_info'):
+            client = get_client(self)
             for res in self:
                 if res.din_id:
                     today = datetime.date.today()
@@ -31,7 +32,6 @@ class HrDepartment(models.Model):
                     object_id = res.din_id
                     stat_dates = formatted_today
                     try:
-                        client = get_client(self)
                         result = client.health.stepinfo_list(_type, object_id, stat_dates)
                         logging.info(">>>获取部门在今日的步数返回结果:{}".format(result))
                         if result['stepinfo_list']:

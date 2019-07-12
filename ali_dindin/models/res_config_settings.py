@@ -23,6 +23,9 @@ class ResConfigSettings(models.TransientModel):
     din_unsynchronized_hidden_departments = fields.Boolean(string=u'不同步隐藏部门')
     din_login_appid = fields.Char(string=u'钉钉登录appId')
     din_login_appsecret = fields.Char(string=u'钉钉登录appSecret')
+    dingtalk_redis_ip = fields.Char('Redis服务器IP')
+    dingtalk_redis_port = fields.Char('Redis服务器端口')
+    dingtalk_redis_db = fields.Char('Redis服务器数据库')
     
     # 安装钉钉模块
     module_dindin_attendance = fields.Boolean(
@@ -109,6 +112,9 @@ class ResConfigSettings(models.TransientModel):
             din_unsynchronized_hidden_departments=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_unsynchronized_hidden_departments'),
             din_login_appid=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_login_appid'),
             din_login_appsecret=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_login_appsecret'),
+            dingtalk_redis_ip=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_ip', default = '127.0.0.1'),
+            dingtalk_redis_port=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_port', default = '6379'),
+            dingtalk_redis_db=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_db', default = 0),
         )
         return res
 
@@ -128,5 +134,7 @@ class ResConfigSettings(models.TransientModel):
         self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_unsynchronized_hidden_departments', self.din_unsynchronized_hidden_departments)
         self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_login_appid', self.din_login_appid)
         self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_login_appsecret', self.din_login_appsecret)
-
+        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.dingtalk_redis_ip', self.dingtalk_redis_ip)
+        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.dingtalk_redis_port', self.dingtalk_redis_port)
+        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.dingtalk_redis_db', self.dingtalk_redis_db)
 

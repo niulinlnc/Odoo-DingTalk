@@ -88,11 +88,11 @@ class GetDingDingHrmDimissionList(models.TransientModel):
 
         :param userid_list: 员工id
         """
+        client = get_client(self)
         logging.info(">>>获取钉钉获取离职员工信息start")
         if len(user_ids) > 50:
             raise UserError("钉钉仅支持批量查询小于等于50个员工!")
         try:
-            client = get_client(self)
             result = client.employeerm.listdimission(userid_list=user_ids)
             logging.info(">>>批量获取员工离职信息返回结果{}".format(result))
 

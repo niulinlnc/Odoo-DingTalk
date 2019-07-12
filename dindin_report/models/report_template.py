@@ -32,11 +32,11 @@ class DingDingReportTemplate(models.Model):
         :param offset: 分页游标，从0开始。根据返回结果里的next_cursor是否为空来判断是否还有下一页，且再次调用时offset设置成next_cursor的值
         :param size: 分页大小，最大可设置成100
         """
+        client = get_client(self)
         group = self.env.user.has_group('dindin_report.dd_get_report_templategroup')
         if not group:
             raise UserError("不好意思，你没有权限进行本操作！")
         try:
-            client = get_client(self)
             result = client.report.template_listbyuserid()
             logging.info(">>>获取日志模板返回结果:{}".format(result))
             d_res = result['template_list']['report_template_top_vo']
@@ -64,12 +64,12 @@ class DingDingReportTemplate(models.Model):
 
         :param userid: 员工id
         """
+        client = get_client(self)
         emp = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)])
         if len(emp) > 1:
             return {'state': False, 'number': 0, 'msg': '登录用户关联了多个员工'}
         if emp and emp.din_id:
             try:
-                client = get_client(self)
                 result = client.report.getunreadcount(emp.din_id)
                 logging.info(">>>查询员工未读日志数返回结果:{}".format(result))
                 if result.get('errcode') == 0:

@@ -65,8 +65,8 @@ class DinDinApprovalMain(models.Model):
         :param form_values:表单参数
         :return: process_instance_id （审批实例id）
         """
+        client = get_client(self)
         try:
-            client = get_client(self)
             result = client.bpms.processinstance_create(process_code, user_id, dept_id, approvers, form_values,
                                agent_id=None, cc_list=cc_list, cc_start=False, cc_finish=False, approvers_v2=())
 

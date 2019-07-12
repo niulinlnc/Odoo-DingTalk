@@ -37,6 +37,7 @@ class DinDinUsersSign(models.Model):
         :param size: 分页大小
         :return:
         """
+        client = get_client(self)
         logging.info(">>>获取用户签到记录...")
         for res in self:
             res.line_ids = False
@@ -48,7 +49,6 @@ class DinDinUsersSign(models.Model):
             cursor = 0
             size = 100
             try:
-                client = get_client(self)
                 result = client.checkin.record_get(userid_list, start_time, end_time, cursor=cursor, size=size)
                 logging.info(">>>获取多个用户的签到记录结果{}".format(result))
 

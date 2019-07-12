@@ -45,10 +45,10 @@ class DingDingReportUser(models.Model):
         获取日志统计数据（已读人数、评论个数、去重个数、点赞人数）
         :return:
         """
+        client = get_client(self)
         for res in self:
             report_id = res.report_id
             try:
-                client = get_client(self)
                 result = client.report.statistics(report_id)
                 logging.info(">>>获取日志统计数据返回结果{}".format(result))
                 d_res = result
@@ -76,10 +76,10 @@ class DingDingReportUser(models.Model):
         :return:
         """
         # 获取已读人员
+        client = get_client(self)
         report_id = res.report_id
         _type = 0
         try:
-            client = get_client(self)
             result = client.report.statistics_listbytype(report_id, _type, offset=0, size=100)
             logging.info(">>>获取已读人员列表返回结果{}".format(result))
             d_res = result.get('userid_list')
@@ -96,7 +96,6 @@ class DingDingReportUser(models.Model):
         report_id = res.report_id
         _type = 2
         try:
-            client = get_client(self)
             result = client.report.statistics_listbytype(report_id, _type, offset=0, size=100)            
             logging.info(">>>获取点赞人员列表返回结果{}".format(result))
             d_res = result.get('userid_list')
@@ -118,9 +117,9 @@ class DingDingReportUser(models.Model):
         :param res:
         :return:
         """
+        client = get_client(self)
         report_id = res.report_id
         try:
-            client = get_client(self)
             result = client.report.receiver_list(report_id, offset=0, size=100)  
             logging.info(">>>获取分享人员列表返回结果{}".format(result))
             d_res = result.get('userid_list')
@@ -142,9 +141,9 @@ class DingDingReportUser(models.Model):
         :param res:
         :return:
         """
+        client = get_client(self)
         report_id = res.report_id
         try:
-            client = get_client(self)
             result = client.report.comment_list(report_id, offset=0, size=20)  
             logging.info(">>>获取日志评论详情返回结果{}".format(result))
             d_res = result.get('comments')
@@ -199,6 +198,7 @@ class GetUserDingDingReportList(models.TransientModel):
         :param template_name: 要查询的模板名称（可选）
         :param userid: 员工的userid（可选）
         """
+        client = get_client(self)
         for res in self:
             group = self.env.user.has_group('dindin_report.dd_get_user_report_list')
             if not group:
@@ -214,7 +214,6 @@ class GetUserDingDingReportList(models.TransientModel):
                 template_name = res.report_type.name if res.report_type else ''
                 logging.info(">>>查询游标返回结果:{}".format(cursor))
                 try:
-                    client = get_client(self)
                     result = client.report.list(start_time, end_time, cursor=cursor, size=size, template_name=template_name, userid=userid)
                     logging.info(">>>获取日志列表返回结果:{}".format(result))
                     d_res = result.get('data_list')
