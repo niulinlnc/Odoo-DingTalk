@@ -9,7 +9,7 @@ from requests import ReadTimeout
 from odoo import api, fields, models, tools
 from odoo.modules import get_module_resource
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client, grouped_list
 import base64
 
 _logger = logging.getLogger(__name__)
@@ -57,8 +57,26 @@ class GetDingDingHealthList(models.TransientModel):
     @api.onchange('is_all_emp')
     def onchange_all_emp(self):
         if self.is_all_emp:
-            emps = self.env['hr.employee'].search([('din_id', '!=', '')])
+            emps = self.env['hr.employee'].search([('din_id', '!=', ''), ('health_state', '=', 'open')])
             self.emp_ids = [(6, 0, emps.ids)]
+
+
+    @api.multi
+    def get_health_list_v1(self):
+        """
+        批量查询多个用户的钉钉运动步数
+
+        :param userids: 员工userid列表，最多传50个
+        :param stat_date: 时间
+        """
+        logging.info(">>>获取钉钉员工运动数据start")
+        for user in self.emp_ids:
+            logging.info(">>>查询{}".format(user.name))
+            self.get_health(user.din_id)
+        logging.info(">>>获取钉钉员工运动数据end")
+        action = self.env.ref('dingding_health.dingding_health_action')
+        action_dict = action.read()[0]
+        return action_dict
 
     @api.multi
     def get_health_list(self):
@@ -69,13 +87,33 @@ class GetDingDingHealthList(models.TransientModel):
         :param stat_date: 时间
         """
         logging.info(">>>获取钉钉员工运动数据start")
-        if len(self.emp_ids) > 50:
-            raise UserError("钉钉仅支持批量查询小于等于50个员工!")
-
-        userid_list = list()
+        din_ids = list()
         for user in self.emp_ids:
-            userid_list.append(user.din_id)
-        userids = userid_list
+            din_ids.append(user.din_id)         
+        user_list = grouped_list(din_ids, 50)
+        for u in user_list:
+            if isinstance(u, str):
+                self.get_health(user_list)
+            else:
+                self.get_health(u)
+
+        logging.info(">>>获取钉钉员工运动数据end")
+        action = self.env.ref('dingding_health.dingding_health_action')
+        action_dict = action.read()[0]
+        return action_dict
+
+
+    @api.model
+    def get_health(self, userids):
+        """
+        批量查询多个用户的钉钉运动步数
+
+        :param userids: 员工userid列表，最多传50个
+        :param stat_date: 时间
+        """
+        logging.info(">>>获取钉钉员工运动数据start")
+        if len(userids) > 50:
+            raise UserError("钉钉仅支持批量查询小于等于50个员工!")
         today = datetime.date.today()
         formatted_today = today.strftime('%Y%m%d')
         stat_dates = formatted_today
@@ -99,9 +137,5 @@ class GetDingDingHealthList(models.TransientModel):
                         else:
                             self.env['dingding.health'].sudo().create(data)
         except Exception as e:
-            raise UserError(e)
+            logging.info(">>>获取失败,该员工可能已离职，详情：{}".format(e))
 
-        logging.info(">>>获取钉钉员工花名册end")
-        action = self.env.ref('dingding_health.dingding_health_action')
-        action_dict = action.read()[0]
-        return action_dict

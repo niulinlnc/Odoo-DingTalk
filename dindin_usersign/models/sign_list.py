@@ -7,7 +7,7 @@ import requests
 from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 
@@ -25,18 +25,6 @@ class DinDinSignList(models.Model):
     latitude = fields.Char(string='纬度')
     longitude = fields.Char(string='经度')
     visit_user = fields.Char(string='拜访对象')
-
-    @api.model
-    def get_time_stamp(self, timeNum):
-        """
-        将13位时间戳转换为时间
-        :param timeNum:
-        :return:
-        """
-        timeStamp = float(timeNum / 1000)
-        timeArray = time.localtime(timeStamp)
-        otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-        return otherStyleTime
 
     @api.model
     def get_signs_by_user(self, userid, signtime):
@@ -68,7 +56,7 @@ class DinDinSignList(models.Model):
                 emp = self.env['hr.employee'].sudo().search([('din_id', '=', data.get('userid'))])
                 self.env['dindin.signs.list'].create({
                     'emp_id': emp.id if emp else False,
-                    'checkin_time': self.get_time_stamp(data.get('checkin_time')),
+                    'checkin_time': stamp_to_time(data.get('checkin_time')),
                     'place': data.get('place'),
                     'visit_user': data.get('visit_user'),
                     'detail_place': data.get('detail_place'),

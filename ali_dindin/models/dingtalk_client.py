@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import logging
+import time
+from odoo import fields
 from dingtalk.client import AppKeyClient
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
-
 
 def get_client(obj):
     """钉钉客户端初始化
@@ -19,3 +20,49 @@ def get_client(obj):
     else:
         return AppKeyClient(din_corpid, din_appkey, din_appsecret)
 
+def grouped_list(all_list, limit):
+    """
+    根据输入的列表和单个列表限制元素个数，对列表进行分组后输出
+    :param all_data_list:列表集
+    :param limit: 单个列表最大包含元素数量
+    :return:
+    """
+    user_list = list()
+    if len(all_list) > limit:
+        n = 1
+        e_list = list()
+        for user in all_list:
+            if n <= limit:
+                e_list.append(user)
+                n = n + 1
+            else:
+                user_list.append(e_list)
+                e_list = list()
+                e_list.append(user)
+                n = 2
+        user_list.append(e_list)
+    else:
+        for user in all_list:
+            user_list.append(user)
+    return user_list
+
+def stamp_to_time(time_num):
+    """
+    将13位时间戳转换为时间
+    :param time_num:
+    :return:
+    """
+    time_stamp = float(time_num / 1000) 
+    time_array = time.localtime(time_stamp)
+    return time.strftime("%Y-%m-%d %H:%M:%S", time_array)
+
+def time_to_stamp(time):
+    """
+    将时间转成13位时间戳
+    :param date:
+    :return:
+    """
+    time_str = fields.Datetime.to_string(time)
+    time_stamp = time.mktime(time.strptime(time_str, "%Y-%m-%d %H:%M:%S"))
+    time_stamp = time_stamp * 1000
+    return time_stamp

@@ -6,7 +6,7 @@ import requests
 from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 # 已弃用，已经钉钉考勤整合至odoo考勤
@@ -145,12 +145,12 @@ class DinDinAttendanceList(models.Model):
                 for rec in result.get('recordresult'):
                     data = {
                         'recordId': rec.get('recordId'),
-                        'workDate': self.get_time_stamp(rec.get('workDate')),  # 工作日
+                        'workDate': stamp_to_time(rec.get('workDate')),  # 工作日
                         'checkType': rec.get('checkType'),  # 考勤类型
                         'timeResult': rec.get('timeResult'),  # 时间结果
                         'locationResult': rec.get('locationResult'),  # 考勤类型
-                        'baseCheckTime': self.get_time_stamp(rec.get('baseCheckTime')),  # 基准时间
-                        'userCheckTime': self.get_time_stamp(rec.get('userCheckTime')),  # 实际打卡时间
+                        'baseCheckTime': stamp_to_time(rec.get('baseCheckTime')),  # 基准时间
+                        'userCheckTime': stamp_to_time(rec.get('userCheckTime')),  # 实际打卡时间
                         'sourceType': rec.get('sourceType'),  # 数据来源
                     }
                     groups = self.env['dindin.simple.groups'].sudo().search([('group_id', '=', rec.get('groupId'))])
@@ -160,7 +160,7 @@ class DinDinAttendanceList(models.Model):
                     if emp_id:
                         data.update({'emp_id': emp_id[0].id})
                     a_list = self.env['dindin.attendance.list'].search(
-                        [('recordId', '=', rec.get('recordId')),('emp_id', '=',  emp_id[0].id),  ('baseCheckTime', '=', self.get_time_stamp(rec.get('baseCheckTime')))])
+                        [('recordId', '=', rec.get('recordId')),('emp_id', '=',  emp_id[0].id),  ('baseCheckTime', '=', stamp_to_time(rec.get('baseCheckTime')))])
                     if a_list:
                         a_list.sudo().write(data)
                     else:
@@ -174,14 +174,3 @@ class DinDinAttendanceList(models.Model):
         except Exception as e:
             raise UserError(e)
 
-    @api.model
-    def get_time_stamp(self, timeNum):
-        """
-        将13位时间戳转换为时间
-        :param timeNum:
-        :return:
-        """
-        timeStamp = float(timeNum / 1000)
-        timeArray = time.localtime(timeStamp)
-        otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-        return otherStyleTime

@@ -7,7 +7,7 @@ from requests import ReadTimeout
 from datetime import datetime, timedelta
 from odoo.exceptions import UserError
 from odoo import models, fields, api
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client, stamp_to_time
 
 class HrEmployee(models.Model):
     _inherit = "hr.employee"
@@ -190,13 +190,13 @@ class HrAttendanceTransient(models.TransientModel):
                 for rec in result.get('recordresult'):
                         data = {
                             'recordId': rec.get('recordId'),
-                            'workDate': self.get_time_stamp(rec.get('workDate')),  # 工作日
+                            'workDate': stamp_to_time(rec.get('workDate')),  # 工作日
                             'timeResult': rec.get('timeResult'),  # 时间结果
                             'locationResult': rec.get('locationResult'),  # 考勤结果
-                            'baseCheckTime': self.get_time_stamp(rec.get('baseCheckTime')),  # 基准时间
+                            'baseCheckTime': stamp_to_time(rec.get('baseCheckTime')),  # 基准时间
                             'sourceType': rec.get('sourceType'),  # 数据来源
                             'checkType': rec.get('checkType'),
-                            'check_in': self.get_time_stamp(rec.get('userCheckTime')),
+                            'check_in': stamp_to_time(rec.get('userCheckTime')),
                             'attendance_id': rec.get('id'),
                         }
                         groups = self.env['dindin.simple.groups'].sudo().search(
@@ -206,7 +206,7 @@ class HrAttendanceTransient(models.TransientModel):
                         data.update({'emp_id': emp_id[0].id if emp_id else False})
                         attendance = self.env['dingding.attendance'].sudo().search(
                             [('emp_id', '=', emp_id[0].id),
-                             ('check_in', '=', self.get_time_stamp(rec.get('userCheckTime'))),
+                             ('check_in', '=', stamp_to_time(rec.get('userCheckTime'))),
                              ('checkType', '=', rec.get('checkType'))])
                         if not attendance:
                             self.env['dingding.attendance'].sudo().create(data)
@@ -218,15 +218,3 @@ class HrAttendanceTransient(models.TransientModel):
                 raise UserError('请求失败,原因为:{}'.format(result.get('errmsg')))
         except Exception as e:
             raise UserError(e)
-
-    @api.model
-    def get_time_stamp(self, timeNum):
-        """
-        将13位时间戳转换为时间
-        :param timeNum:
-        :return:
-        """
-        timeStamp = float(timeNum / 1000)
-        timeArray = time.localtime(timeStamp)
-        otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-        return otherStyleTime

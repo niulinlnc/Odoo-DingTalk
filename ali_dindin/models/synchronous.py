@@ -6,7 +6,7 @@ import time
 import requests
 from odoo import api, fields, models, tools
 from odoo.exceptions import UserError
-from .dingtalk_client import get_client
+from .dingtalk_client import get_client, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 
@@ -144,7 +144,7 @@ class DingDingSynchronous(models.TransientModel):
                         'mobile_phone':'+{}-{}'.format(user.get('stateCode'),user.get('mobile')),
                     })
                 if user.get('hiredDate'):
-                    time_stamp = self.get_time_stamp(user.get('hiredDate'))
+                    time_stamp = stamp_to_time(user.get('hiredDate'))
                     data.update({
                         'din_hiredDate': time_stamp,
                     })
@@ -254,13 +254,3 @@ class DingDingSynchronous(models.TransientModel):
         except Exception as e:
             raise UserError(e)
 
-    @api.model
-    def get_time_stamp(self, time_num):
-        """
-        将13位时间戳转换为时间
-        :param time_num:
-        :return:
-        """
-        time_stamp = float(time_num / 1000)
-        time_array = time.localtime(time_stamp)
-        return time.strftime("%Y-%m-%d %H:%M:%S", time_array)

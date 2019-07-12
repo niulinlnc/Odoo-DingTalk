@@ -130,7 +130,7 @@
                     </group>
                 </group>
                 <group>
-                    <field name="emp_ids" widget="many2many_tags" placeholder="获取的员工..."/>
+                    <field name="emp_ids" widget="many2many_tags" placeholder="获取的员工..." domain="[('health_state', '=', 'open')]"/>
                 </group>
                 <footer>
                     <button string="开始获取" name="get_health_list" type="object" class="oe_highlight"/>

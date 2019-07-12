@@ -6,7 +6,7 @@ import requests
 from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client, grouped_list, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 
@@ -65,13 +65,16 @@ class GetDingDingHrmDimissionList(models.TransientModel):
         批量获取员工离职信息
         """
         logging.info(">>>获取钉钉获取离职员工信息start")
-        userid_list = self.emp_ids
-        if len(userid_list) > 50:
-            raise UserError("钉钉仅支持批量查询小于等于50个员工!")
-        userids = list()
-        for user in userid_list:
-            userids.append(user.din_id)
-        self.dimission_list(userids)
+        din_ids = list()
+        for user in self.emp_ids:
+            din_ids.append(user.din_id)         
+        user_list = grouped_list(din_ids, 50)
+        for u in user_list:
+            if isinstance(u, str):
+                self.dimission_list(user_list)
+            else:
+                self.dimission_list(u)
+        logging.info(">>>获取钉钉获取离职员工信息end")
         action = self.env.ref('dingding_hrm.dingding_hrm_dimission_list_action')
         action_dict = action.read()[0]
         return action_dict
@@ -107,7 +110,7 @@ class GetDingDingHrmDimissionList(models.TransientModel):
                             dept_list.append(hr_dept.id)
                     data = {
                         'emp_id': emp[0].id,
-                        'last_work_day': self.get_time_stamp(res.get('last_work_day')),
+                        'last_work_day': stamp_to_time(res.get('last_work_day')),
                         'department_id': [(6, 0, dept_list)],
                         'reason_memo': res.get('reason_memo'),
                         'reason_type': res.get('reason_type'),
@@ -125,16 +128,3 @@ class GetDingDingHrmDimissionList(models.TransientModel):
         except Exception as e:
             raise UserError(e)
         logging.info(">>>获取获取离职员工信息end")
-
-
-    @api.model
-    def get_time_stamp(self, timeNum):
-        """
-        将13位时间戳转换为时间
-        :param timeNum:
-        :return:
-        """
-        timeStamp = float(timeNum / 1000)
-        timeArray = time.localtime(timeStamp)
-        otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-        return otherStyleTime

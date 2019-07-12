@@ -19,6 +19,12 @@
                                 <div class="text-muted">
                                     展示员工今日实时步数
                                 </div>
+                                <button
+                                    type="object"
+                                    string="更新运动开启状态" 
+                                    icon="fa-arrow-right" 
+                                    name="get_all_user_health_state"
+                                />
                             </div>
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">

@@ -5,7 +5,7 @@ import time
 import requests
 from odoo import api, fields, models, tools
 from odoo.exceptions import UserError
-from .dingtalk_client import get_client
+from .dingtalk_client import get_client, time_to_stamp, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 try:
@@ -100,7 +100,7 @@ class HrEmployee(models.Model):
                 'isHide': res.din_isHide,  # 隐藏手机号
             }
             if res.din_hiredDate:
-                hiredDate = self.date_to_stamp(res.din_hiredDate)
+                hiredDate = time_to_stamp(res.din_hiredDate)
                 data.update({'hiredDate': hiredDate})
             try:
                 client = get_client(self)
@@ -159,7 +159,7 @@ class HrEmployee(models.Model):
                             'mobile_phone':'+{}-{}'.format(result.get('stateCode'), result.get('mobile')),
                         })
                     if result.get('hiredDate'):
-                        date_str = self.get_time_stamp(result.get('hiredDate'))
+                        date_str = stamp_to_time(result.get('hiredDate'))
                         data.update({
                             'din_hiredDate': date_str,
                         })
@@ -213,7 +213,7 @@ class HrEmployee(models.Model):
                         'mobile_phone':'+{}-{}'.format(result.get('stateCode'), result.get('mobile')),
                     })
                 if result.get('hiredDate'):
-                    date_str = self.get_time_stamp(result.get('hiredDate'))
+                    date_str = stamp_to_time(result.get('hiredDate'))
                     data.update({
                         'din_hiredDate': date_str,
                     })
@@ -320,28 +320,4 @@ class HrEmployee(models.Model):
                 binary_data = tools.image_resize_image_big(emp.din_face)
                 emp.sudo().write({'image': binary_data})
 
-
-    @api.model
-    def get_time_stamp(self, time_num):
-        """
-        将13位时间戳转换为时间
-        :param time_num:
-        :return:
-        """
-        time_stamp = float(time_num / 1000) 
-        time_array = time.localtime(time_stamp)
-        return time.strftime("%Y-%m-%d %H:%M:%S", time_array)
-
-    # 把时间转成时间戳形式
-    @api.model
-    def date_to_stamp(self, date):
-        """
-        将时间转成13位时间戳
-        :param time_num:
-        :return:
-        """
-        date_str = fields.Datetime.to_string(date)
-        date_stamp = time.mktime(time.strptime(date_str, "%Y-%m-%d %H:%M:%S"))
-        date_stamp = date_stamp * 1000
-        return date_stamp
 

@@ -42,50 +42,53 @@ class HrEmployee(models.Model):
                         else:
                             res.update({'dd_step_count': 0})
                     except Exception as e:
-                        raise UserError(e)
+                        # raise UserError(e)
+                        res.message_post(body=u"获取失败，原因：{}".format(e), message_type='notification')
                 else:
                     res.update({'dd_step_count': 0})
 
     @api.multi
     def get_user_health_state(self):
         """
-        获取员工钉钉运动开启状态
+        获取选定范围员工钉钉运动开启状态
         :param userid: 用户id
         """
         for res in self:
             if res.din_id and res.active:
                 userid = res.din_id
-                try:
-                    client = get_client(self)
-                    result = client.health.stepinfo_getuserstatus(userid)
-                    logging.info(">>>获取员工在今日的步数返回结果:{}".format(result))
-                    if result:
-                        res.update({'health_state': 'open'})
-                    else:
-                        res.update({'health_state': 'close'})
-                except Exception as e:
-                        raise UserError(e)
+                result = self.get_health_state(userid)
+                if result:
+                    res.update({'health_state': 'open'})
+                else:
+                    res.update({'health_state': 'close'})
+
+    @api.multi
+    def get_all_user_health_state(self):
+        """
+        获取所有员工钉钉运动开启状态
+        :param userid: 用户id
+        """
+        din_ids = self.env['hr.employee'].search_read([('din_id', '!=', '')], fields=['din_id'])
+        for emp in din_ids:
+            user_id = emp.get('din_id')
+            result = self.get_health_state(user_id)
+            emp = self.env['hr.employee'].search([('din_id', '=', user_id)])
+            if result:
+                emp.update({'health_state': 'open'})
+            else:
+                emp.update({'health_state': 'close'})
 
     @api.model
-    def get_time_stamp(self, time_num):
+    def get_health_state(self, userid):
         """
-        将13位时间戳转换为时间
-        :param time_num:
-        :return:
+        获取员工钉钉运动开启状态
+        :param userid: 用户id
         """
-        time_stamp = float(time_num / 1000) 
-        time_array = time.localtime(time_stamp)
-        return time.strftime("%Y-%m-%d %H:%M:%S", time_array)
+        try:
+            client = get_client(self)
+            result = client.health.stepinfo_getuserstatus(userid)
+            logging.info(">>>获取id{}钉钉运动开启状态返回结果:{}".format(userid, result))
+            return result
+        except Exception as e:
+            logging.info(">>>获取失败，原因：{}".format(e))
 
-    # 把时间转成时间戳形式
-    @api.model
-    def date_to_stamp(self, date):
-        """
-        将时间转成13位时间戳
-        :param time_num:
-        :return:
-        """
-        date_str = fields.Datetime.to_string(date)
-        date_stamp = time.mktime(time.strptime(date_str, "%Y-%m-%d %H:%M:%S"))
-        date_stamp = date_stamp * 1000
-        return date_stamp

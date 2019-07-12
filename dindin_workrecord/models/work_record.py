@@ -7,7 +7,7 @@ import requests
 from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 
@@ -155,7 +155,7 @@ class DinDinWorkRecord(models.Model):
                                 'name': res.get('title'),
                                 'emp_id': emp.get('id'),
                                 'record_url': res.get('url'),
-                                'record_time': self.get_time_stamp(res.get('create_time')),
+                                'record_time': stamp_to_time(res.get('create_time')),
                                 'record_type': 'put',
                                 'record_id': res.get('record_id'),
                                 'line_ids': rec_line,
@@ -285,7 +285,7 @@ class GetUserDingDingWorkRecord(models.TransientModel):
                                 'name': res.get('title'),
                                 'emp_id': emp.get('id'),
                                 'record_url': res.get('url'),
-                                'record_time': self.get_time_stamp(res.get('create_time')),
+                                'record_time': stamp_to_time(res.get('create_time')),
                                 'record_type': 'put',
                                 'record_id': res.get('record_id'),
                                 'line_ids': rec_line,
@@ -318,15 +318,3 @@ class GetUserDingDingWorkRecord(models.TransientModel):
             return result
         except Exception as e:
             raise UserError(e)
-
-    @api.model
-    def get_time_stamp(self, timeNum):
-        """
-        将13位时间戳转换为时间
-        :param timeNum:
-        :return:
-        """
-        timeStamp = float(timeNum/1000)
-        timeArray = time.localtime(timeStamp)
-        otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-        return otherStyleTime

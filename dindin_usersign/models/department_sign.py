@@ -8,7 +8,7 @@ import requests
 from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class DinDinDepartmentSign(models.Model):
                 line_list = list()
                 for data in result:
                     emp = self.env['hr.employee'].sudo().search([('din_id', '=', data.get('userId'))])
-                    timestamp = self.get_time_stamp(data.get('timestamp'))
+                    timestamp = stamp_to_time(data.get('timestamp'))
                     line_list.append({
                         'emp_id': emp.id if emp else False,
                         'timestamp': timestamp,
@@ -69,19 +69,6 @@ class DinDinDepartmentSign(models.Model):
                 res.line_ids = line_list
             except Exception as e:
                 raise UserError(e)
-
-    @api.model
-    def get_time_stamp(self, timeNum):
-        """
-        将13位时间戳转换为时间
-        :param timeNum:
-        :return:
-        """
-        timeStamp = float(timeNum / 1000)
-        timeArray = time.localtime(timeStamp)
-        otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-        return otherStyleTime
-
 
 class DinDinDepartmentSignLine(models.Model):
     _name = 'dindin.department.signs.line'

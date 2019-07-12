@@ -6,7 +6,7 @@ import time
 from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 
@@ -228,7 +228,7 @@ class GetUserDingDingReportList(models.TransientModel):
                             'report_id': data_list.get('report_id'),
                             'department_id': emp[0].department_id.id if emp and emp.department_id else False,
                             'employee_id': emp[0].id if emp else False,
-                            'report_date': self.get_time_stamp(data_list.get('create_time')),
+                            'report_date': stamp_to_time(data_list.get('create_time')),
                         }
                         report_list = list()
                         for content in data_list['contents']['json_object']:
@@ -255,19 +255,6 @@ class GetUserDingDingReportList(models.TransientModel):
                     raise UserError(e)
         action = self.env.ref('dindin_report.dingding_report_user_action').read()[0]
         return action
-
-    @api.model
-    def get_time_stamp(self, time_number):
-        """
-        将13位时间戳转换为时间
-        :param time_number:
-        :return:
-        """
-        if time_number:
-            time_stamp = float(time_number / 1000)
-            time_array = time.localtime(time_stamp)
-            return time.strftime("%Y-%m-%d %H:%M:%S", time_array)
-
 
 class DingDingReportCommentsList(models.Model):
     _name = 'dingding.report.comments.list'

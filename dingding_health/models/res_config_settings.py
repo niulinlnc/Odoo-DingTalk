@@ -23,3 +23,6 @@ class ResConfigSettings(models.TransientModel):
         super(ResConfigSettings, self).set_values()
         self.env['ir.config_parameter'].sudo().set_param('dingding_health.auto_user_health_info', self.auto_user_health_info)
         self.env['ir.config_parameter'].sudo().set_param('dingding_health.auto_dept_health_info', self.auto_dept_health_info)
+
+    def get_all_user_health_state(self):
+        self.env.ref('dingding_health.ir_cron_data_get_health_state').method_direct_trigger()

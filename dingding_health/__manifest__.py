@@ -12,6 +12,7 @@
     'application': False,
     'auto_install': False,
     'data': [
+        'data/system_conf.xml',
         'security/health_group.xml',
         'security/ir.model.access.csv',
         'views/menu.xml',
