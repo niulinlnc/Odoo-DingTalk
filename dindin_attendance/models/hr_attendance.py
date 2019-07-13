@@ -166,7 +166,6 @@ class HrAttendanceTransient(models.TransientModel):
         :param user:
         :return:
         """
-        client = get_client(self)
         logging.info(">>>开始获取员工打卡信息...")
         din_ids = list()
         for user in self.emp_ids:
@@ -186,7 +185,7 @@ class HrAttendanceTransient(models.TransientModel):
                         break
                     else:
                         offset = offset + limit
-                        logging.info(">>>准备获取剩余数据中的第{}至{}条".format(offset, offset+limit))
+                        logging.info(">>>准备获取剩余数据中的第{}至{}条".format(offset+1, offset+limit))
         logging.info(">>>根据日期获取员工打卡信息结束...")
         action = self.env.ref('dindin_attendance.dingding_attendance_action')
         action_dict = action.read()[0]
