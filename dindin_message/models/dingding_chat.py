@@ -96,6 +96,7 @@ class DingDingChat(models.Model):
         :param management_type: 管理类型，0-默认，所有人可管理，1-仅群主可管理
         :return: 群会话的id
         """
+        client = get_client(self)
         for res in self:
             user_list = self.check_employee_din_id(res)
             logging.info(">>>开始钉钉创建群会话")
@@ -109,7 +110,6 @@ class DingDingChat(models.Model):
             managementType=res.management_ype
             useridlist=user_list
             try:
-                client = get_client(self)
                 result = client.chat.create(name, owner, useridlist, show_history_type=showHistoryType, searchable=searchable,
                     validation_type=validationType, mention_all_authority=mentionAllAuthority, chat_banned_type=chatBannedType, management_type=managementType)
                 logging.info(">>>创建会话返回结果{}".format(result)) 
@@ -140,6 +140,7 @@ class DingDingChat(models.Model):
         :param management_type: 管理类型，0-默认，所有人可管理，1-仅群主可管理
         :return:
         """
+        client = get_client(self)
         for res in self:
             self.check_employee_din_id(res)
             logging.info(">>>开始钉钉修改群会话")
@@ -155,7 +156,6 @@ class DingDingChat(models.Model):
             managementType = res.management_ype
 
             try:
-                client = get_client(self)
                 result = client.chat.update(chatid, name=name, owner=owner, add_useridlist=(), del_useridlist=(), icon='', chat_banned_type=chatBannedType,
                     searchable=searchable, validation_type=validationType, mention_all_authority=mentionAllAuthority, show_history_type=showHistoryType, management_type=managementType)
                 logging.info(">>>修改会话返回结果{}".format(result)) 
@@ -261,6 +261,7 @@ class DingDingChatUserModelAdd(models.TransientModel):
         添加群成员
         :return:
         """
+        client = get_client(self)
         for res in self:
             chat_id = self.env.context.get('active_id', False)
             ding_chat = self.env['dingding.chat'].browse(chat_id)
@@ -272,7 +273,6 @@ class DingDingChatUserModelAdd(models.TransientModel):
             chatid = ding_chat.chat_id
             add_useridlist = user_list
             try:
-                client = get_client(self)
                 result = client.chat.update(chatid, add_useridlist=add_useridlist)
                 logging.info(">>>添加群成员返回结果{}".format(result)) 
                 if result.get('errcode') == 0:
@@ -325,6 +325,7 @@ class DingDingChatUserModelDel(models.TransientModel):
         删除群成员
         :return:
         """
+        client = get_client(self)
         for res in self:
             chat_id = self.env.context.get('active_id', False)
             ding_chat = self.env['dingding.chat'].browse(chat_id)
@@ -336,7 +337,6 @@ class DingDingChatUserModelDel(models.TransientModel):
             chatid = ding_chat.chat_id
             del_useridlist = user_list
             try:
-                client = get_client(self)
                 result = client.chat.update(chatid, del_useridlist=del_useridlist)
                 logging.info(">>>删除群成员返回结果{}".format(result))
                 if result.get('errcode') == 0:
@@ -361,6 +361,7 @@ class DingDingSendChatMessage(models.TransientModel):
         点击群会话发送群消息按钮
         :return:
         """
+        client = get_client(self)
         chat_id = self.env.context.get('active_id', False)
         ding_chat = self.env['dingding.chat'].browse(chat_id)
         chatid = ding_chat.chat_id
@@ -371,7 +372,6 @@ class DingDingSendChatMessage(models.TransientModel):
             }
         }
         try:
-            client = get_client(self)
             result = client.chat.send(chatid, msg)
             logging.info(">>>发送群消息返回结果{}".format(result))
             ding_chat.message_post(body="消息已成功发送!".format(self.message), message_type='notification')
@@ -384,7 +384,7 @@ class DingDingSendChatMessage(models.TransientModel):
         发送群会话消息
         :return:
         """
-
+        client = get_client(self)
         chatid = ding_chat.chat_id
         msg = {
             "msgtype": "markdown",
@@ -394,7 +394,6 @@ class DingDingSendChatMessage(models.TransientModel):
             }
         }
         try:
-            client = get_client(self)
             result = client.chat.send(chatid, msg)
             logging.info(">>>发送群消息返回结果{}".format(result))
         except Exception as e:
@@ -409,6 +408,7 @@ class DingDingSendChatMessage(models.TransientModel):
         :param message 消息内容
         :return:
         """
+        client = get_client(self)
         agentid = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid')
         userid_list = userstr
         msg_body = {
@@ -419,7 +419,6 @@ class DingDingSendChatMessage(models.TransientModel):
             }
         }
         try:
-            client = get_client(self)
             result = client.message.send(agentid, msg_body, touser_list=userid_list, toparty_list=())
             logging.info(">>>发送待办消息返回结果{}".format(result))
         except Exception as e:
@@ -439,11 +438,11 @@ class DingDingChatList(models.TransientModel):
         获取群会话
         :return:
         """
+        client = get_client(self)
         for res in self:
             logging.info(">>>开始获取群会话...")
             chatid = res.chat_id
             try:
-                client = get_client(self)
                 result = client.chat.get(chatid)
                 logging.info(">>>获取群会话返回结果{}".format(result))
                 employee = self.env['hr.employee'].sudo().search([('din_id', '=', result.get('owner'))])

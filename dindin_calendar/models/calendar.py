@@ -36,6 +36,7 @@ class DinDinCalendarEvent(models.Model):
         :param val:
         :return:
         """
+        client = get_client(self)
         start_time = datetime.datetime.strptime("{}.42".format(val.get('start')), "%Y-%m-%d %H:%M:%S.%f").timetuple()
         end_time = datetime.datetime.strptime("{}.42".format(str(val.get('stop'))), "%Y-%m-%d %H:%M:%S.%f").timetuple()
         user = self.env['res.users'].sudo().search([('id', '=', val.get('user_id'))])
@@ -67,7 +68,6 @@ class DinDinCalendarEvent(models.Model):
             'biz_id': val.get('number'),  # 业务号
         }
         try:
-            client = get_client(self)
             result = client.calendar.create(create_vo)
             logging.info(">>>创建日程返回结果:{}".format(result))
             return result.get('dingtalk_calendar_id')
@@ -94,8 +94,8 @@ class DinDinCalendarEvent(models.Model):
         :param userid: 员工id
         :param calendar_id: 日程id
         """
+        client = get_client(self)
         try:
-            client = get_client(self)
             result = client.calendar.delete(userid=userid, calendar_id=calendar_id)
             logging.info(">>>删除日程返回结果:{}".format(result))
         except Exception as e:
@@ -115,7 +115,7 @@ class DinDinCalendarEvent(models.Model):
         :param max_results: 结果返回的最多数量，默认250，最多返回2500
         :param time_max: 查询时间上限
         """
-
+        client = get_client(self)
         user_id = self.env['hr.employee'].search([('user_id', '=', self.env.user.id)]).din_id
         calendar_folder_id=''
         time_min=None
@@ -126,7 +126,6 @@ class DinDinCalendarEvent(models.Model):
         time_max=None
       
         try:
-            client = get_client(self)
             result = client.calendar.list(user_id, calendar_folder_id=calendar_folder_id, time_min=time_min, i_cal_uid=i_cal_uid,
                 single_events=single_events, page_token=page_token, max_results=max_results, time_max=time_max)
             logging.info(">>>查询日程返回结果:{}".format(result))

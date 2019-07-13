@@ -111,6 +111,7 @@ class GetDingDingHealthList(models.TransientModel):
         :param userids: 员工userid列表，最多传50个
         :param stat_date: 时间
         """
+        client = get_client(self)
         logging.info(">>>获取钉钉员工运动数据start")
         if len(userids) > 50:
             raise UserError("钉钉仅支持批量查询小于等于50个员工!")
@@ -118,7 +119,6 @@ class GetDingDingHealthList(models.TransientModel):
         formatted_today = today.strftime('%Y%m%d')
         stat_dates = formatted_today
         try:
-            client = get_client(self)
             result = client.health.stepinfo_listbyuserid(userids, stat_dates)
             logging.info(">>>批量获取员工运动数据返回结果{}".format(result))
             if result['stepinfo_list']:

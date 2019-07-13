@@ -44,8 +44,8 @@ class DingDingSynchronous(models.TransientModel):
         同步钉钉部门
         :return:
         """
+        client = get_client(self)
         try:
-            client = get_client(self)
             result = client.department.list(fetch_child=True)
             for res in result:
                 data = {
@@ -112,8 +112,8 @@ class DingDingSynchronous(models.TransientModel):
         :param s_avatar: 是否获取钉钉头像
         :return:
         """
+        client = get_client(self)
         try:
-            client = get_client(self)
             result = client.user.list(department[0].din_id, offset, size, order='custom')
             for user in result.get('userlist'):
                 data = {
@@ -175,9 +175,9 @@ class DingDingSynchronous(models.TransientModel):
         同步钉钉联系人标签
         :return:
         """
+        client = get_client(self)
         logging.info(">>>同步钉钉联系人标签")
         try:
-            client = get_client(self)
             result = client.ext.listlabelgroups(offset=0, size=100)
             logging.info(result)
             category_list = list()
@@ -205,9 +205,9 @@ class DingDingSynchronous(models.TransientModel):
         同步钉钉联系人列表
         :return:
         """
+        client = get_client(self)
         logging.info(">>>同步钉钉联系人列表start")
         try:
-            client = get_client(self)
             result = client.ext.list(offset=0, size=100)
             logging.info(result)
             for res in result:

@@ -19,11 +19,11 @@ class DinDinBlackboard(models.TransientModel):
         根据当前用户获取公告信息
         :return:
         """
+        client = get_client(self)
         uid = self.env.user.id
         emp = self.env['hr.employee'].sudo().search([('user_id', '=', uid)])
         if emp:
             try:
-                client = get_client(self)
                 result = client.blackboard.listtopten(emp.din_id)
                 logging.info(">>>获取公告返回结果:{}".format(result))
                 if result.get('errcode') == 0:

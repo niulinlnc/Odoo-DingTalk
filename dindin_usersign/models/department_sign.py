@@ -39,6 +39,7 @@ class DinDinDepartmentSign(models.Model):
         :param order_asc: 是否正序排列
         :return:
         """
+        client = get_client(self)
         logging.info(">>>获取部门用户签到记录...")
         for res in self:
             res.line_ids = False
@@ -49,7 +50,6 @@ class DinDinDepartmentSign(models.Model):
             else:
                 department_id = res.department_id.din_id
             try:
-                client = get_client(self)
                 result = client.checkin.record(department_id, start_time, end_time, offset=0, size=100, order_asc=True)
                 logging.info(">>>获得签到数据返回结果{}".format(result))
                 line_list = list()

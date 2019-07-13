@@ -71,6 +71,7 @@ class DinDinCallback(models.Model):
         注册事件
         :return:
         """
+        client = get_client(self)
         logging.info(">>>注册事件...")
         for res in self:
             call_list = list()
@@ -81,7 +82,6 @@ class DinDinCallback(models.Model):
             aes_key = res.aes_key if res.aes_key else ''
             url = res.url if res.url else ''
             try:
-                client = get_client(self)
                 result = client.callback.register_call_back(call_back_tags, token, aes_key, url)
                 logging.info(">>>注册回调事件返回结果:{}".format(result))
                 if result.get('errcode') == 0:
@@ -99,6 +99,7 @@ class DinDinCallback(models.Model):
         更新事件
         :return:
         """
+        client = get_client(self)
         for res in self:
             call_list = list()
             for call in res.call_ids:
@@ -108,7 +109,6 @@ class DinDinCallback(models.Model):
             aes_key = res.aes_key if res.aes_key else ''
             url = res.url if res.url else ''
             try:
-                client = get_client(self)
                 result = client.callback.update_call_back(call_back_tags, token, aes_key, url)
                 logging.info(">>>更新回调事件返回结果:{}".format(result))
                 if result.get('errcode') == 0:
@@ -132,9 +132,9 @@ class DinDinCallback(models.Model):
 
     @api.model
     def delete_call_back(self, call_token):
+        client = get_client(self)
         logging.info(">>>删除事件...")
         try:
-            client = get_client(self)
             result = client.callback.delete_call_back()
             logging.info(">>>删除回调事件返回结果:{}".format(result))
             if result.get('errcode') == 0:
@@ -153,8 +153,8 @@ class DinDinCallback(models.Model):
         获取所有回调列表
         :return:
         """
+        client = get_client(self)
         try:
-            client = get_client(self)
             result = client.callback.get_call_back()
             logging.info(">>>获取所有回调事件返回结果:{}".format(result))
             if result.get('errcode') != 0:

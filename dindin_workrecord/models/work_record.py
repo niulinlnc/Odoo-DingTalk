@@ -64,21 +64,18 @@ class DinDinWorkRecord(models.Model):
         :param source_name: 待办来源名称
         """
         self.ensure_one()
-
-        
+        client = get_client(self)
         if len(self.line_ids) < 1:
             raise UserError('待办表单列表不能为空!')
         else:
             formItemList = {}
             for line in self.line_ids:
                 formItemList.update({'{}'.format(line.title): line.content}) 
-
         userid = self.emp_id.din_id
         create_time = self.record_time
         title = self.name
         url = self.record_url if self.record_url else ''
         try:
-            client = get_client(self)
             result = client.workrecord.add(userid, create_time, title, url, formItemList, originator_user_id='', source_name='')
             logging.info(">>>新增待办事项返回结果{}".format(result))
             self.write({'state': '01', 'record_id': result})
@@ -98,6 +95,7 @@ class DinDinWorkRecord(models.Model):
         :param toparty_list: 部门id列表
         :return:message_id
         """
+        client = get_client(self)
         self.ensure_one()
         msg_list = list()
         for line in self.line_ids:
@@ -122,7 +120,6 @@ class DinDinWorkRecord(models.Model):
             }
         }
         try:
-            client = get_client(self)
             result = client.message.send(agentid, msg_body, touser_list=userid_list, toparty_list=())
             logging.info(">>>发送待办消息返回结果{}".format(result))
             if result.get('errcode') == 0:
@@ -184,9 +181,9 @@ class DinDinWorkRecord(models.Model):
         :param limit: 分页大小，最多50
         :param status: 待办事项状态，0表示未完成，1表示完成
         """
+        client = get_client(self)
         status = 0
         try:
-            client = get_client(self)
             result = client.workrecord.getbyuserid(user_id, status, offset=offset, limit=limit)
             logging.info(">>>获取用户待办事项返回结果{}".format(result))
             return result
@@ -201,12 +198,12 @@ class DinDinWorkRecord(models.Model):
         :param userid: 用户id
         :param record_id: 待办事项唯一id
         """
+        client = get_client(self)
         for res in self:
             logging.info("待办更新")
             userid = res.emp_id.din_id
             record_id = res.record_id
             try:
-                client = get_client(self)
                 result = client.workrecord.update(userid, record_id)
                 logging.info(">>>获更新代办事项返回结果{}".format(result))
                 if result:
@@ -310,9 +307,9 @@ class GetUserDingDingWorkRecord(models.TransientModel):
         :param limit: 分页大小，最多50
         :param status: 待办事项状态，0表示未完成，1表示完成
         """
+        client = get_client(self)
         status = 0
         try:
-            client = get_client(self)
             result = client.workrecord.getbyuserid(user_id, status, offset=offset, limit=limit)
             logging.info(">>>获取用户待办事项返回结果{}".format(result))
             return result

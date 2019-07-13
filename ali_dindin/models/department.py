@@ -22,7 +22,7 @@ class HrDepartment(models.Model):
 
     @api.multi
     def create_ding_department(self):
-        
+        client = get_client(self)
         for res in self:
             if res.din_id:
                 raise UserError("该部门已在钉钉中存在！")
@@ -35,7 +35,6 @@ class HrDepartment(models.Model):
             else:
                 raise UserError("请选择上级部门!")
             try:
-                client = get_client(self)
                 result = client.department.create(data)              
                 logging.info(">>>新增部门返回结果:{}".format(result))
                 if result.get('errcode') == 0:
@@ -48,7 +47,7 @@ class HrDepartment(models.Model):
 
     @api.multi
     def update_ding_department(self):
-
+        client = get_client(self)
         for res in self:
             # 获取部门din_id
             if not res.parent_id:
@@ -59,7 +58,6 @@ class HrDepartment(models.Model):
                 'parentid': res.parent_id.din_id,  # 父部门id
             }
             try:
-                client = get_client(self)
                 result = client.department.update(data)    
                 logging.info(">>>修改部门时钉钉返回结果:{}".format(result))
                 if result.get('errcode') == 0:
@@ -84,8 +82,8 @@ class HrDepartment(models.Model):
     @api.model
     def delete_din_department(self, din_id):
         """删除钉钉部门"""
+        client = get_client(self)
         try:
-            client = get_client(self)
             result = client.department.delete(din_id)    
             logging.info(">>>删除钉钉部门返回结果:{}".format(result))
             if result.get('errcode') != 0:

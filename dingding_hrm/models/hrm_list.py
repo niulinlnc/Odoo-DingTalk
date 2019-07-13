@@ -80,10 +80,10 @@ class GetDingDingHrmList(models.TransientModel):
         :param userid_list: 员工id列表
         :param field_filter_list: 需要获取的花名册字段信息
         """
+        client = get_client(self)
         if len(userid_list) > 20:
             raise UserError("钉钉仅支持批量查询小于等于20个员工!")
         try:
-            client = get_client(self)
             result = client.employeerm.list(userid_list, field_filter_list=())
             # logging.info(">>>批量获取员工花名册返回结果{}".format(result))
             if result.get('emp_field_info_v_o'):

@@ -38,6 +38,7 @@ class DinDinSignList(models.Model):
         :param size: 分页大小
         :return:
         """
+        client = get_client(self)
         start_time = int(signtime) - 1002
         end_time = int(signtime) + 1002
 
@@ -48,7 +49,6 @@ class DinDinSignList(models.Model):
         size = 100
 
         try:
-            client = get_client(self)
             result = client.checkin.record_get(userid_list, start_time, end_time, offset=cursor, size=size)
             logging.info(">>>获取多个用户的签到记录结果{}".format(result))
             r_result = result.get('result')
