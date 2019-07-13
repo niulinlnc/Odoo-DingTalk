@@ -18,14 +18,14 @@ def get_client(obj):
     din_corpid = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_corpId')
     din_appkey = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_appkey')
     din_appsecret = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_appsecret')
-    dingtalk_redis_ip = obj.env['ir.config_parameter'].sudo().get_param('dingtalk.redis.ip')
-    dingtalk_redis_port = obj.env['ir.config_parameter'].sudo().get_param('dingtalk.redis.port')
-    dingtalk_redis_db = obj.env['ir.config_parameter'].sudo().get_param('dingtalk.redis.db')
+    dingtalk_redis_ip = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_ip')
+    dingtalk_redis_port = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_port')
+    dingtalk_redis_db = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_db')
     session_manager = redis.Redis(host=dingtalk_redis_ip, port=dingtalk_redis_port, db=dingtalk_redis_db)
     if not din_appkey and not din_appsecret and not din_corpid:
         raise UserError('钉钉设置项中的CorpId、AppKey和AppSecret不能为空')
     else:
-        return AppKeyClient(din_corpid, din_appkey, din_appsecret, KvStorage(session_manager))
+        return AppKeyClient(din_corpid, din_appkey, din_appsecret, storage=KvStorage(session_manager))
 
 def grouped_list(all_list, limit):
     """
