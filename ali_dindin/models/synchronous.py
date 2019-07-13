@@ -4,13 +4,14 @@ import json
 import logging
 import time
 import requests
+import redis
 from odoo import api, fields, models, tools
 from odoo.exceptions import UserError
-from .dingtalk_client import get_client, stamp_to_time
+from dingtalk.client import AppKeyClient
+from dingtalk.storage.kvstorage import KvStorage
+from odoo.addons.ali_dindin.dingtalk.utils import stamp_to_time
 
 _logger = logging.getLogger(__name__)
-
-
 
 class DingDingSynchronous(models.TransientModel):
     _name = 'dingding.bash.data.synchronous'
@@ -21,6 +22,24 @@ class DingDingSynchronous(models.TransientModel):
     employee = fields.Boolean(string=u'同步钉钉员工', default=True)
     employee_avatar = fields.Boolean(string=u'是否替换为钉钉员工头像', default=False)
     partner = fields.Boolean(string=u'同步钉钉联系人', default=True)
+
+    def get_client(self):
+        """钉钉客户端实例
+        安装 pip3 install dingtalk-sdk
+        升级 pip3 install -U dingtalk-sdk
+        从master升级：pip3 install -U https://github.com/007gzs/dingtalk-sdk/archive/master.zip
+        """
+        din_corpid = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_corpId')
+        din_appkey = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_appkey')
+        din_appsecret = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_appsecret')
+        dingtalk_redis_ip = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_ip')
+        dingtalk_redis_port = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_port')
+        dingtalk_redis_db = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_db')
+        session_manager = redis.Redis(host=dingtalk_redis_ip, port=dingtalk_redis_port, db=dingtalk_redis_db)
+        if not din_appkey and not din_appsecret and not din_corpid:
+            raise UserError('钉钉设置项中的CorpId、AppKey和AppSecret不能为空')
+        else:
+            return AppKeyClient(din_corpid, din_appkey, din_appsecret, storage=KvStorage(session_manager))
 
     @api.multi
     def start_synchronous_data(self):
@@ -44,7 +63,7 @@ class DingDingSynchronous(models.TransientModel):
         同步钉钉部门
         :return:
         """
-        client = get_client(self)
+        client = self.get_client()
         try:
             result = client.department.list(fetch_child=True)
             for res in result:
@@ -112,7 +131,7 @@ class DingDingSynchronous(models.TransientModel):
         :param s_avatar: 是否获取钉钉头像
         :return:
         """
-        client = get_client(self)
+        client = self.get_client()
         try:
             result = client.user.list(department[0].din_id, offset, size, order='custom')
             for user in result.get('userlist'):
@@ -175,7 +194,7 @@ class DingDingSynchronous(models.TransientModel):
         同步钉钉联系人标签
         :return:
         """
-        client = get_client(self)
+        client = self.get_client()
         logging.info(">>>同步钉钉联系人标签")
         try:
             result = client.ext.listlabelgroups(offset=0, size=100)
@@ -205,7 +224,7 @@ class DingDingSynchronous(models.TransientModel):
         同步钉钉联系人列表
         :return:
         """
-        client = get_client(self)
+        client = self.get_client()
         logging.info(">>>同步钉钉联系人列表start")
         try:
             result = client.ext.list(offset=0, size=100)

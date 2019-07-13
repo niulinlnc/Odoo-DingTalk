@@ -2,9 +2,11 @@
 import json
 import logging
 import requests
-from odoo import api, fields, models
+import redis
+from odoo import api, fields, models, tools
 from odoo.exceptions import UserError
-from .dingtalk_client import get_client
+from dingtalk.client import AppKeyClient
+from dingtalk.storage.kvstorage import KvStorage
 
 _logger = logging.getLogger(__name__)
 
@@ -29,6 +31,24 @@ class ResPartner(models.Model):
     din_share_department_ids = fields.Many2many('hr.department', 'partner_department_rel', 'partner_id', 'department_id', string='共享范围')
     din_share_employee_ids = fields.Many2many('hr.employee', 'partner_shar_employee_rel', 'partner_id', 'emp_id', string='共享给员工')
 
+    def get_client(self):
+        """钉钉客户端实例
+        安装 pip3 install dingtalk-sdk
+        升级 pip3 install -U dingtalk-sdk
+        从master升级：pip3 install -U https://github.com/007gzs/dingtalk-sdk/archive/master.zip
+        """
+        din_corpid = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_corpId')
+        din_appkey = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_appkey')
+        din_appsecret = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_appsecret')
+        dingtalk_redis_ip = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_ip')
+        dingtalk_redis_port = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_port')
+        dingtalk_redis_db = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_db')
+        session_manager = redis.Redis(host=dingtalk_redis_ip, port=dingtalk_redis_port, db=dingtalk_redis_db)
+        if not din_appkey and not din_appsecret and not din_corpid:
+            raise UserError('钉钉设置项中的CorpId、AppKey和AppSecret不能为空')
+        else:
+            return AppKeyClient(din_corpid, din_appkey, din_appsecret, storage=KvStorage(session_manager))
+
     @api.multi
     def create_ding_partner(self):
         """
@@ -47,7 +67,7 @@ class ResPartner(models.Model):
         :param share_user_ids: 共享给的员工userId列表
         :return:
         """
-        client = get_client(self)
+        client = self.get_client()
         for res in self:
             if res.din_userid:
                 raise UserError('钉钉中已存在该联系人,请不要重复上传或使用更新联系人功能！')
@@ -112,7 +132,7 @@ class ResPartner(models.Model):
         :param share_user_ids: 共享给的员工userId列表
         :return:
         """
-        client = get_client(self)
+        client = self.get_client()
         for res in self:
             # 获取标签
             label_list = list()
@@ -160,7 +180,7 @@ class ResPartner(models.Model):
     @api.model
     def delete_din_extcontact(self, din_userid):
         """删除钉钉联系人"""
-        client = get_client(self)
+        client = self.get_client()
         try:
             result = client.extcontact.delete(din_userid)
             logging.info("删除钉钉联系人结果:{}".format(result))
@@ -191,7 +211,7 @@ class ResPartner(models.Model):
         'success': True}
 
         """
-        client = get_client(self)
+        client = self.get_client()
         for partner in self:
             userid = partner.din_userid
             try:
