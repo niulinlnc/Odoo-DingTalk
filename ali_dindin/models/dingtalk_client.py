@@ -2,6 +2,7 @@
 import logging
 import time
 import redis
+from datetime import datetime, timedelta
 from odoo import api, fields, models
 from dingtalk.client import AppKeyClient
 from dingtalk.storage.kvstorage import KvStorage
@@ -52,6 +53,30 @@ def grouped_list(all_list, limit):
         for user in all_list:
             user_list.append(user)
     return user_list
+
+def grouped_day(begin_time, end_time, days):
+    """
+    对日期进行分段
+    :param begin_date:开始日期
+    :param end_date:结束日期
+    :param days: 最大间隔时间
+    :return:
+    """
+    date_list = []
+    begin_time = datetime.strptime(str(begin_time), "%Y-%m-%d %H:%M:%S")
+    end_time = datetime.strptime(str(end_time), "%Y-%m-%d %H:%M:%S")
+    delta = timedelta(days=days)
+    t1 = begin_time
+    while t1 <= end_time:
+        if end_time < t1 + delta:
+            t2 = end_time
+        else:
+            t2 = t1 + delta
+        t1_str = t1.strftime("%Y-%m-%d %H:%M:%S")
+        t2_str = t2.strftime("%Y-%m-%d %H:%M:%S")
+        date_list.append([t1_str, t2_str])
+        t1 = t2 + timedelta(seconds=1)
+    return date_list
 
 def stamp_to_time(time_num):
     """
