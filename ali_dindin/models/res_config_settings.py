@@ -25,7 +25,7 @@ class ResConfigSettings(models.TransientModel):
     din_login_appsecret = fields.Char(string=u'钉钉登录appSecret')
     dingtalk_redis_ip = fields.Char(string=u'Redis服务器IP')
     dingtalk_redis_port = fields.Char(string=u'Redis服务器端口')
-    dingtalk_redis_db = fields.Integer(string=u'Redis服务器数据库')
+    dingtalk_redis_db = fields.Char(string=u'Redis服务器数据库')
     
     # 安装钉钉模块
     module_dindin_attendance = fields.Boolean(
