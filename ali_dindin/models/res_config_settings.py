@@ -114,7 +114,7 @@ class ResConfigSettings(models.TransientModel):
             din_login_appsecret=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_login_appsecret'),
             dingtalk_redis_ip=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_ip', default = '127.0.0.1'),
             dingtalk_redis_port=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_port', default = '6379'),
-            dingtalk_redis_db=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_db', default = 0),
+            dingtalk_redis_db=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_db', default = '0'),
         )
         return res
 

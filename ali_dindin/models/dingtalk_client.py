@@ -14,7 +14,8 @@ _logger = logging.getLogger(__name__)
 def get_client(obj):
     """钉钉客户端初始化
        安装 pip3 install dingtalk-sdk
-       手动尝新：pip3 install -U https://github.com/007gzs/dingtalk-sdk/archive/master.zip
+       升级 pip3 install -U dingtalk-sdk
+       从master升级：pip3 install -U https://github.com/007gzs/dingtalk-sdk/archive/master.zip
     """
     din_corpid = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_corpId')
     din_appkey = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_appkey')
