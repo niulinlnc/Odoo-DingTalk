@@ -9,7 +9,7 @@ from requests import ReadTimeout
 from odoo import api, fields, models, tools
 from odoo.modules import get_module_resource
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client, grouped_list
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client, list_cut
 import base64
 
 _logger = logging.getLogger(__name__)
@@ -90,13 +90,9 @@ class GetDingDingHealthList(models.TransientModel):
         din_ids = list()
         for user in self.emp_ids:
             din_ids.append(user.din_id)         
-        user_list = grouped_list(din_ids, 50)
+        user_list = list_cut(din_ids, 50)
         for u in user_list:
-            if isinstance(u, str):
-                self.get_health(user_list)
-            else:
-                self.get_health(u)
-
+            self.get_health(u)
         logging.info(">>>获取钉钉员工运动数据end")
         action = self.env.ref('dingding_health.dingding_health_action')
         action_dict = action.read()[0]

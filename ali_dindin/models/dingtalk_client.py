@@ -29,41 +29,26 @@ def get_client(obj):
     else:
         return AppKeyClient(din_corpid, din_appkey, din_appsecret, storage=KvStorage(session_manager))
 
-def grouped_list(all_list, limit):
+def list_cut(mylist, limit):
     """
-    根据输入的列表和单个列表限制元素个数，对列表进行分组后输出
-    :param all_data_list:列表集
-    :param limit: 单个列表最大包含元素数量
+    列表分段
+    :param mylist:列表集
+    :param limit: 子列表元素限制数量
     :return:
     """
-    user_list = list()
-    if len(all_list) > limit:
-        n = 1
-        e_list = list()
-        for user in all_list:
-            if n <= limit:
-                e_list.append(user)
-                n = n + 1
-            else:
-                user_list.append(e_list)
-                e_list = list()
-                e_list.append(user)
-                n = 2
-        user_list.append(e_list)
-    else:
-        for user in all_list:
-            user_list.append(user)
-    return user_list
+    length = len(mylist)
+    cut_list = [mylist[i:i+limit] for i in range(0, length, limit)]
+    return cut_list
 
-def grouped_day(begin_time, end_time, days):
+def day_cut(begin_time, end_time, days):
     """
-    对日期进行分段
+    日期分段
     :param begin_date:开始日期
     :param end_date:结束日期
     :param days: 最大间隔时间
     :return:
     """
-    date_list = []
+    cut_day = []
     begin_time = datetime.strptime(str(begin_time), "%Y-%m-%d %H:%M:%S")
     end_time = datetime.strptime(str(end_time), "%Y-%m-%d %H:%M:%S")
     delta = timedelta(days=days)
@@ -75,9 +60,9 @@ def grouped_day(begin_time, end_time, days):
             t2 = t1 + delta
         t1_str = t1.strftime("%Y-%m-%d %H:%M:%S")
         t2_str = t2.strftime("%Y-%m-%d %H:%M:%S")
-        date_list.append([t1_str, t2_str])
+        cut_day.append([t1_str, t2_str])
         t1 = t2 + timedelta(seconds=1)
-    return date_list
+    return cut_day
 
 def stamp_to_time(time_num):
     """

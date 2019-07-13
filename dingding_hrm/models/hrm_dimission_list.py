@@ -6,7 +6,7 @@ import requests
 from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client, grouped_list, stamp_to_time
+from odoo.addons.ali_dindin.models.dingtalk_client import get_client, list_cut, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 
@@ -68,12 +68,9 @@ class GetDingDingHrmDimissionList(models.TransientModel):
         din_ids = list()
         for user in self.emp_ids:
             din_ids.append(user.din_id)         
-        user_list = grouped_list(din_ids, 50)
+        user_list = list_cut(din_ids, 50)
         for u in user_list:
-            if isinstance(u, str):
-                self.dimission_list(user_list)
-            else:
-                self.dimission_list(u)
+            self.dimission_list(u)
         logging.info(">>>获取钉钉获取离职员工信息end")
         action = self.env.ref('dingding_hrm.dingding_hrm_dimission_list_action')
         action_dict = action.read()[0]
