@@ -18,7 +18,7 @@ class DinDinApprovalTemplate(models.Model):
     process_code = fields.Char(string='模板唯一标识')
     url = fields.Char(string='模板跳转url')
     company_id = fields.Many2one(comodel_name='res.company',
-                                 string=u'公司', default=lambda self: self.env.user.company_id.id)
+                                 string='公司', default=lambda self: self.env.user.company_id.id)
 
     @api.model
     def get_template(self):

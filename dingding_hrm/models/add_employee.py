@@ -26,19 +26,19 @@ class AddDingDingEmployee(models.Model):
         ('ing', '已入职')
     ]
 
-    active = fields.Boolean(string=u'有效', default=True)
+    active = fields.Boolean(string='有效', default=True)
     user_id = fields.Char(string='钉钉用户Id')
     name = fields.Char(string='员工姓名', required=True)
     mobile = fields.Char(string='手机号', required=True)
-    pre_entry_time = fields.Datetime(string=u'预期入职时间', required=True)
-    dept_id = fields.Many2one(comodel_name='hr.department', string=u'入职部门')
+    pre_entry_time = fields.Datetime(string='预期入职时间', required=True)
+    dept_id = fields.Many2one(comodel_name='hr.department', string='入职部门')
     company_id = fields.Many2one(
         'res.company', '公司', default=lambda self: self.env.user.company_id.id)
     image = fields.Binary("照片", default=_default_image, attachment=True)
     image_medium = fields.Binary("Medium-sized photo", attachment=True)
     image_small = fields.Binary("Small-sized photo", attachment=True)
     state = fields.Selection(
-        string=u'状态', selection=USERSTATE, default='new', track_visibility='onchange')
+        string='状态', selection=USERSTATE, default='new', track_visibility='onchange')
 
     @api.model
     def create(self, values):

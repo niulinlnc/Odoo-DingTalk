@@ -12,14 +12,14 @@ class DinDinMessageTemplateLine(models.Model):
     _description = "消息模板列表"
     _rec_name = 'template_id'
 
-    sequence = fields.Integer(string=u'序号')
+    sequence = fields.Integer(string='序号')
     model_id = fields.Many2one(
-        comodel_name='ir.model', string=u'Odoo模型', required=True)
+        comodel_name='ir.model', string='Odoo模型', required=True)
     template_id = fields.Many2one(
-        comodel_name='dindin.message.template', string=u'消息模板', ondelete='cascade')
+        comodel_name='dindin.message.template', string='消息模板', ondelete='cascade')
     field_name = fields.Char(string='消息名称', required=True)
     field_id = fields.Many2one(
-        comodel_name='ir.model.fields', string=u'取值字段', required=True)
+        comodel_name='ir.model.fields', string='取值字段', required=True)
 
     @api.onchange('model_id')
     def _onchange_model_id_onchange(self):
@@ -43,20 +43,20 @@ class DinDinMessageTemplate(models.Model):
 
     name = fields.Char(string='模板名', required=True)
     model_id = fields.Many2one(
-        comodel_name='ir.model', string=u'Odoo模型', required=True)
-    company_id = fields.Many2one(comodel_name='res.company', string=u'公司',
+        comodel_name='ir.model', string='Odoo模型', required=True)
+    company_id = fields.Many2one(comodel_name='res.company', string='公司',
                                  default=lambda self: self.env.user.company_id.id)
-    create_send = fields.Boolean(string=u'创建时自动发送消息')
-    delete_send = fields.Boolean(string=u'删除时自动发送消息')
+    create_send = fields.Boolean(string='创建时自动发送消息')
+    delete_send = fields.Boolean(string='删除时自动发送消息')
     line_ids = fields.One2many(
-        comodel_name='dindin.message.template.line', inverse_name='template_id', string=u'消息字段')
-    msg_type = fields.Selection(string=u'接受者', selection=[('00', '员工'), ('01', '部门'), ('03', '所有人')],
+        comodel_name='dindin.message.template.line', inverse_name='template_id', string='消息字段')
+    msg_type = fields.Selection(string='接受者', selection=[('00', '员工'), ('01', '部门'), ('03', '所有人')],
                                 required=True, default='00')
     emp_ids = fields.Many2many(comodel_name='hr.employee', relation='dingding_message_temp_and_employee_rel',
-                               column1='template_id', column2='employee_id', string=u'员工',
+                               column1='template_id', column2='employee_id', string='员工',
                                domain=[('din_id', '!=', '')])
     dept_ids = fields.Many2many(comodel_name='hr.department', relation='dingding_message_temp_and_department_rel',
-                                column1='template_id', column2='department_id', string=u'部门',
+                                column1='template_id', column2='department_id', string='部门',
                                 domain=[('din_id', '!=', '')])
 
     _sql_constraints = [

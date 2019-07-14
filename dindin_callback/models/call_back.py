@@ -38,20 +38,20 @@ class DinDinCallback(models.Model):
         ('03', '审批事件'),
     ]
 
-    company_id = fields.Many2one(comodel_name='res.company', string=u'公司',
+    company_id = fields.Many2one(comodel_name='res.company', string='公司',
                                  default=lambda self: self.env.user.company_id.id)
     call_id = fields.Many2one(
-        comodel_name='dindin.users.callback.list', string=u'回调类型', ondelete='cascade')
+        comodel_name='dindin.users.callback.list', string='回调类型', ondelete='cascade')
     value_type = fields.Selection(
-        string=u'注册事件类型', selection=ValueType, default='all', copy=False)
+        string='注册事件类型', selection=ValueType, default='all', copy=False)
     token = fields.Char(string='Token', default=_get_default_token, size=50)
     aes_key = fields.Char(
         string='数据加密密钥', default=_get_default_aes_key, size=50)
     url = fields.Char(string='回调URL', size=200, default=_get_default_localhost)
-    state = fields.Selection(string=u'状态', selection=[(
+    state = fields.Selection(string='状态', selection=[(
         '00', '未注册'), ('01', '已注册')], default='00', copy=False)
     call_ids = fields.Many2many(comodel_name='dindin.users.callback.list', relation='dindin_users_callback_and_list_ref',
-                                column1='call_id', column2='list_id', string=u'回调类型列表', copy=False)
+                                column1='call_id', column2='list_id', string='回调类型列表', copy=False)
 
     _sql_constraints = [
         ('value_type_uniq', 'unique(value_type)', u'事件类型重复!'),
@@ -91,7 +91,7 @@ class DinDinCallback(models.Model):
                 logging.info(">>>注册回调事件返回结果:{}".format(result))
                 if result.get('errcode') == 0:
                     self.write({'state': '01'})
-                    self.message_post(body=u"注册事件成功")
+                    self.message_post(body="注册事件成功")
                 else:
                     raise UserError("注册失败！原因:{}".format(result.get('errmsg')))
             except Exception as e:
@@ -119,7 +119,7 @@ class DinDinCallback(models.Model):
                 logging.info(">>>更新回调事件返回结果:{}".format(result))
                 if result.get('errcode') == 0:
                     self.write({'state': '01'})
-                    self.message_post(body=u"更新事件成功")
+                    self.message_post(body="更新事件成功")
                 else:
                     raise UserError("更新失败！原因:{}".format(result.get('errmsg')))
             except Exception as e:

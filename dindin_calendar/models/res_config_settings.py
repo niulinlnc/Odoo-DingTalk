@@ -8,8 +8,8 @@ _logger = logging.getLogger(__name__)
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
-    auto_calendar_event = fields.Boolean(string=u'自动上传日程')
-    auto_del_calendar_event = fields.Boolean(string=u'自动删除日程')
+    auto_calendar_event = fields.Boolean(string='自动上传日程')
+    auto_del_calendar_event = fields.Boolean(string='自动删除日程')
 
     def get_values(self):
         res = super(ResConfigSettings, self).get_values()

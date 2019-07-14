@@ -17,7 +17,7 @@ class DingDingReportTemplate(models.Model):
     report_code = fields.Char(string='模板唯一标识')
     url = fields.Char(string='模板跳转url')
     company_id = fields.Many2one(
-        'res.company', string=u'公司', default=lambda self: self.env.user.company_id.id)
+        'res.company', string='公司', default=lambda self: self.env.user.company_id.id)
 
     @api.model
     def get_all_template(self):

@@ -27,34 +27,34 @@ class DingDingChat(models.Model):
     chat_id = fields.Char(string='群会话Id')
     chat_icon = fields.Char(string='群头像mediaId')
     name = fields.Char(string='群名称', required=True)
-    company_id = fields.Many2one(comodel_name='res.company', string=u'公司',
+    company_id = fields.Many2one(comodel_name='res.company', string='公司',
                                  default=lambda self: self.env.user.company_id.id)
     employee_id = fields.Many2one(
-        comodel_name='hr.employee', string=u'群主', required=True)
-    show_history_type = fields.Selection(string=u'聊天历史消息', selection=[('0', '否'), ('1', '是'), ], default='0',
+        comodel_name='hr.employee', string='群主', required=True)
+    show_history_type = fields.Selection(string='聊天历史消息', selection=[('0', '否'), ('1', '是'), ], default='0',
                                          help="新成员是否可查看聊天历史消息,新成员入群是否可查看最近100条聊天记录")
-    searchable = fields.Selection(string=u'群可搜索', selection=[
+    searchable = fields.Selection(string='群可搜索', selection=[
                                   ('0', '否'), ('1', '是'), ], default='0')
-    validation_type = fields.Selection(string=u'入群验证', selection=[
+    validation_type = fields.Selection(string='入群验证', selection=[
                                        ('0', '否'), ('1', '是'), ], default='0')
-    mention_all_authority = fields.Selection(string=u'@all 权限', selection=[
+    mention_all_authority = fields.Selection(string='@all 权限', selection=[
                                              ('0', '所有人'), ('1', '仅群主'), ], default='0')
     chat_banned_type = fields.Selection(
-        string=u'群禁言', selection=[('0', '不禁言'), ('1', '全员禁言'), ], default='0')
-    management_ype = fields.Selection(string=u'管理类型', selection=[
+        string='群禁言', selection=[('0', '不禁言'), ('1', '全员禁言'), ], default='0')
+    management_ype = fields.Selection(string='管理类型', selection=[
                                       ('0', '所有人可管理'), ('1', '仅群主可管理')], default='1')
     useridlist = fields.Many2many(comodel_name='hr.employee', relation='dingding_chat_and_hr_employee_rel',
-                                  column1='chat_id', column2='emp_id', string=u'群成员', required=True)
-    state = fields.Selection(string=u'状态', selection=[('new', '新建'), ('normal', '已建立'), ('close', '解散')],
+                                  column1='chat_id', column2='emp_id', string='群成员', required=True)
+    state = fields.Selection(string='状态', selection=[('new', '新建'), ('normal', '已建立'), ('close', '解散')],
                              default='new', track_visibility='onchange')
     channel_ids = fields.Many2many(comodel_name='mail.channel', relation='dingding_chat_and_mail_channel_rel',
-                                   column1='chat_id', column2='mail_id', string=u'关注频道')
+                                   column1='chat_id', column2='mail_id', string='关注频道')
     model_ids = fields.Many2many(comodel_name='ir.model', relation='dingding_chat_and_ir_model_rel',
-                                 column1='chat_id', column2='model_id', string=u'关联模型')
+                                 column1='chat_id', column2='model_id', string='关联模型')
     image = fields.Binary("照片", default=_default_image, attachment=True)
     image_medium = fields.Binary("Medium-sized photo", attachment=True)
     image_small = fields.Binary("Small-sized photo", attachment=True)
-    robot_count = fields.Integer(string=u'群机器人数', compute='get_robot_count')
+    robot_count = fields.Integer(string='群机器人数', compute='get_robot_count')
     active = fields.Boolean(default=True)
 
     @api.model
@@ -124,7 +124,7 @@ class DingDingChat(models.Model):
                 if result.get('errcode') == 0:
                     res.write({'chat_id': result.get(
                         'chatid'), 'state': 'normal'})
-                    res.message_post(body=u"群会话已创建!群会话的ID:{}".format(
+                    res.message_post(body="群会话已创建!群会话的ID:{}".format(
                         result.get('chatid')), message_type='notification')
                 else:
                     raise UserError('创建失败，详情为:{}'.format(result.get('errmsg')))
@@ -171,7 +171,7 @@ class DingDingChat(models.Model):
                 logging.info(">>>修改会话返回结果{}".format(result))
                 if result.get('errcode') == 0:
                     res.message_post(
-                        body=u"群会话已修改!", message_type='notification')
+                        body="群会话已修改!", message_type='notification')
                 else:
                     raise UserError('修改失败，详情为:{}'.format(result.get('errmsg')))
             except Exception as e:
@@ -240,7 +240,7 @@ class DingDingChat(models.Model):
                     [('din_id', '=', msg.get('Operator'))])
                 chat.sudo().write({'state': 'close'})
                 if emp:
-                    chat.sudo().message_post(body=u"群会话已被解散，操作人: {}!".format(
+                    chat.sudo().message_post(body="群会话已被解散，操作人: {}!".format(
                         emp[0].name), message_type='notification')
         return True
 
@@ -250,9 +250,9 @@ class DingDingChatUserModelAdd(models.TransientModel):
     _description = "群会话添加成员"
 
     on_user_ids = fields.Many2many(comodel_name='hr.employee', relation='dingding_chat_on_user_add_and_hr_employee_rel',
-                                   column1='model_id', column2='emp_id', string=u'已有成员')
+                                   column1='model_id', column2='emp_id', string='已有成员')
     user_ids = fields.Many2many(comodel_name='hr.employee', relation='dingding_chat_user_add_and_hr_employee_rel',
-                                column1='model_id', column2='emp_id', string=u'新群成员', required=True)
+                                column1='model_id', column2='emp_id', string='新群成员', required=True)
 
     @api.onchange('on_user_ids')
     def _onchange_on_user_ids(self):
@@ -302,7 +302,7 @@ class DingDingChatUserModelAdd(models.TransientModel):
                         new_user_list.append(user.id)
                     ding_chat.write({'useridlist': [(6, 0, new_user_list)]})
                     ding_chat.message_post(
-                        body=u"群成员已增加!", message_type='notification')
+                        body="群成员已增加!", message_type='notification')
                 else:
                     raise UserError(
                         '群成员更新失败，详情为:{}'.format(result.get('errmsg')))
@@ -315,10 +315,10 @@ class DingDingChatUserModelDel(models.TransientModel):
     _description = "群会话删除成员"
 
     user_ids = fields.Many2many(comodel_name='hr.employee', relation='dingding_chat_user_del_and_hr_employee_rel',
-                                column1='model_id', column2='emp_id', string=u'删除群成员', required=True)
+                                column1='model_id', column2='emp_id', string='删除群成员', required=True)
     old_user_ids = fields.Many2many(comodel_name='hr.employee',
                                     relation='dingding_chat_old_user_del_and_hr_employee_rel',
-                                    column1='model_id', column2='emp_id', string=u'群成员', required=True)
+                                    column1='model_id', column2='emp_id', string='群成员', required=True)
 
     @api.onchange('old_user_ids')
     def _onchange_old_user_ids(self):
@@ -364,7 +364,7 @@ class DingDingChatUserModelDel(models.TransientModel):
                     for user in res.user_ids:
                         ding_chat.write({'useridlist': [(3, user.id)]})
                     ding_chat.message_post(
-                        body=u"群成员已删除!", message_type='notification')
+                        body="群成员已删除!", message_type='notification')
                 else:
                     raise UserError(
                         '群成员更新失败，详情为:{}'.format(result.get('errmsg')))
@@ -376,7 +376,7 @@ class DingDingSendChatMessage(models.TransientModel):
     _name = 'dingding.send.chat.message'
     _description = "发送群消息"
 
-    message = fields.Text(string=u'消息内容', required=True)
+    message = fields.Text(string='消息内容', required=True)
 
     @api.multi
     def send_dingding_test_message(self):

@@ -26,14 +26,14 @@ class DingDingHealth(models.Model):
             'hr', 'static/src/img', 'default_image.png')
         return tools.image_resize_image_big(base64.b64encode(open(image_path, 'rb').read()))
 
-    active = fields.Boolean(string=u'active', default=True)
+    active = fields.Boolean(string='active', default=True)
     company_id = fields.Many2one(
-        'res.company', string=u'公司', default=lambda self: self.env.user.company_id.id)
+        'res.company', string='公司', default=lambda self: self.env.user.company_id.id)
     department_id = fields.Many2one(
-        'hr.department', string=u'部门', required=True)
-    emp_id = fields.Many2one('hr.employee', string=u'员工', required=True)
-    health_date = fields.Date(string=u'日期', required=True)
-    health_count = fields.Integer(string=u'运动步数')
+        'hr.department', string='部门', required=True)
+    emp_id = fields.Many2one('hr.employee', string='员工', required=True)
+    health_date = fields.Date(string='日期', required=True)
+    health_count = fields.Integer(string='运动步数')
     image = fields.Binary("照片", default=_default_image, attachment=True)
     image_medium = fields.Binary("Medium-sized photo", attachment=True)
     image_small = fields.Binary("Small-sized photo", attachment=True)
@@ -54,8 +54,8 @@ class GetDingDingHealthList(models.TransientModel):
     _description = '获取钉钉员工运动数据'
 
     emp_ids = fields.Many2many(comodel_name='hr.employee', relation='dingding_health_list_and_hr_employee_rel',
-                               column1='list_id', column2='emp_id', string=u'员工', required=True)
-    is_all_emp = fields.Boolean(string=u'全部员工')
+                               column1='list_id', column2='emp_id', string='员工', required=True)
+    is_all_emp = fields.Boolean(string='全部员工')
 
     @api.onchange('is_all_emp')
     def onchange_all_emp(self):

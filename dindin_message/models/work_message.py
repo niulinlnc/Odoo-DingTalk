@@ -27,23 +27,23 @@ class DinDinWorkMessage(models.Model):
     _inherit = ['mail.thread']
     _rec_name = 'name'
 
-    company_id = fields.Many2one(comodel_name='res.company', string=u'公司',
+    company_id = fields.Many2one(comodel_name='res.company', string='公司',
                                  default=lambda self: self.env.user.company_id.id)
     name = fields.Char(string='标题', required=True)
-    to_all_user = fields.Boolean(string=u'发送给企业全部用户')
+    to_all_user = fields.Boolean(string='发送给企业全部用户')
     user_ids = fields.One2many(comodel_name='dindin.work.message.user.list', inverse_name='message_id',
-                               string=u'接受消息用户列表')
+                               string='接受消息用户列表')
     dep_ids = fields.One2many(comodel_name='dindin.work.message.dept.list', inverse_name='message_id',
-                              string=u'接受部门消息列表')
+                              string='接受部门消息列表')
     msg_type = fields.Selection(
-        string=u'消息类型', selection=MESSAGETYPE, default='text', required=True)
+        string='消息类型', selection=MESSAGETYPE, default='text', required=True)
     task_id = fields.Char(string='任务Id')
-    state = fields.Selection(string=u'发送状态', selection=[('0', '未开始'), ('1', '处理中'), ('2', '处理完毕')],
+    state = fields.Selection(string='发送状态', selection=[('0', '未开始'), ('1', '处理中'), ('2', '处理完毕')],
                              default='0')
     text_message = fields.Text(string='文本消息内容')
     card_message = fields.Text(string='卡片消息内容', help="支持markdown语法")
     card_message_ids = fields.One2many(comodel_name='dindin.work.card.message.list', inverse_name='message_id',
-                                       string=u'按钮列表')
+                                       string='按钮列表')
     markdown_message = fields.Text(string='Markdown消息内容', help="支持markdown语法")
     link_url = fields.Char(string='链接URL', help="点击消息时链接URL")
     link_image_url = fields.Char(string='链接图片URL', help="链接图片URL")
@@ -55,7 +55,7 @@ class DinDinWorkMessage(models.Model):
     oa_body_title = fields.Char(string='正文标题')
     oa_body_content = fields.Text(string='正文内容')
     oa_message_ids = fields.One2many(comodel_name='dindin.work.oa.message.list', inverse_name='message_id',
-                                     string=u'OA表单列表')
+                                     string='OA表单列表')
     oa_richunit = fields.Char(string='富文本单位')
     oa_richnum = fields.Float(string='富文本数量')
 
@@ -194,7 +194,7 @@ class DinDinWorkMessage(models.Model):
             'task_id': task_id,
             'state': '1'
         })
-        self.message_post(body=u"消息信息已推送到钉钉，正在加急处理中!",
+        self.message_post(body="消息信息已推送到钉钉，正在加急处理中!",
                           message_type='notification')
 
     @api.model
@@ -255,7 +255,7 @@ class DinDinWorkMessage(models.Model):
             result = client.message.getsendprogress(agent_id, task_id)
             logging.info(">>>查询工作消息状态返回结果{}".format(result))
             self.write({'state': str(result.get('status'))})
-            self.message_post(body=u"查询消息进度成功，返回值:{}!".format(
+            self.message_post(body="查询消息进度成功，返回值:{}!".format(
                 result), message_type='notification')
         except Exception as e:
             raise UserError(e)
@@ -307,7 +307,7 @@ class DinDinWorkMessage(models.Model):
                     for dept in self.dep_ids:
                         if dept.dept_id.din_id == invalid:
                             dept.write({'msg_type': '00'})
-            self.message_post(body=u"查询工作通知消息的发送结果成功",
+            self.message_post(body="查询工作通知消息的发送结果成功",
                               message_type='notification')
         except Exception as e:
             raise UserError(e)
@@ -338,7 +338,7 @@ class DinDinWorkMessage(models.Model):
                     for dept in msg.dep_ids:
                         dept.write({'msg_type': '04'})
                 else:
-                    msg.message_post(body=u"全体工作通知消息撤回成功，返回值:{}!".format(
+                    msg.message_post(body="全体工作通知消息撤回成功，返回值:{}!".format(
                         result), message_type='notification')
             except Exception as e:
                 raise UserError(e)
@@ -358,15 +358,15 @@ class DinDinWorkMessageUserList(models.Model):
     ]
 
     emp_id = fields.Many2one(comodel_name='hr.employee',
-                             string=u'员工', required=True)
+                             string='员工', required=True)
     mobile_phone = fields.Char(string='电话')
     job_title = fields.Char(string='职位')
     department_id = fields.Many2one(
-        comodel_name='hr.department', string=u'部门', ondelete='cascade')
+        comodel_name='hr.department', string='部门', ondelete='cascade')
     msg_type = fields.Selection(
-        string=u'消息状态', selection=MESSGAETYPE, default='03')
+        string='消息状态', selection=MESSGAETYPE, default='03')
     message_id = fields.Many2one(
-        comodel_name='dindin.work.message', string=u'消息', ondelete='cascade')
+        comodel_name='dindin.work.message', string='消息', ondelete='cascade')
 
     @api.onchange('emp_id')
     def onchange_emp(self):
@@ -390,11 +390,11 @@ class DinDinWorkMessageDeptList(models.Model):
     ]
 
     dept_id = fields.Many2one(
-        comodel_name='hr.department', string=u'部门', ondelete='cascade', required=True)
+        comodel_name='hr.department', string='部门', ondelete='cascade', required=True)
     msg_type = fields.Selection(
-        string=u'消息状态', selection=MESSGAETYPE, default='03')
+        string='消息状态', selection=MESSGAETYPE, default='03')
     message_id = fields.Many2one(
-        comodel_name='dindin.work.message', string=u'消息', ondelete='cascade')
+        comodel_name='dindin.work.message', string='消息', ondelete='cascade')
 
 
 class CardMessageList(models.Model):
@@ -405,7 +405,7 @@ class CardMessageList(models.Model):
     title = fields.Char(string='标题', required=True)
     value = fields.Char(string='标题链接地址', required=True)
     message_id = fields.Many2one(
-        comodel_name='dindin.work.message', string=u'消息', ondelete='cascade')
+        comodel_name='dindin.work.message', string='消息', ondelete='cascade')
 
 
 class OaMessageList(models.Model):
@@ -416,4 +416,4 @@ class OaMessageList(models.Model):
     key = fields.Char(string='关键字', required=True)
     value = fields.Char(string='内容', required=True)
     message_id = fields.Many2one(
-        comodel_name='dindin.work.message', string=u'消息', ondelete='cascade')
+        comodel_name='dindin.work.message', string='消息', ondelete='cascade')

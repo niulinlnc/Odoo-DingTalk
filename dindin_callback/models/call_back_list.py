@@ -21,9 +21,9 @@ class DinDinCallbackList(models.Model):
     value = fields.Char(string='类型代码')
     call_back_url = fields.Char(string='回调地址函数')
     value_type = fields.Selection(
-        string=u'事件分类', selection=ValueType, default='')
+        string='事件分类', selection=ValueType, default='')
     company_id = fields.Many2one(comodel_name='res.company',
-                                 string=u'公司', default=lambda self: self.env.user.company_id.id)
+                                 string='公司', default=lambda self: self.env.user.company_id.id)
 
     _sql_constraints = [
         ('value_uniq', 'unique(value)', u'类型代码重复!'),

@@ -16,10 +16,10 @@ class DingDingSynchronous(models.TransientModel):
     _description = "基础数据同步"
     _rec_name = 'employee'
 
-    department = fields.Boolean(string=u'同步钉钉部门', default=True)
-    employee = fields.Boolean(string=u'同步钉钉员工', default=True)
-    employee_avatar = fields.Boolean(string=u'是否替换为钉钉员工头像', default=False)
-    partner = fields.Boolean(string=u'同步钉钉联系人', default=True)
+    department = fields.Boolean(string='同步钉钉部门', default=True)
+    employee = fields.Boolean(string='同步钉钉员工', default=True)
+    employee_avatar = fields.Boolean(string='是否替换为钉钉员工头像', default=False)
+    partner = fields.Boolean(string='同步钉钉联系人', default=True)
 
     @api.multi
     def start_synchronous_data(self):

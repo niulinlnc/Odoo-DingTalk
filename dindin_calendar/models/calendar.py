@@ -16,7 +16,7 @@ class DinDinCalendarEvent(models.Model):
     _inherit = 'calendar.event'
 
     number = fields.Char(string='日程编号', copy=False)
-    d_minutes = fields.Integer(string=u'前?分钟提醒')
+    d_minutes = fields.Integer(string='前?分钟提醒')
     dingtalk_calendar_id = fields.Char(string='钉钉日历id')
 
     @api.model
@@ -29,7 +29,7 @@ class DinDinCalendarEvent(models.Model):
         if auto_calendar_event:
             values['dingtalk_calendar_id'] = self.create_dindin_calendar(
                 values)
-            self.sudo().message_post(body=u"已同步上传至钉钉日程", message_type='notification')
+            self.sudo().message_post(body="已同步上传至钉钉日程", message_type='notification')
         return super(DinDinCalendarEvent, self).create(values)
 
     @api.model

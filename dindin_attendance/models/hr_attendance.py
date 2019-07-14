@@ -45,19 +45,19 @@ class DingDingAttendance(models.Model):
         ('odoo', 'Odoo系统'),
     ]
     emp_id = fields.Many2one(comodel_name='hr.employee',
-                             string=u'员工', required=True)
+                             string='员工', required=True)
     check_in = fields.Datetime(
         string="打卡时间", default=fields.Datetime.now, required=True)
     ding_group_id = fields.Many2one(
-        comodel_name='dindin.simple.groups', string=u'钉钉考勤组')
+        comodel_name='dindin.simple.groups', string='钉钉考勤组')
     recordId = fields.Char(string='记录ID')
-    workDate = fields.Datetime(string=u'工作日')
-    checkType = fields.Selection(string=u'考勤类型', selection=[
+    workDate = fields.Datetime(string='工作日')
+    checkType = fields.Selection(string='考勤类型', selection=[
                                  ('OnDuty', '上班'), ('OffDuty', '下班')])
-    timeResult = fields.Selection(string=u'时间结果', selection=TimeResult)
-    locationResult = fields.Selection(string=u'位置结果', selection=LocationResult)
-    baseCheckTime = fields.Datetime(string=u'基准时间')
-    sourceType = fields.Selection(string=u'数据来源', selection=SourceType)
+    timeResult = fields.Selection(string='时间结果', selection=TimeResult)
+    locationResult = fields.Selection(string='位置结果', selection=LocationResult)
+    baseCheckTime = fields.Datetime(string='基准时间')
+    sourceType = fields.Selection(string='数据来源', selection=SourceType)
     attendance_id = fields.Char(string='钉钉id')
 
 
@@ -65,12 +65,12 @@ class HrAttendanceTransient(models.TransientModel):
     _name = 'hr.attendance.tran'
     _description = '获取钉钉考勤信息'
 
-    start_date = fields.Datetime(string=u'开始时间', required=True)
+    start_date = fields.Datetime(string='开始时间', required=True)
     stop_date = fields.Datetime(
-        string=u'结束时间', required=True, default=str(fields.datetime.now()))
+        string='结束时间', required=True, default=str(fields.datetime.now()))
     emp_ids = fields.Many2many(comodel_name='hr.employee', relation='hr_dingding_attendance_and_hr_employee_rel',
-                               column1='attendance_id', column2='emp_id', string=u'员工', required=True)
-    is_all_emp = fields.Boolean(string=u'全部员工')
+                               column1='attendance_id', column2='emp_id', string='员工', required=True)
+    is_all_emp = fields.Boolean(string='全部员工')
 
     @api.onchange('is_all_emp')
     def onchange_all_emp(self):

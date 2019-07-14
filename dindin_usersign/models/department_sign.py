@@ -12,15 +12,15 @@ class DinDinDepartmentSign(models.Model):
     _description = "部门签到记录"
     _rec_name = 'department_id'
 
-    company_id = fields.Many2one(comodel_name='res.company', string=u'公司',
+    company_id = fields.Many2one(comodel_name='res.company', string='公司',
                                  default=lambda self: self.env.user.company_id.id)
     department_id = fields.Many2one(
-        comodel_name='hr.department', string=u'部门', required=True)
-    is_root = fields.Boolean(string=u'根部门', default=False)
-    start_time = fields.Datetime(string=u'开始时间', required=True)
-    end_time = fields.Datetime(string=u'结束时间', required=True)
+        comodel_name='hr.department', string='部门', required=True)
+    is_root = fields.Boolean(string='根部门', default=False)
+    start_time = fields.Datetime(string='开始时间', required=True)
+    end_time = fields.Datetime(string='结束时间', required=True)
     line_ids = fields.One2many(
-        comodel_name='dindin.department.signs.line', inverse_name='signs_id', string=u'列表')
+        comodel_name='dindin.department.signs.line', inverse_name='signs_id', string='列表')
 
     @api.multi
     def find_department_sign(self):
@@ -75,10 +75,10 @@ class DinDinDepartmentSignLine(models.Model):
     _rec_name = 'emp_id'
 
     signs_id = fields.Many2one(
-        comodel_name='dindin.department.signs', string=u'签到', ondelete='cascade')
+        comodel_name='dindin.department.signs', string='签到', ondelete='cascade')
     emp_id = fields.Many2one(comodel_name='hr.employee',
-                             string=u'员工', required=True)
-    timestamp = fields.Datetime(string=u'签到时间')
+                             string='员工', required=True)
+    timestamp = fields.Datetime(string='签到时间')
     place = fields.Char(string='签到地址')
     detailPlace = fields.Char(string='签到详细地址')
     remark = fields.Char(string='签到备注')

@@ -14,31 +14,31 @@ class DingDingReportUser(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     active = fields.Boolean(default=True)
-    name = fields.Char(string=u'日志名称', required=True)
+    name = fields.Char(string='日志名称', required=True)
     report_type = fields.Many2one(
-        comodel_name='dingding.report.template', string=u'日志类型')
-    department_id = fields.Many2one(comodel_name='hr.department', string=u'部门')
-    employee_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', domain=[
+        comodel_name='dingding.report.template', string='日志类型')
+    department_id = fields.Many2one(comodel_name='hr.department', string='部门')
+    employee_id = fields.Many2one(comodel_name='hr.employee', string='员工', domain=[
                                   ('din_id', '!=', '')], required=True)
     report_id = fields.Char(string='日志Id')
     remark = fields.Text(string='日志备注')
-    report_date = fields.Date(string=u'创建日期')
+    report_date = fields.Date(string='创建日期')
     company_id = fields.Many2one(
         'res.company', string='公司', default=lambda self: self.env.user.company_id.id)
     line_ids = fields.One2many(
-        comodel_name='dingding.report.user.line', inverse_name='rep_id', string=u'日志列表')
+        comodel_name='dingding.report.user.line', inverse_name='rep_id', string='日志列表')
     read_num = fields.Integer(string='已读人数', default=0)
     comment_num = fields.Integer(string='评论个数', default=0)
     comment_user_num = fields.Integer(string='去重后评论数', default=0)
     like_num = fields.Integer(string='点赞人数', default=0)
     people_read_list = fields.Many2many(comodel_name='hr.employee', relation='d_report_user_and_read_list_rel',
-                                        column1='report_id', column2='emp_id', string=u'已读人员')
+                                        column1='report_id', column2='emp_id', string='已读人员')
     people_receive_list = fields.Many2many(comodel_name='hr.employee', relation='d_report_user_and_receive_list_rel',
-                                           column1='report_id', column2='emp_id', string=u'日志接收人')
+                                           column1='report_id', column2='emp_id', string='日志接收人')
     people_like_list = fields.Many2many(comodel_name='hr.employee', relation='d_report_user_and_like_list_rel',
-                                        column1='report_id', column2='emp_id', string=u'点赞人员')
+                                        column1='report_id', column2='emp_id', string='点赞人员')
     comment_ids = fields.One2many(
-        comodel_name='dingding.report.comments.list', inverse_name='rep_id', string=u'评论列表')
+        comodel_name='dingding.report.comments.list', inverse_name='rep_id', string='评论列表')
 
     @api.multi
     def get_report_number_info(self):
@@ -179,10 +179,10 @@ class DingDingReportUserLine(models.Model):
     _rec_name = 'rep_id'
 
     rep_id = fields.Many2one(
-        comodel_name='dingding.report.user', string=u'用户日志', ondelete='cascade')
-    sequence = fields.Integer(string=u'序号')
+        comodel_name='dingding.report.user', string='用户日志', ondelete='cascade')
+    sequence = fields.Integer(string='序号')
     title = fields.Char(string='标题')
-    content = fields.Text(string=u'内容')
+    content = fields.Text(string='内容')
 
 
 class GetUserDingDingReportList(models.TransientModel):
@@ -191,13 +191,13 @@ class GetUserDingDingReportList(models.TransientModel):
     _rec_name = 'start_time'
 
     employee_id = fields.Many2one(
-        comodel_name='hr.employee', string=u'员工', domain=[('din_id', '!=', '')])
+        comodel_name='hr.employee', string='员工', domain=[('din_id', '!=', '')])
     start_time = fields.Datetime(
-        string=u'开始日期', required=True, default=str(fields.datetime.now()))
+        string='开始日期', required=True, default=str(fields.datetime.now()))
     end_time = fields.Datetime(
-        string=u'结束日期', required=True, default=str(fields.datetime.now()))
+        string='结束日期', required=True, default=str(fields.datetime.now()))
     report_type = fields.Many2one(
-        comodel_name='dingding.report.template', string=u'日志类型')
+        comodel_name='dingding.report.template', string='日志类型')
 
     @api.multi
     def get_report_by_user(self):
@@ -280,7 +280,7 @@ class DingDingReportCommentsList(models.Model):
     _description = "日志评论列表"
     _rec_name = 'rep_id'
 
-    sequence = fields.Integer(string=u'序号')
+    sequence = fields.Integer(string='序号')
     emp_id = fields.Many2one('hr.employee', string='评论人', required=True)
     report_comment = fields.Text(string='评论内容')
     report_create_time = fields.Char(string='评论时间')

@@ -18,8 +18,8 @@ class DinDinSignList(models.Model):
     _rec_name = 'emp_id'
 
     emp_id = fields.Many2one(comodel_name='hr.employee',
-                             string=u'员工', required=True)
-    checkin_time = fields.Datetime(string=u'签到时间')
+                             string='员工', required=True)
+    checkin_time = fields.Datetime(string='签到时间')
     place = fields.Char(string='签到地址')
     detail_place = fields.Char(string='签到详细地址')
     remark = fields.Char(string='签到备注')

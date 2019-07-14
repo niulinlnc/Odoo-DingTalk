@@ -15,10 +15,10 @@ _logger = logging.getLogger(__name__)
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
-    health_state = fields.Selection(string=u'运动状态', selection=[
+    health_state = fields.Selection(string='运动状态', selection=[
                                     ('open', '开启'), ('close', '关闭')], default='open')
     dd_step_count = fields.Integer(
-        string=u'运动步数', compute='get_user_today_health')
+        string='运动步数', compute='get_user_today_health')
 
     @api.multi
     def get_user_today_health(self):
@@ -47,7 +47,7 @@ class HrEmployee(models.Model):
                             res.update({'dd_step_count': 0})
                     except Exception as e:
                         # raise UserError(e)
-                        res.message_post(body=u"获取失败，原因：{}".format(
+                        res.message_post(body="获取失败，原因：{}".format(
                             e), message_type='notification')
                 else:
                     res.update({'dd_step_count': 0})

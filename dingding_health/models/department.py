@@ -15,7 +15,7 @@ class HrDepartment(models.Model):
     _inherit = 'hr.department'
 
     dd_step_count = fields.Integer(
-        string=u'运动步数', compute='get_dept_today_health')
+        string='运动步数', compute='get_dept_today_health')
 
     @api.multi
     def get_dept_today_health(self):

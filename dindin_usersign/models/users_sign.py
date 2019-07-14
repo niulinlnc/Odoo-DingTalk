@@ -17,14 +17,14 @@ class DinDinUsersSign(models.Model):
     _description = "用户签到记录"
     _rec_name = 'start_time'
 
-    company_id = fields.Many2one(comodel_name='res.company', string=u'公司',
+    company_id = fields.Many2one(comodel_name='res.company', string='公司',
                                  default=lambda self: self.env.user.company_id.id)
     emp_ids = fields.Many2many(comodel_name='hr.employee', relation='users_sign_and_employee_to_rel',
-                               column1='sign_id', column2='emp_id', string=u'员工', required=True)
-    start_time = fields.Datetime(string=u'开始时间', required=True)
-    end_time = fields.Datetime(string=u'结束时间', required=True)
+                               column1='sign_id', column2='emp_id', string='员工', required=True)
+    start_time = fields.Datetime(string='开始时间', required=True)
+    end_time = fields.Datetime(string='结束时间', required=True)
     line_ids = fields.One2many(
-        comodel_name='dindin.users.signs.line', inverse_name='signs_id', string=u'列表')
+        comodel_name='dindin.users.signs.line', inverse_name='signs_id', string='列表')
 
     @api.multi
     def find_users_sign(self):
@@ -79,10 +79,10 @@ class DinDinUsersSignLine(models.Model):
     _rec_name = 'emp_id'
 
     signs_id = fields.Many2one(
-        comodel_name='dindin.users.signs', string=u'签到', ondelete='cascade')
+        comodel_name='dindin.users.signs', string='签到', ondelete='cascade')
     emp_id = fields.Many2one(comodel_name='hr.employee',
-                             string=u'员工', required=True)
-    checkin_time = fields.Datetime(string=u'签到时间')
+                             string='员工', required=True)
+    checkin_time = fields.Datetime(string='签到时间')
     place = fields.Char(string='签到地址')
     detail_place = fields.Char(string='签到详细地址')
     remark = fields.Char(string='签到备注')

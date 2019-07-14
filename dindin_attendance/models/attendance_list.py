@@ -35,21 +35,21 @@ class DinDinAttendanceList(models.Model):
         ('AUTO_CHECK', '自动打卡'),
     ]
 
-    company_id = fields.Many2one(comodel_name='res.company', string=u'公司',
+    company_id = fields.Many2one(comodel_name='res.company', string='公司',
                                  default=lambda self: self.env.user.company_id.id)
     group_id = fields.Many2one(
-        comodel_name='dindin.simple.groups', string=u'考勤组')
+        comodel_name='dindin.simple.groups', string='考勤组')
     recordId = fields.Char(string='记录ID')
-    workDate = fields.Date(string=u'工作日')
+    workDate = fields.Date(string='工作日')
     emp_id = fields.Many2one(comodel_name='hr.employee',
-                             string=u'员工', required=True)
-    checkType = fields.Selection(string=u'考勤类型', selection=[
+                             string='员工', required=True)
+    checkType = fields.Selection(string='考勤类型', selection=[
                                  ('OnDuty', '上班'), ('OffDuty', '下班')])
-    timeResult = fields.Selection(string=u'时间结果', selection=TimeResult)
-    locationResult = fields.Selection(string=u'位置结果', selection=LocationResult)
-    baseCheckTime = fields.Datetime(string=u'基准时间')
-    userCheckTime = fields.Datetime(string=u'实际打卡时间')
-    sourceType = fields.Selection(string=u'数据来源', selection=SourceType)
+    timeResult = fields.Selection(string='时间结果', selection=TimeResult)
+    locationResult = fields.Selection(string='位置结果', selection=LocationResult)
+    baseCheckTime = fields.Datetime(string='基准时间')
+    userCheckTime = fields.Datetime(string='实际打卡时间')
+    sourceType = fields.Selection(string='数据来源', selection=SourceType)
 
     @api.model
     def get_attendance_list(self, start_date, end_date, user=None):

@@ -87,21 +87,21 @@ class DingDingMessageTemplate(models.Model):
 
     name = fields.Char(string='消息名称', required=True)
     model_id = fields.Many2one(
-        comodel_name='ir.model', string=u'应用模型', required=True)
+        comodel_name='ir.model', string='应用模型', required=True)
     subject = fields.Char(string='消息主题')
-    body = fields.Text(string=u'内容')
+    body = fields.Text(string='内容')
     active = fields.Boolean(default=True)
-    email = fields.Boolean(string=u'Email消息时触发')
-    comment = fields.Boolean(string=u'备注消息时触发')
-    notification = fields.Boolean(string=u'讨论消息时触发')
-    chat_id = fields.Many2one(comodel_name='dingding.chat', string=u'To群会话')
+    email = fields.Boolean(string='Email消息时触发')
+    comment = fields.Boolean(string='备注消息时触发')
+    notification = fields.Boolean(string='讨论消息时触发')
+    chat_id = fields.Many2one(comodel_name='dingding.chat', string='To群会话')
     send_to = fields.Selection(
-        string=u'发送到', selection=SENDTOTYPE, default='chat', required=True)
+        string='发送到', selection=SENDTOTYPE, default='chat', required=True)
     chat_ids = fields.Many2many(comodel_name='dingding.chat', relation='message_template_and_dingding_chat_rel',
-                                column1='template_id', column2='chat_id', string=u'群会话')
+                                column1='template_id', column2='chat_id', string='群会话')
     user_ids = fields.Many2many('hr.employee', string='接受人')
-    field_ids = fields.Many2many('ir.model.fields', string=u'单据字段')
-    rotbot_ids = fields.Many2many('dingding.robot', string=u'群机器人')
+    field_ids = fields.Many2many('ir.model.fields', string='单据字段')
+    rotbot_ids = fields.Many2many('dingding.robot', string='群机器人')
 
     @api.model
     def generate_message_text(self, model_name, body_html, res_id):

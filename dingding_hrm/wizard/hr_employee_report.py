@@ -14,11 +14,11 @@ class HrEmployeeReport(models.Model):
     _auto = False
     _description = u"员工入职状态"
 
-    id = fields.Integer(string=u'序号')
-    company_id = fields.Many2one(comodel_name='res.company', string=u'公司')
-    employee_id = fields.Many2one(comodel_name='hr.employee', string=u'员工')
-    department_id = fields.Many2one(comodel_name='hr.department', string=u'部门')
-    work_status = fields.Selection(string=u'入职状态', selection=[('1', '待入职'), ('2', '在职'), ('3', '离职')])
+    id = fields.Integer(string='序号')
+    company_id = fields.Many2one(comodel_name='res.company', string='公司')
+    employee_id = fields.Many2one(comodel_name='hr.employee', string='员工')
+    department_id = fields.Many2one(comodel_name='hr.department', string='部门')
+    work_status = fields.Selection(string='入职状态', selection=[('1', '待入职'), ('2', '在职'), ('3', '离职')])
 
     def init(self):
         tools.drop_view_if_exists(self._cr, 'hr_employee_dingding_report')

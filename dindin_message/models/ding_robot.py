@@ -24,12 +24,12 @@ class DingDingRobot(models.Model):
     _description = "群机器人"
     _rec_name = 'name'
 
-    active = fields.Boolean(string=u'active', default=True)
+    active = fields.Boolean(string='active', default=True)
     name = fields.Char(string='机器人名称', required=True, index=True)
     webhook = fields.Char(string='Hook地址', required=True)
-    remarks = fields.Text(string=u'说明备注')
+    remarks = fields.Text(string='说明备注')
     chat_id = fields.Many2one(
-        comodel_name='dingding.chat', string=u'关联群组', index=True)
+        comodel_name='dingding.chat', string='关联群组', index=True)
 
     @api.multi
     def test_robot_connection(self):
@@ -86,18 +86,18 @@ class DingDingRobotSendMessage(models.TransientModel):
     _description = "通过群机器人发送消息"
 
     msg_type = fields.Selection(
-        string=u'消息类型', selection=MESSAGETYPE, default='text', required=True)
+        string='消息类型', selection=MESSAGETYPE, default='text', required=True)
     robot_id = fields.Many2one('dingding.robot', required=True, string='群机器人')
     chat_id = fields.Many2one(
         'dingding.chat', related='robot_id.chat_id', string='关联群组')
     at_user_ids = fields.Many2many(comodel_name='hr.employee', relation='dingding_robot_and_hr_employee_rel',
-                                   column1='message_id', column2='emp_id', string=u'提醒人员')
+                                   column1='message_id', column2='emp_id', string='提醒人员')
     isAtAll = fields.Boolean(string='@所有人时', default=False)
     text_message = fields.Text(string='文本消息内容')
     msg_title = fields.Char(string='消息标题', help="文本格式")
     card_message = fields.Text(string='卡片消息内容', help="支持markdown语法")
     btns = fields.One2many(comodel_name='dingding.robot.send.card.message.list', inverse_name='message_id',
-                           string=u'按钮列表')
+                           string='按钮列表')
     markdown_message = fields.Text(string='Markdown消息内容', help="支持markdown语法")
     link_url = fields.Char(string='链接URL', help="点击消息时链接URL")
     link_image_url = fields.Char(string='链接图片URL', help="链接图片URL")
@@ -179,4 +179,4 @@ class CardMessageList(models.TransientModel):
     actionURL = fields.Char(string='标题链接地址', required=True)
     pic_url = fields.Char(string='图片链接地址')
     message_id = fields.Many2one(
-        comodel_name='dingding.robot.send.message', string=u'消息', ondelete='cascade')
+        comodel_name='dingding.robot.send.message', string='消息', ondelete='cascade')

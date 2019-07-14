@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from odoo import api, fields, models, tools
-from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
+from odoo import api, fields, models, _
+from odoo.addons.ali_dindin.dingtalk.main import get_client
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -16,8 +16,8 @@ class HrDepartment(models.Model):
 
     din_id = fields.Char(string='钉钉Id')
     din_sy_state = fields.Boolean(
-        string=u'钉钉同步标识', default=False, help="避免使用同步时,会执行创建、修改上传钉钉方法")
-    dingding_type = fields.Selection(string=u'钉钉状态', selection=[('no', '不存在'), ('yes', '存在')],
+        string='钉钉同步标识', default=False, help="避免使用同步时,会执行创建、修改上传钉钉方法")
+    dingding_type = fields.Selection(string='钉钉状态', selection=[('no', '不存在'), ('yes', '存在')],
                                      compute="_compute_dingding_type")
 
     @api.multi
@@ -38,13 +38,14 @@ class HrDepartment(models.Model):
             try:
                 result = client.department.create(data)
                 logging.info(">>>新增部门返回结果:{}".format(result))
+
                 if result.get('errcode') == 0:
                     res.write({'din_id': result.get('id')})
-                    res.message_post(body=u"钉钉消息：部门信息已上传至钉钉",
+                    res.message_post(body="钉钉消息：部门信息已上传至钉钉",
                                      message_type='notification')
                 else:
                     raise UserError(
-                        '上传钉钉系统时发生错误，详情为:{}'.format(result.get('errmsg')))
+                        _('上传钉钉系统时发生错误，详情为:{}').format(result.get('errmsg')))
             except Exception as e:
                 raise UserError(e)
 
@@ -54,7 +55,7 @@ class HrDepartment(models.Model):
         for res in self:
             # 获取部门din_id
             if not res.parent_id:
-                raise UserError("请选择上级部门!")
+                raise UserError(_("请选择上级部门!"))
             data = {
                 'id': res.din_id,  # id
                 'name': res.name,  # 部门名称
@@ -64,7 +65,7 @@ class HrDepartment(models.Model):
                 result = client.department.update(data)
                 logging.info(">>>修改部门时钉钉返回结果:{}".format(result))
                 if result.get('errcode') == 0:
-                    res.message_post(body=u"钉钉消息：新的信息已同步更新至钉钉",
+                    res.message_post(body="钉钉消息：新的信息已同步更新至钉钉",
                                      message_type='notification')
                 else:
                     raise UserError(

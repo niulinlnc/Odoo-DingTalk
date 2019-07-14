@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from odoo import api, fields, models, tools
+from odoo import api, fields, models, _
 from odoo.addons.ali_dindin.dingtalk.main import get_client
 from odoo.exceptions import UserError
 
@@ -25,9 +25,9 @@ class ResPartner(models.Model):
     din_company_name = fields.Char(
         string='钉钉联系人公司', help="用于存储在钉钉系统中返回的联系人所在公司")
     din_sy_state = fields.Boolean(
-        string=u'钉钉同步标识', default=False, help="避免使用同步时,会执行创建、修改上传钉钉方法")
+        string='钉钉同步标识', default=False, help="避免使用同步时,会执行创建、修改上传钉钉方法")
     din_employee_id = fields.Many2one(
-        comodel_name='hr.employee', string=u'负责人', ondelete='cascade')
+        comodel_name='hr.employee', string='负责人', ondelete='cascade')
     din_share_department_ids = fields.Many2many(
         'hr.department', 'partner_department_rel', 'partner_id', 'department_id', string='共享范围')
     din_share_employee_ids = fields.Many2many(
@@ -54,7 +54,7 @@ class ResPartner(models.Model):
         client = get_client(self)
         for res in self:
             if res.din_userid:
-                raise UserError('钉钉中已存在该联系人,请不要重复上传或使用更新联系人功能！')
+                raise UserError(_('钉钉中已存在该联系人,请不要重复上传或使用更新联系人功能！'))
             # 获取标签
             label_ids = list()
             if res.category_id:
@@ -62,9 +62,9 @@ class ResPartner(models.Model):
                     label_ids.append(category.din_id)
                 label_ids = list(map(int, label_ids))
             else:
-                raise UserError('请选择联系人标签，若不存在标签，请先使用手动同步联系人标签功能！')
+                raise UserError(_('请选择联系人标签，若不存在标签，请先使用手动同步联系人标签功能！'))
             if not res.din_employee_id:
-                raise UserError("请选择联系人对应的负责人!")
+                raise UserError(_("请选择联系人对应的负责人!"))
 
             name = res.name  # 联系人名称
             title = res.function if res.function else ''  # 职位
@@ -93,7 +93,7 @@ class ResPartner(models.Model):
                                                   )
                 logging.info("创建联系人返回结果:{}".format(result))
                 res.write({'din_userid': result})
-                res.message_post(body=u"钉钉消息：联系人信息已上传至钉钉",
+                res.message_post(body=_("钉钉消息：联系人信息已上传至钉钉"),
                                  message_type='notification')
             except Exception as e:
                 raise UserError(e)
@@ -148,7 +148,7 @@ class ResPartner(models.Model):
                 result = client.extcontact.update(user_id, name, follower_user_id, label_ids, mobile, state_code='86',
                                                   title=title, share_dept_ids=share_dept_ids, remark=remark, address=address, company_name=company_name, share_user_ids=share_user_ids)
                 logging.info("更新联系人返回结果:{}".format(result))
-                res.message_post(body=u"钉钉消息：联系人信息已更新至钉钉",
+                res.message_post(body="钉钉消息：联系人信息已更新至钉钉",
                                  message_type='notification')
             except Exception as e:
                 raise UserError(e)
@@ -180,20 +180,20 @@ class ResPartner(models.Model):
         获取企业外部联系人详情
         :param user_id: userId
         返回数据结构：
-        {'ding_open_errcode': 0, 
+        {'ding_open_errcode': 0,
         'result': {
-            'address': 'xxxx', 
-            'company_name': 'xxxx', 
-            'follower_user_id': '01454209', 
-            'label_ids': {'number': [1362340, 1362317, 136229]}, 
-            'mobile': '189****', 
-            'name': '曾**', 
-            'remark': '电xxxx', 
-            'share_dept_ids': {'number': [108280604]}, 
-            'share_user_ids': {}, 
-            'state_code': '86', 
-            'title': '总经理', 
-            'userid': '014711'}, 
+            'address': 'xxxx',
+            'company_name': 'xxxx',
+            'follower_user_id': '01454209',
+            'label_ids': {'number': [1362340, 1362317, 136229]},
+            'mobile': '189****',
+            'name': '曾**',
+            'remark': '电xxxx',
+            'share_dept_ids': {'number': [108280604]},
+            'share_user_ids': {},
+            'state_code': '86',
+            'title': '总经理',
+            'userid': '014711'},
         'success': True}
 
         """
@@ -246,7 +246,7 @@ class ResPartner(models.Model):
                                     (6, 0, emp_list.ids)] if emp_list else ''})
                     partner.sudo().write(data)
                     partner.message_post(
-                        body=u"钉钉消息：已从钉钉同步联系人信息", message_type='notification')
+                        body="钉钉消息：已从钉钉同步联系人信息", message_type='notification')
                 else:
                     _logger.info("从钉钉同步联系人时发生意外，原因为:{}".format(
                         result.get('errmsg')))
@@ -254,13 +254,3 @@ class ResPartner(models.Model):
                         result.get('errmsg')), message_type='notification')
             except Exception as e:
                 raise UserError(e)
-
-# 未使用，但是不能删除，因为第一个版本创建的视图还存在
-
-
-class DinDinSynchronous(models.TransientModel):
-    _name = 'dindin.synchronous.extcontact'
-    _description = "同步钉钉联系人功能模块"
-
-    sy_type = fields.Selection(string=u'同步类型', selection=[(
-        '00', '联系人标签'), ('01', '外部联系人列表')], default='00')

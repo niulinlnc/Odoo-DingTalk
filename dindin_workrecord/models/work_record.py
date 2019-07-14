@@ -18,22 +18,22 @@ class DinDinWorkRecord(models.Model):
     _inherit = ['mail.thread']
     _rec_name = 'name'
 
-    company_id = fields.Many2one(comodel_name='res.company', string=u'公司',
+    company_id = fields.Many2one(comodel_name='res.company', string='公司',
                                  default=lambda self: self.env.user.company_id.id)
     name = fields.Char(string='标题', required=True)
     emp_id = fields.Many2one(comodel_name='hr.employee',
-                             string=u'待办用户', required=True)
+                             string='待办用户', required=True)
     record_time = fields.Datetime(
-        string=u'待办时间', default=datetime.datetime.now())
+        string='待办时间', default=datetime.datetime.now())
     record_url = fields.Char(string='待办URL链接', required=True)
-    state = fields.Selection(string=u'发送状态', selection=[
+    state = fields.Selection(string='发送状态', selection=[
                              ('00', '草稿'), ('01', '已发送')], default='00')
     line_ids = fields.One2many(
-        comodel_name='dindin.work.record.list', inverse_name='record_id', string=u'待办事项表单')
+        comodel_name='dindin.work.record.list', inverse_name='record_id', string='待办事项表单')
     record_id = fields.Char(string='待办任务ID', help="用于发送到钉钉后接受返回的id，通过id可以修改待办")
-    record_type = fields.Selection(string=u'待办类型', selection=[
+    record_type = fields.Selection(string='待办类型', selection=[
                                    ('out', '发起'), ('put', '接收'), ], default='out')
-    record_state = fields.Selection(string=u'待办状态', selection=[
+    record_state = fields.Selection(string='待办状态', selection=[
                                     ('00', '已通知'), ('01', '已更新'), ], default='00')
     attachment_number = fields.Integer(
         compute='_compute_attachment_number', string='附件上传功能')
@@ -94,7 +94,7 @@ class DinDinWorkRecord(models.Model):
         except Exception as e:
             raise UserError(e)
         self.send_message_to_emp()
-        self.message_post(body=u"待办事项已推送到钉钉!", message_type='notification')
+        self.message_post(body="待办事项已推送到钉钉!", message_type='notification')
 
     @api.multi
     def send_message_to_emp(self):
@@ -107,8 +107,8 @@ class DinDinWorkRecord(models.Model):
         :param toparty_list: 部门id列表
         :return:message_id
         """
-        client = get_client(self)
         self.ensure_one()
+        client = get_client(self)
         msg_list = list()
         for line in self.line_ids:
             msg_list.append({'key': "{}: ".format(
@@ -226,11 +226,11 @@ class DinDinWorkRecord(models.Model):
                 result = client.workrecord.update(userid, record_id)
                 logging.info(">>>获更新代办事项返回结果{}".format(result))
                 if result:
-                    res.message_post(body=u"待办状态已更新!",
+                    res.message_post(body="待办状态已更新!",
                                      message_type='notification')
                     res.write({'record_state': '01'})
                 else:
-                    res.message_post(body=u"待办状态更新失败!",
+                    res.message_post(body="待办状态更新失败!",
                                      message_type='notification')
             except Exception as e:
                 raise UserError(e)
@@ -271,7 +271,7 @@ class DinDinWorkRecordList(models.Model):
     title = fields.Char(string='标题', required=True)
     content = fields.Char(string='内容', required=True)
     record_id = fields.Many2one(
-        comodel_name='dindin.work.record', string=u'待办', ondelete='cascade')
+        comodel_name='dindin.work.record', string='待办', ondelete='cascade')
 
 
 class GetUserDingDingWorkRecord(models.TransientModel):

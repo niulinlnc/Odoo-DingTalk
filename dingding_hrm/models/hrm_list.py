@@ -13,11 +13,11 @@ class DingDingHrmList(models.Model):
     _rec_name = 'emp_id'
 
     emp_id = fields.Many2one(comodel_name='hr.employee',
-                             string=u'员工', required=True)
-    department_id = fields.Many2one(comodel_name='hr.department', string=u'部门')
+                             string='员工', required=True)
+    department_id = fields.Many2one(comodel_name='hr.department', string='部门')
     line_ids = fields.One2many(
-        comodel_name='dingding.hrm.list.line', inverse_name='list_is', string=u'信息列表')
-    company_id = fields.Many2one(comodel_name='res.company', string=u'公司',
+        comodel_name='dingding.hrm.list.line', inverse_name='list_is', string='信息列表')
+    company_id = fields.Many2one(comodel_name='res.company', string='公司',
                                  default=lambda self: self.env.user.company_id.id)
 
 
@@ -27,8 +27,8 @@ class DingDingHrmListline(models.Model):
     _rec_name = 'list_is'
 
     list_is = fields.Many2one(
-        comodel_name='dingding.hrm.list', string=u'获取员工花名册', ondelete='cascade')
-    sequence = fields.Integer(string=u'序号')
+        comodel_name='dingding.hrm.list', string='获取员工花名册', ondelete='cascade')
+    sequence = fields.Integer(string='序号')
     group_id = fields.Char(string='字段分组ID')
     value = fields.Char(string='值')
     label = fields.Char(string='参照值')
@@ -41,8 +41,8 @@ class GetDingDingHrmList(models.TransientModel):
     _description = '获取钉钉员工花名册'
 
     emp_ids = fields.Many2many(comodel_name='hr.employee', relation='dingding_hrm_list_and_hr_employee_rel',
-                               column1='list_id', column2='emp_id', string=u'员工', required=True)
-    is_all_emp = fields.Boolean(string=u'全部员工')
+                               column1='list_id', column2='emp_id', string='员工', required=True)
+    is_all_emp = fields.Boolean(string='全部员工')
 
     @api.onchange('is_all_emp')
     def onchange_all_emp(self):

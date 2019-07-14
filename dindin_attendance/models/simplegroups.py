@@ -12,7 +12,7 @@ class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
     din_group_id = fields.Many2one(
-        comodel_name='dindin.simple.groups', string=u'考勤组')
+        comodel_name='dindin.simple.groups', string='考勤组')
 
 
 class DinDinSimpleGroups(models.Model):
@@ -22,15 +22,15 @@ class DinDinSimpleGroups(models.Model):
     name = fields.Char(string='名称')
     group_id = fields.Char(string='钉钉考勤组ID')
 
-    s_type = fields.Selection(string=u'考勤类型',
+    s_type = fields.Selection(string='考勤类型',
                               selection=[('FIXED', '固定排班'), ('TURN', '轮班排班'), ('NONE', '无班次')], default='NONE')
-    member_count = fields.Integer(string=u'成员人数')
+    member_count = fields.Integer(string='成员人数')
     manager_list = fields.Many2many(comodel_name='hr.employee', relation='dindin_simple_group_hr_emp_rel',
-                                    column1='group_id', column2='emp_id', string=u'负责人')
+                                    column1='group_id', column2='emp_id', string='负责人')
     dept_name_list = fields.Many2many(comodel_name='hr.department', relation='dindin_simple_group_hr_dept_rel',
-                                      column1='group_id', column2='dept_id', string=u'关联部门')
+                                      column1='group_id', column2='dept_id', string='关联部门')
     emp_ids = fields.One2many(
-        comodel_name='hr.employee', inverse_name='din_group_id', string=u'成员列表')
+        comodel_name='hr.employee', inverse_name='din_group_id', string='成员列表')
 
     @api.model
     def get_simple_groups(self):

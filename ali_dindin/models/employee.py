@@ -3,7 +3,7 @@ import logging
 
 import requests
 
-from odoo import api, fields, models, tools
+from odoo import api, fields, models, tools, _
 from odoo.addons.ali_dindin.dingtalk.main import (get_client, stamp_to_time,
                                                   time_to_stamp)
 from odoo.exceptions import UserError
@@ -32,12 +32,12 @@ class HrEmployee(models.Model):
     din_active = fields.Boolean("是否激活", readonly=True)
     din_orderInDepts = fields.Char("所在部门序位")
     din_isLeaderInDepts = fields.Char("是否为部门主管")
-    din_sy_state = fields.Boolean(string=u'同步标识', default=False)
-    work_status = fields.Selection(string=u'入职状态', selection=[(
+    din_sy_state = fields.Boolean(string='同步标识', default=False)
+    work_status = fields.Selection(string='入职状态', selection=[(
         '1', '待入职'), ('2', '在职'), ('3', '离职')], default='2')
-    office_status = fields.Selection(string=u'在职子状态', selection=[(
+    office_status = fields.Selection(string='在职子状态', selection=[(
         '2', '试用期'), ('3', '正式'), ('5', '待离职'), ('-1', '无状态')], default='-1')
-    dingding_type = fields.Selection(string=u'钉钉状态', selection=[(
+    dingding_type = fields.Selection(string='钉钉状态', selection=[(
         'no', '不存在'), ('yes', '存在')], compute="_compute_dingding_type")
     department_ids = fields.Many2many(
         'hr.department', 'employee_department_rel', 'emp_id', 'department_id', string='所属部门')
@@ -52,8 +52,8 @@ class HrEmployee(models.Model):
             # 获取部门din_id
             department_list = list()
             if not res.department_id:
-                raise UserError("请选择员工部门!")
-            elif res.department_ids:
+                raise UserError(_("请选择员工部门!"))
+            if res.department_ids:
                 department_list = res.department_ids.mapped('din_id')
                 department_list.append(res.department_id.din_id)
             else:
@@ -73,7 +73,7 @@ class HrEmployee(models.Model):
                 result = client.user.create(data)
                 logging.info(">>>新增员工返回结果:{}".format(result))
                 res.write({'din_id': result})
-                res.message_post(body=u"钉钉消息：员工信息已上传至钉钉",
+                res.message_post(body="钉钉消息：员工信息已上传至钉钉",
                                  message_type='notification')
             except Exception as e:
                 raise UserError(e)
@@ -91,7 +91,7 @@ class HrEmployee(models.Model):
                 raise UserError("请选择员工部门!")
             elif res.department_ids:
                 department_list = res.department_ids.mapped('din_id')
-                if not res.department_id.din_id in res.department_ids.mapped('din_id'):
+                if res.department_id.din_id not in res.department_ids.mapped('din_id'):
                     department_list.append(res.department_id.din_id)
             else:
                 department_list.append(res.department_id.din_id)
@@ -115,11 +115,11 @@ class HrEmployee(models.Model):
             try:
                 result = client.user.update(data)
                 if result.get('errcode') == 0:
-                    res.message_post(body=u"新的信息已同步更新至钉钉",
+                    res.message_post(body="新的信息已同步更新至钉钉",
                                      message_type='notification')
                 else:
                     raise UserError(
-                        '上传钉钉系统时发生错误，详情为:{}'.format(result.get('errmsg')))
+                        _('上传钉钉系统时发生错误，详情为:{}').format(result.get('errmsg')))
             except Exception as e:
                 raise UserError(e)
 
@@ -130,7 +130,7 @@ class HrEmployee(models.Model):
             emps = self.env['hr.employee'].sudo().search(
                 [('user_id', '=', self.user_id.id)])
             if len(emps) > 1:
-                raise UserError("Sorry!，关联的相关(系统)用户已关联到其他员工，若需要变更请修改原关联的相关用户！")
+                raise UserError(_("Sorry!，关联的相关(系统)用户已关联到其他员工，若需要变更请修改原关联的相关用户！"))
 
     # 从钉钉手动获取用户详情
     @api.multi

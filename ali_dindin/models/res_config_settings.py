@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from odoo import api, fields, models
+from odoo import fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -9,24 +9,24 @@ _logger = logging.getLogger(__name__)
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
-    din_agentid = fields.Char(string=u'AgentId')
-    din_corpId = fields.Char(string=u'企业CorpId')
-    din_appkey = fields.Char(string=u'AppKey')
-    din_appsecret = fields.Char(string=u'AppSecret')
+    din_agentid = fields.Char(string='AgentId')
+    din_corpId = fields.Char(string='企业CorpId')
+    din_appkey = fields.Char(string='AppKey')
+    din_appsecret = fields.Char(string='AppSecret')
     din_token = fields.Boolean(string="自动获取Token")
-    din_delete_extcontact = fields.Boolean(string=u'删除外部联系人')
-    din_create_employee = fields.Boolean(string=u'添加员工')
-    din_update_employee = fields.Boolean(string=u'修改员工')
-    din_delete_employee = fields.Boolean(string=u'删除员工')
-    din_create_department = fields.Boolean(string=u'添加部门')
-    din_update_department = fields.Boolean(string=u'修改部门')
-    din_delete_department = fields.Boolean(string=u'删除部门')
-    din_not_get_hidden_department = fields.Boolean(string=u'不同步隐藏部门')
-    din_login_appid = fields.Char(string=u'钉钉登录appId')
-    din_login_appsecret = fields.Char(string=u'钉钉登录appSecret')
-    dingtalk_redis_ip = fields.Char(string=u'Redis服务器IP')
-    dingtalk_redis_port = fields.Char(string=u'Redis服务器端口')
-    dingtalk_redis_db = fields.Char(string=u'Redis服务器数据库')
+    din_delete_extcontact = fields.Boolean(string='删除外部联系人')
+    din_create_employee = fields.Boolean(string='添加员工')
+    din_update_employee = fields.Boolean(string='修改员工')
+    din_delete_employee = fields.Boolean(string='删除员工')
+    din_create_department = fields.Boolean(string='添加部门')
+    din_update_department = fields.Boolean(string='修改部门')
+    din_delete_department = fields.Boolean(string='删除部门')
+    din_not_get_hidden_department = fields.Boolean(string='不同步隐藏部门')
+    din_login_appid = fields.Char(string='钉钉登录appId')
+    din_login_appsecret = fields.Char(string='钉钉登录appSecret')
+    dingtalk_redis_ip = fields.Char(string='Redis服务器IP')
+    dingtalk_redis_port = fields.Char(string='Redis服务器端口')
+    dingtalk_redis_db = fields.Char(string='Redis服务器数据库')
 
     # 安装钉钉模块
     module_dindin_attendance = fields.Boolean(
