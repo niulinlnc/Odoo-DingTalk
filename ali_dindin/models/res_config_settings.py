@@ -26,7 +26,7 @@ class ResConfigSettings(models.TransientModel):
     dingtalk_redis_ip = fields.Char(string=u'Redis服务器IP')
     dingtalk_redis_port = fields.Char(string=u'Redis服务器端口')
     dingtalk_redis_db = fields.Char(string=u'Redis服务器数据库')
-    
+
     # 安装钉钉模块
     module_dindin_attendance = fields.Boolean(
         '钉钉办公-考勤排班',
@@ -94,47 +94,80 @@ class ResConfigSettings(models.TransientModel):
         help='钉钉办公-运动.\n'
         '- This installs the module dingding_health.'
     )
-    
+
     def get_values(self):
         res = super(ResConfigSettings, self).get_values()
         res.update(
-            din_agentid=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid'),
-            din_corpId=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_corpId'),
-            din_appkey=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_appkey'),
-            din_appsecret=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_appsecret'),
-            din_delete_extcontact=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_delete_extcontact'),
-            din_create_employee=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_create_employee'),
-            din_update_employee=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_update_employee'),
-            din_delete_employee=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_delete_employee'),
-            din_create_department=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_create_department'),
-            din_update_department=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_update_department'),
-            din_delete_department=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_delete_department'),
-            din_not_get_hidden_department=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_not_get_hidden_department'),
-            din_login_appid=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_login_appid'),
-            din_login_appsecret=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_login_appsecret'),
-            dingtalk_redis_ip=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_ip', default = '127.0.0.1'),
-            dingtalk_redis_port=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_port', default = '6379'),
-            dingtalk_redis_db=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_db', default = '0'),
+            din_agentid=self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_agentid'),
+            din_corpId=self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_corpId'),
+            din_appkey=self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_appkey'),
+            din_appsecret=self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_appsecret'),
+            din_delete_extcontact=self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_delete_extcontact'),
+            din_create_employee=self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_create_employee'),
+            din_update_employee=self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_update_employee'),
+            din_delete_employee=self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_delete_employee'),
+            din_create_department=self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_create_department'),
+            din_update_department=self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_update_department'),
+            din_delete_department=self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_delete_department'),
+            din_not_get_hidden_department=self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_not_get_hidden_department'),
+            din_login_appid=self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_login_appid'),
+            din_login_appsecret=self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_login_appsecret'),
+            dingtalk_redis_ip=self.env['ir.config_parameter'].sudo().get_param(
+                'ali_dindin.dingtalk_redis_ip', default='127.0.0.1'),
+            dingtalk_redis_port=self.env['ir.config_parameter'].sudo().get_param(
+                'ali_dindin.dingtalk_redis_port', default='6379'),
+            dingtalk_redis_db=self.env['ir.config_parameter'].sudo().get_param(
+                'ali_dindin.dingtalk_redis_db', default='0'),
         )
         return res
 
     def set_values(self):
         super(ResConfigSettings, self).set_values()
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_agentid', self.din_agentid)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_corpId', self.din_corpId)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_appkey', self.din_appkey)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_appsecret', self.din_appsecret)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_delete_extcontact', self.din_delete_extcontact)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_create_employee', self.din_create_employee)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_update_employee', self.din_update_employee)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_delete_employee', self.din_delete_employee)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_create_department', self.din_create_department)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_update_department', self.din_update_department)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_delete_department', self.din_delete_department)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_not_get_hidden_department', self.din_not_get_hidden_department)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_login_appid', self.din_login_appid)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_login_appsecret', self.din_login_appsecret)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.dingtalk_redis_ip', self.dingtalk_redis_ip)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.dingtalk_redis_port', self.dingtalk_redis_port)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.dingtalk_redis_db', self.dingtalk_redis_db)
-
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.din_agentid', self.din_agentid)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.din_corpId', self.din_corpId)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.din_appkey', self.din_appkey)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.din_appsecret', self.din_appsecret)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.din_delete_extcontact', self.din_delete_extcontact)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.din_create_employee', self.din_create_employee)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.din_update_employee', self.din_update_employee)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.din_delete_employee', self.din_delete_employee)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.din_create_department', self.din_create_department)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.din_update_department', self.din_update_department)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.din_delete_department', self.din_delete_department)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.din_not_get_hidden_department', self.din_not_get_hidden_department)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.din_login_appid', self.din_login_appid)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.din_login_appsecret', self.din_login_appsecret)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.dingtalk_redis_ip', self.dingtalk_redis_ip)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.dingtalk_redis_port', self.dingtalk_redis_port)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'ali_dindin.dingtalk_redis_db', self.dingtalk_redis_db)

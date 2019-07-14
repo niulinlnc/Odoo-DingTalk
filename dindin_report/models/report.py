@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
-import requests
-import time
-from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
@@ -19,14 +15,18 @@ class DingDingReportUser(models.Model):
 
     active = fields.Boolean(default=True)
     name = fields.Char(string=u'日志名称', required=True)
-    report_type = fields.Many2one(comodel_name='dingding.report.template', string=u'日志类型')
+    report_type = fields.Many2one(
+        comodel_name='dingding.report.template', string=u'日志类型')
     department_id = fields.Many2one(comodel_name='hr.department', string=u'部门')
-    employee_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', domain=[('din_id', '!=', '')], required=True)
+    employee_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', domain=[
+                                  ('din_id', '!=', '')], required=True)
     report_id = fields.Char(string='日志Id')
     remark = fields.Text(string='日志备注')
     report_date = fields.Date(string=u'创建日期')
-    company_id = fields.Many2one('res.company', string='公司', default=lambda self: self.env.user.company_id.id)
-    line_ids = fields.One2many(comodel_name='dingding.report.user.line', inverse_name='rep_id', string=u'日志列表')
+    company_id = fields.Many2one(
+        'res.company', string='公司', default=lambda self: self.env.user.company_id.id)
+    line_ids = fields.One2many(
+        comodel_name='dingding.report.user.line', inverse_name='rep_id', string=u'日志列表')
     read_num = fields.Integer(string='已读人数', default=0)
     comment_num = fields.Integer(string='评论个数', default=0)
     comment_user_num = fields.Integer(string='去重后评论数', default=0)
@@ -37,7 +37,8 @@ class DingDingReportUser(models.Model):
                                            column1='report_id', column2='emp_id', string=u'日志接收人')
     people_like_list = fields.Many2many(comodel_name='hr.employee', relation='d_report_user_and_like_list_rel',
                                         column1='report_id', column2='emp_id', string=u'点赞人员')
-    comment_ids = fields.One2many(comodel_name='dingding.report.comments.list', inverse_name='rep_id', string=u'评论列表')
+    comment_ids = fields.One2many(
+        comodel_name='dingding.report.comments.list', inverse_name='rep_id', string=u'评论列表')
 
     @api.multi
     def get_report_number_info(self):
@@ -80,13 +81,15 @@ class DingDingReportUser(models.Model):
         report_id = res.report_id
         _type = 0
         try:
-            result = client.report.statistics_listbytype(report_id, _type, offset=0, size=100)
+            result = client.report.statistics_listbytype(
+                report_id, _type, offset=0, size=100)
             logging.info(">>>获取已读人员列表返回结果{}".format(result))
             d_res = result.get('userid_list')
             if d_res:
                 people_read_list = list()
                 for user_id in d_res.get('string'):
-                    emp = self.env['hr.employee'].search([('din_id', '=', user_id)])
+                    emp = self.env['hr.employee'].search(
+                        [('din_id', '=', user_id)])
                     if emp:
                         people_read_list.append(emp.id)
                 res.write({'people_read_list': [(6, 0, people_read_list)]})
@@ -96,13 +99,15 @@ class DingDingReportUser(models.Model):
         report_id = res.report_id
         _type = 2
         try:
-            result = client.report.statistics_listbytype(report_id, _type, offset=0, size=100)            
+            result = client.report.statistics_listbytype(
+                report_id, _type, offset=0, size=100)
             logging.info(">>>获取点赞人员列表返回结果{}".format(result))
             d_res = result.get('userid_list')
             if d_res:
                 people_like_list = list()
                 for user_id in d_res.get('string'):
-                    emp = self.env['hr.employee'].search([('din_id', '=', user_id)])
+                    emp = self.env['hr.employee'].search(
+                        [('din_id', '=', user_id)])
                     if emp:
                         people_like_list.append(emp.id)
                 res.write({'people_like_list': [(6, 0, people_like_list)]})
@@ -120,16 +125,18 @@ class DingDingReportUser(models.Model):
         client = get_client(self)
         report_id = res.report_id
         try:
-            result = client.report.receiver_list(report_id, offset=0, size=100)  
+            result = client.report.receiver_list(report_id, offset=0, size=100)
             logging.info(">>>获取分享人员列表返回结果{}".format(result))
             d_res = result.get('userid_list')
             if d_res:
                 people_receive_list = list()
                 for user_id in d_res.get('string'):
-                    emp = self.env['hr.employee'].search([('din_id', '=', user_id)])
+                    emp = self.env['hr.employee'].search(
+                        [('din_id', '=', user_id)])
                     if emp:
                         people_receive_list.append(emp.id)
-                res.write({'people_receive_list': [(6, 0, people_receive_list)]})
+                res.write({'people_receive_list': [
+                          (6, 0, people_receive_list)]})
         except Exception as e:
             raise UserError(e)
         return True
@@ -144,13 +151,14 @@ class DingDingReportUser(models.Model):
         client = get_client(self)
         report_id = res.report_id
         try:
-            result = client.report.comment_list(report_id, offset=0, size=20)  
+            result = client.report.comment_list(report_id, offset=0, size=20)
             logging.info(">>>获取日志评论详情返回结果{}".format(result))
             d_res = result.get('comments')
             if d_res:
                 comment_list = list()
                 for comment in d_res.get('report_comment_vo'):
-                    emp = self.env['hr.employee'].sudo().search([('din_id', '=', comment.get('userid'))])
+                    emp = self.env['hr.employee'].sudo().search(
+                        [('din_id', '=', comment.get('userid'))])
                     if emp:
                         comment_list.append((0, 0, {
                             'emp_id': emp[0].id,
@@ -170,7 +178,8 @@ class DingDingReportUserLine(models.Model):
     _description = "日志列表"
     _rec_name = 'rep_id'
 
-    rep_id = fields.Many2one(comodel_name='dingding.report.user', string=u'用户日志', ondelete='cascade')
+    rep_id = fields.Many2one(
+        comodel_name='dingding.report.user', string=u'用户日志', ondelete='cascade')
     sequence = fields.Integer(string=u'序号')
     title = fields.Char(string='标题')
     content = fields.Text(string=u'内容')
@@ -181,10 +190,14 @@ class GetUserDingDingReportList(models.TransientModel):
     _description = "获取员工日志列表"
     _rec_name = 'start_time'
 
-    employee_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', domain=[('din_id', '!=', '')])
-    start_time = fields.Datetime(string=u'开始日期', required=True, default=str(fields.datetime.now()))
-    end_time = fields.Datetime(string=u'结束日期', required=True, default=str(fields.datetime.now()))
-    report_type = fields.Many2one(comodel_name='dingding.report.template', string=u'日志类型')
+    employee_id = fields.Many2one(
+        comodel_name='hr.employee', string=u'员工', domain=[('din_id', '!=', '')])
+    start_time = fields.Datetime(
+        string=u'开始日期', required=True, default=str(fields.datetime.now()))
+    end_time = fields.Datetime(
+        string=u'结束日期', required=True, default=str(fields.datetime.now()))
+    report_type = fields.Many2one(
+        comodel_name='dingding.report.template', string=u'日志类型')
 
     @api.multi
     def get_report_by_user(self):
@@ -200,7 +213,8 @@ class GetUserDingDingReportList(models.TransientModel):
         """
         client = get_client(self)
         for res in self:
-            group = self.env.user.has_group('dindin_report.dd_get_user_report_list')
+            group = self.env.user.has_group(
+                'dindin_report.dd_get_user_report_list')
             if not group:
                 raise UserError("不好意思，你没有权限进行本操作！")
             cursor = 0
@@ -214,12 +228,15 @@ class GetUserDingDingReportList(models.TransientModel):
                 template_name = res.report_type.name if res.report_type else ''
                 logging.info(">>>查询游标返回结果:{}".format(cursor))
                 try:
-                    result = client.report.list(start_time, end_time, cursor=cursor, size=size, template_name=template_name, userid=userid)
+                    result = client.report.list(
+                        start_time, end_time, cursor=cursor, size=size, template_name=template_name, userid=userid)
                     logging.info(">>>获取日志列表返回结果:{}".format(result))
                     d_res = result.get('data_list')
                     for data_list in d_res['report_oapi_vo']:
-                        emp = self.env['hr.employee'].search([('name', '=', data_list.get('creator_name'))])
-                        template = self.env['dingding.report.template'].search([('name', '=', data_list.get('template_name'))])
+                        emp = self.env['hr.employee'].search(
+                            [('name', '=', data_list.get('creator_name'))])
+                        template = self.env['dingding.report.template'].search(
+                            [('name', '=', data_list.get('template_name'))])
                         data = {
                             'name': data_list.get('template_name'),
                             'report_type': template[0].id if template else False,
@@ -237,7 +254,8 @@ class GetUserDingDingReportList(models.TransientModel):
                                 'content': content.get('value'),
                             }))
                         data.update({'line_ids': report_list})
-                        report = self.env['dingding.report.user'].search([('report_id', '=', data_list.get('report_id'))])
+                        report = self.env['dingding.report.user'].search(
+                            [('report_id', '=', data_list.get('report_id'))])
                         if report:
                             report.line_ids = False
                             report.write(data)
@@ -249,11 +267,13 @@ class GetUserDingDingReportList(models.TransientModel):
                         size = 20
                     else:
                         break
-                    
+
                 except Exception as e:
                     raise UserError(e)
-        action = self.env.ref('dindin_report.dingding_report_user_action').read()[0]
+        action = self.env.ref(
+            'dindin_report.dingding_report_user_action').read()[0]
         return action
+
 
 class DingDingReportCommentsList(models.Model):
     _name = 'dingding.report.comments.list'

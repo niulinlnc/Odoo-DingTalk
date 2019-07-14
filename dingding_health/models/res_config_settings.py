@@ -14,15 +14,20 @@ class ResConfigSettings(models.TransientModel):
     def get_values(self):
         res = super(ResConfigSettings, self).get_values()
         res.update(
-            auto_user_health_info=self.env['ir.config_parameter'].sudo().get_param('dingding_health.auto_user_health_info'),
-            auto_dept_health_info=self.env['ir.config_parameter'].sudo().get_param('dingding_health.auto_dept_health_info'),
+            auto_user_health_info=self.env['ir.config_parameter'].sudo(
+            ).get_param('dingding_health.auto_user_health_info'),
+            auto_dept_health_info=self.env['ir.config_parameter'].sudo(
+            ).get_param('dingding_health.auto_dept_health_info'),
         )
         return res
 
     def set_values(self):
         super(ResConfigSettings, self).set_values()
-        self.env['ir.config_parameter'].sudo().set_param('dingding_health.auto_user_health_info', self.auto_user_health_info)
-        self.env['ir.config_parameter'].sudo().set_param('dingding_health.auto_dept_health_info', self.auto_dept_health_info)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'dingding_health.auto_user_health_info', self.auto_user_health_info)
+        self.env['ir.config_parameter'].sudo().set_param(
+            'dingding_health.auto_dept_health_info', self.auto_dept_health_info)
 
     def get_all_user_health_state(self):
-        self.env.ref('dingding_health.ir_cron_data_get_health_state').method_direct_trigger()
+        self.env.ref(
+            'dingding_health.ir_cron_data_get_health_state').method_direct_trigger()

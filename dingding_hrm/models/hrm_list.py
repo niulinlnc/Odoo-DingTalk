@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
-import requests
-from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client, list_cut
@@ -15,9 +12,11 @@ class DingDingHrmList(models.Model):
     _description = "获取员工花名册"
     _rec_name = 'emp_id'
 
-    emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True)
+    emp_id = fields.Many2one(comodel_name='hr.employee',
+                             string=u'员工', required=True)
     department_id = fields.Many2one(comodel_name='hr.department', string=u'部门')
-    line_ids = fields.One2many(comodel_name='dingding.hrm.list.line', inverse_name='list_is', string=u'信息列表')
+    line_ids = fields.One2many(
+        comodel_name='dingding.hrm.list.line', inverse_name='list_is', string=u'信息列表')
     company_id = fields.Many2one(comodel_name='res.company', string=u'公司',
                                  default=lambda self: self.env.user.company_id.id)
 
@@ -27,7 +26,8 @@ class DingDingHrmListline(models.Model):
     _description = "获取员工花名册明细"
     _rec_name = 'list_is'
 
-    list_is = fields.Many2one(comodel_name='dingding.hrm.list', string=u'获取员工花名册', ondelete='cascade')
+    list_is = fields.Many2one(
+        comodel_name='dingding.hrm.list', string=u'获取员工花名册', ondelete='cascade')
     sequence = fields.Integer(string=u'序号')
     group_id = fields.Char(string='字段分组ID')
     value = fields.Char(string='值')
@@ -59,7 +59,7 @@ class GetDingDingHrmList(models.TransientModel):
         logging.info(">>>获取钉钉员工花名册start")
         din_ids = list()
         for user in self.emp_ids:
-            din_ids.append(user.din_id)         
+            din_ids.append(user.din_id)
         user_list = list_cut(din_ids, 20)
         for u in user_list:
             self.hrm_list(u)
@@ -94,9 +94,11 @@ class GetDingDingHrmList(models.TransientModel):
                             'field_code': field_list.get('field_code'),
                             'field_name': field_list.get('field_name'),
                         }))
-                    emp = self.env['hr.employee'].search([('din_id', '=', res.get('userid'))])
+                    emp = self.env['hr.employee'].search(
+                        [('din_id', '=', res.get('userid'))])
                     if emp:
-                        hrm = self.env['dingding.hrm.list'].search([('emp_id', '=', emp[0].id)])
+                        hrm = self.env['dingding.hrm.list'].search(
+                            [('emp_id', '=', emp[0].id)])
                         if hrm:
                             hrm.write({
                                 'department_id': emp[0].department_id.id,
@@ -110,4 +112,3 @@ class GetDingDingHrmList(models.TransientModel):
                             })
         except Exception as e:
             raise UserError(e)
-        

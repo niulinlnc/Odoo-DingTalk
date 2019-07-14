@@ -18,7 +18,7 @@ odoo.define('dingding_hrm.get.dingding.pre.entry.button', function (require) {
     let getTemplate = function () {
         let def = rpc.query({
             model: 'dingding.add.employee',
-            method: 'query_pre_entry',
+            method: 'count_pre_entry',
             args: [],
         }).then(function () {
             console.log("查询成功");

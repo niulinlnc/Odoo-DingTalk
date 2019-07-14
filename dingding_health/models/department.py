@@ -14,7 +14,8 @@ _logger = logging.getLogger(__name__)
 class HrDepartment(models.Model):
     _inherit = 'hr.department'
 
-    dd_step_count = fields.Integer(string=u'运动步数', compute='get_dept_today_health')
+    dd_step_count = fields.Integer(
+        string=u'运动步数', compute='get_dept_today_health')
 
     @api.multi
     def get_dept_today_health(self):
@@ -32,11 +33,13 @@ class HrDepartment(models.Model):
                     object_id = res.din_id
                     stat_dates = formatted_today
                     try:
-                        result = client.health.stepinfo_list(_type, object_id, stat_dates)
+                        result = client.health.stepinfo_list(
+                            _type, object_id, stat_dates)
                         logging.info(">>>获取部门在今日的步数返回结果:{}".format(result))
                         if result['stepinfo_list']:
                             for stepinfo_list in result['stepinfo_list']['basic_step_info_vo']:
-                                res.update({'dd_step_count': stepinfo_list['step_count']})
+                                res.update(
+                                    {'dd_step_count': stepinfo_list['step_count']})
                         else:
                             res.update({'dd_step_count': 0})
                     except Exception as e:

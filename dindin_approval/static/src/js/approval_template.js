@@ -52,7 +52,7 @@ odoo.define('dindin_approval.pull.dindin.approval.button', function (require) {
                         close: true
                     }
                 ],
-                $content: $(QWeb.render('PullDinDinApprovalTemplate', {widget: this, data: []}))
+                $content: $(QWeb.render('PullDinDinApprovalTemplate', { widget: this, data: [] }))
             }).open();
         },
 
@@ -84,7 +84,7 @@ odoo.define('dindin_approval.pull.dindin.approval.button', function (require) {
                         close: true
                     }
                 ],
-                $content: $(QWeb.render('PullDinDinApprovalTemplate', {widget: this, data: []}))
+                $content: $(QWeb.render('PullDinDinApprovalTemplate', { widget: this, data: [] }))
             }).open();
         },
     });

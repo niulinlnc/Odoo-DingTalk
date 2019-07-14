@@ -69,7 +69,7 @@ odoo.define('dindin.simple.groups.button', function (require) {
                         close: true
                     }
                 ],
-                $content: $(QWeb.render('PullDinDinSimpleGroups', {widget: this, data: []}))
+                $content: $(QWeb.render('PullDinDinSimpleGroups', { widget: this, data: [] }))
             }).open();
         },
         get_simple_emps_action: function () {
@@ -87,7 +87,7 @@ odoo.define('dindin.simple.groups.button', function (require) {
                         close: true
                     }
                 ],
-                $content: $(QWeb.render('GetDinDinSimpleGroupsEmps', {widget: this, data: []}))
+                $content: $(QWeb.render('GetDinDinSimpleGroupsEmps', { widget: this, data: [] }))
             }).open();
         },
 

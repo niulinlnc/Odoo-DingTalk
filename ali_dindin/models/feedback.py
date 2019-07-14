@@ -20,7 +20,8 @@ class DingDingUserFeedback(models.Model):
     partner = fields.Char(string='联系人')
     contact_information = fields.Char(string='联系方式')
     remarks = fields.Text(string=u'备注')
-    state = fields.Selection(string=u'反馈状态', selection=[('00', '草稿'), ('01', '等待答复'), ('02', '已回复')], default='00')
+    state = fields.Selection(string=u'反馈状态', selection=[(
+        '00', '草稿'), ('01', '等待答复'), ('02', '已回复')], default='00')
 
     @api.multi
     def commit_feedback(self):

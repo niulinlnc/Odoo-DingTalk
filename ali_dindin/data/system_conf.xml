@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
+	<data noupdate="1">
 		<!--基础api-->
 		<record id="ali_dindin_system_conf_token" model="ali.dindin.system.conf">
 			<field name="name">阿里钉钉-Token值</field>
@@ -8,7 +8,7 @@
 			<field name="value">0000</field>
 		</record>
 
-        <record id="ali_dindin_system_conf_gettoken" model="ali.dindin.system.conf">
+		<record id="ali_dindin_system_conf_gettoken" model="ali.dindin.system.conf">
 			<field name="name">获取Token值URL</field>
 			<field name="key">token_url</field>
 			<field name="value">https://oapi.dingtalk.com/gettoken</field>
@@ -26,5 +26,5 @@
 			<field name="value">https://oapi.dingtalk.com/user/getUseridByUnionid?access_token=</field>
 		</record>
 
-    </data>
+	</data>
 </odoo>

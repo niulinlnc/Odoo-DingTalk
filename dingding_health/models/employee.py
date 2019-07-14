@@ -15,8 +15,10 @@ _logger = logging.getLogger(__name__)
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
-    health_state = fields.Selection(string=u'运动状态', selection=[('open', '开启'), ('close', '关闭')], default='open')
-    dd_step_count = fields.Integer(string=u'运动步数', compute='get_user_today_health')
+    health_state = fields.Selection(string=u'运动状态', selection=[
+                                    ('open', '开启'), ('close', '关闭')], default='open')
+    dd_step_count = fields.Integer(
+        string=u'运动步数', compute='get_user_today_health')
 
     @api.multi
     def get_user_today_health(self):
@@ -34,16 +36,19 @@ class HrEmployee(models.Model):
                     object_id = res.din_id
                     stat_dates = formatted_today
                     try:
-                        result = client.health.stepinfo_list(_type, object_id, stat_dates)
+                        result = client.health.stepinfo_list(
+                            _type, object_id, stat_dates)
                         logging.info(">>>获取员工在今日的步数返回结果:{}".format(result))
                         if result['stepinfo_list']:
                             for stepinfo_list in result['stepinfo_list']['basic_step_info_vo']:
-                                res.update({'dd_step_count': stepinfo_list['step_count']})
+                                res.update(
+                                    {'dd_step_count': stepinfo_list['step_count']})
                         else:
                             res.update({'dd_step_count': 0})
                     except Exception as e:
                         # raise UserError(e)
-                        res.message_post(body=u"获取失败，原因：{}".format(e), message_type='notification')
+                        res.message_post(body=u"获取失败，原因：{}".format(
+                            e), message_type='notification')
                 else:
                     res.update({'dd_step_count': 0})
 
@@ -68,7 +73,8 @@ class HrEmployee(models.Model):
         获取所有员工钉钉运动开启状态
         :param userid: 用户id
         """
-        din_ids = self.env['hr.employee'].search_read([('din_id', '!=', '')], fields=['din_id'])
+        din_ids = self.env['hr.employee'].search_read(
+            [('din_id', '!=', '')], fields=['din_id'])
         for emp in din_ids:
             user_id = emp.get('din_id')
             result = self.get_health_state(user_id)
@@ -91,4 +97,3 @@ class HrEmployee(models.Model):
             return result
         except Exception as e:
             logging.info(">>>获取失败，原因：{}".format(e))
-

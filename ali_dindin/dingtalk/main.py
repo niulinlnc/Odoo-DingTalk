@@ -14,17 +14,25 @@ def get_client(obj):
        升级 pip3 install -U dingtalk-sdk
        从master升级：pip3 install -U https://github.com/007gzs/dingtalk-sdk/archive/master.zip
     """
-    din_corpid = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_corpId')
-    din_appkey = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_appkey')
-    din_appsecret = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_appsecret')
-    dingtalk_redis_ip = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_ip')
-    dingtalk_redis_port = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_port')
-    dingtalk_redis_db = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_db')
-    session_manager = redis.Redis(host=dingtalk_redis_ip, port=dingtalk_redis_port, db=dingtalk_redis_db)
+    din_corpid = obj.env['ir.config_parameter'].sudo(
+    ).get_param('ali_dindin.din_corpId')
+    din_appkey = obj.env['ir.config_parameter'].sudo(
+    ).get_param('ali_dindin.din_appkey')
+    din_appsecret = obj.env['ir.config_parameter'].sudo(
+    ).get_param('ali_dindin.din_appsecret')
+    dingtalk_redis_ip = obj.env['ir.config_parameter'].sudo(
+    ).get_param('ali_dindin.dingtalk_redis_ip')
+    dingtalk_redis_port = obj.env['ir.config_parameter'].sudo(
+    ).get_param('ali_dindin.dingtalk_redis_port')
+    dingtalk_redis_db = obj.env['ir.config_parameter'].sudo(
+    ).get_param('ali_dindin.dingtalk_redis_db')
+    session_manager = redis.Redis(
+        host=dingtalk_redis_ip, port=dingtalk_redis_port, db=dingtalk_redis_db)
     if not din_appkey and not din_appsecret and not din_corpid:
         raise UserError('钉钉设置项中的CorpId、AppKey和AppSecret不能为空')
     else:
         return AppKeyClient(din_corpid, din_appkey, din_appsecret, storage=KvStorage(session_manager))
+
 
 def list_cut(mylist, limit):
     """
@@ -36,6 +44,7 @@ def list_cut(mylist, limit):
     length = len(mylist)
     cut_list = [mylist[i:i+limit] for i in range(0, length, limit)]
     return cut_list
+
 
 def day_cut(begin_time, end_time, days):
     """
@@ -61,15 +70,17 @@ def day_cut(begin_time, end_time, days):
         t1 = t2 + timedelta(seconds=1)
     return cut_day
 
+
 def stamp_to_time(time_num):
     """
     将13位时间戳转换为时间
     :param time_num:
     :return:
     """
-    time_stamp = float(time_num / 1000) 
+    time_stamp = float(time_num / 1000)
     time_array = time.localtime(time_stamp)
     return time.strftime("%Y-%m-%d %H:%M:%S", time_array)
+
 
 def time_to_stamp(mytime):
     """

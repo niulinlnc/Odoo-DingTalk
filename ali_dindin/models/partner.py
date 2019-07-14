@@ -21,11 +21,16 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     din_userid = fields.Char(string='钉钉联系人ID', help="用于存储在钉钉系统中返回的联系人id")
-    din_company_name = fields.Char(string='钉钉联系人公司', help="用于存储在钉钉系统中返回的联系人所在公司")
-    din_sy_state = fields.Boolean(string=u'钉钉同步标识', default=False, help="避免使用同步时,会执行创建、修改上传钉钉方法")
-    din_employee_id = fields.Many2one(comodel_name='hr.employee', string=u'负责人', ondelete='cascade')
-    din_share_department_ids = fields.Many2many('hr.department', 'partner_department_rel', 'partner_id', 'department_id', string='共享范围')
-    din_share_employee_ids = fields.Many2many('hr.employee', 'partner_shar_employee_rel', 'partner_id', 'emp_id', string='共享给员工')
+    din_company_name = fields.Char(
+        string='钉钉联系人公司', help="用于存储在钉钉系统中返回的联系人所在公司")
+    din_sy_state = fields.Boolean(
+        string=u'钉钉同步标识', default=False, help="避免使用同步时,会执行创建、修改上传钉钉方法")
+    din_employee_id = fields.Many2one(
+        comodel_name='hr.employee', string=u'负责人', ondelete='cascade')
+    din_share_department_ids = fields.Many2many(
+        'hr.department', 'partner_department_rel', 'partner_id', 'department_id', string='共享范围')
+    din_share_employee_ids = fields.Many2many(
+        'hr.employee', 'partner_shar_employee_rel', 'partner_id', 'emp_id', string='共享给员工')
 
     @api.multi
     def create_ding_partner(self):
@@ -65,7 +70,7 @@ class ResPartner(models.Model):
             address = res.street if res.street else ''  # 地址
             remark = res.comment if res.comment else ''  # 备注
             follower_user_id = res.din_employee_id.din_id  # 负责人userid
-            state_code ='86'  # 手机号国家码
+            state_code = '86'  # 手机号国家码
             company_name = res.din_company_name if res.din_company_name else ''  # 钉钉企业公司名称
             mobile = res.mobile if res.mobile else res.phone  # 手机
 
@@ -80,14 +85,15 @@ class ResPartner(models.Model):
             share_user_ids = share_emplist
 
             try:
-                result = client.extcontact.create(name, follower_user_id, label_ids, mobile,state_code,
-                    title=title, share_dept_ids=share_dept_ids, remark=remark, address=address, 
-                    company_name=company_name, 
-                    share_user_ids=share_user_ids
-                )
+                result = client.extcontact.create(name, follower_user_id, label_ids, mobile, state_code,
+                                                  title=title, share_dept_ids=share_dept_ids, remark=remark, address=address,
+                                                  company_name=company_name,
+                                                  share_user_ids=share_user_ids
+                                                  )
                 logging.info("创建联系人返回结果:{}".format(result))
                 res.write({'din_userid': result})
-                res.message_post(body=u"钉钉消息：联系人信息已上传至钉钉", message_type='notification')
+                res.message_post(body=u"钉钉消息：联系人信息已上传至钉钉",
+                                 message_type='notification')
             except Exception as e:
                 raise UserError(e)
 
@@ -117,7 +123,7 @@ class ResPartner(models.Model):
             if res.category_id:
                 for label in res.category_id:
                     label_list.append(label.din_id)
-                label_list = list(map(int, label_list))  # 将列表里的字符串转成数字  
+                label_list = list(map(int, label_list))  # 将列表里的字符串转成数字
             else:
                 raise UserError('请选择联系人标签，若不存在标签，请先使用手动同步联系人标签功能！')
 
@@ -139,9 +145,10 @@ class ResPartner(models.Model):
 
             try:
                 result = client.extcontact.update(user_id, name, follower_user_id, label_ids, mobile, state_code='86',
-                    title=title, share_dept_ids=share_dept_ids, remark=remark, address=address, company_name=company_name, share_user_ids=share_user_ids)
+                                                  title=title, share_dept_ids=share_dept_ids, remark=remark, address=address, company_name=company_name, share_user_ids=share_user_ids)
                 logging.info("更新联系人返回结果:{}".format(result))
-                res.message_post(body=u"钉钉消息：联系人信息已更新至钉钉", message_type='notification')
+                res.message_post(body=u"钉钉消息：联系人信息已更新至钉钉",
+                                 message_type='notification')
             except Exception as e:
                 raise UserError(e)
 
@@ -212,35 +219,47 @@ class ResPartner(models.Model):
                         'street': result.get('address'),  # 地址
                         'mobile': result.get('mobile'),  # 手机
                         'phone': result.get('mobile'),  # 电话
-                        'din_company_name': result.get('company_name'),  # 钉钉公司名称
+                        # 钉钉公司名称
+                        'din_company_name': result.get('company_name'),
                     }
                     # 获取负责人
                     if result.get('follower_user_id'):
                         follower_user = self.env['hr.employee'].sudo().search(
                             [('din_id', '=', result.get('follower_user_id'))])
-                        data.update({'din_employee_id': follower_user[0].id if follower_user else ''})
+                        data.update(
+                            {'din_employee_id': follower_user[0].id if follower_user else ''})
                     # 获取共享范围
                     if result.get('share_dept_ids'):
-                            dep_din_ids = result['share_dept_ids']['number']
-                            dep_din_ids = [str(i) for i in dep_din_ids]
-                            dep_list = self.env['hr.department'].sudo().search([('din_id', 'in', dep_din_ids)])
-                            data.update({'din_share_department_ids': [(6, 0, dep_list.ids)] if dep_list else ''})
+                        dep_din_ids = result['share_dept_ids']['number']
+                        dep_din_ids = [str(i) for i in dep_din_ids]
+                        dep_list = self.env['hr.department'].sudo().search(
+                            [('din_id', 'in', dep_din_ids)])
+                        data.update({'din_share_department_ids': [
+                                    (6, 0, dep_list.ids)] if dep_list else ''})
                     # 获取共享员工
                     if result.get('share_user_ids'):
-                            emp_din_ids = result['share_user_ids']['string']
-                            emp_list = self.env['hr.employee'].sudo().search([('din_id', 'in', emp_din_ids)])
-                            data.update({'din_share_employee_ids': [(6, 0, emp_list.ids)] if emp_list else ''})
+                        emp_din_ids = result['share_user_ids']['string']
+                        emp_list = self.env['hr.employee'].sudo().search(
+                            [('din_id', 'in', emp_din_ids)])
+                        data.update({'din_share_employee_ids': [
+                                    (6, 0, emp_list.ids)] if emp_list else ''})
                     partner.sudo().write(data)
-                    partner.message_post(body=u"钉钉消息：已从钉钉同步联系人信息", message_type='notification')
+                    partner.message_post(
+                        body=u"钉钉消息：已从钉钉同步联系人信息", message_type='notification')
                 else:
-                    _logger.info("从钉钉同步联系人时发生意外，原因为:{}".format(result.get('errmsg')))
-                    partner.message_post(body="从钉钉同步联系人失败:{}".format(result.get('errmsg')), message_type='notification')
+                    _logger.info("从钉钉同步联系人时发生意外，原因为:{}".format(
+                        result.get('errmsg')))
+                    partner.message_post(body="从钉钉同步联系人失败:{}".format(
+                        result.get('errmsg')), message_type='notification')
             except Exception as e:
                 raise UserError(e)
 
 # 未使用，但是不能删除，因为第一个版本创建的视图还存在
+
+
 class DinDinSynchronous(models.TransientModel):
     _name = 'dindin.synchronous.extcontact'
     _description = "同步钉钉联系人功能模块"
 
-    sy_type = fields.Selection(string=u'同步类型', selection=[('00', '联系人标签'), ('01', '外部联系人列表')], default='00')
+    sy_type = fields.Selection(string=u'同步类型', selection=[(
+        '00', '联系人标签'), ('01', '外部联系人列表')], default='00')

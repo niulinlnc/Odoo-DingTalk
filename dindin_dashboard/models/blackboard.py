@@ -32,7 +32,7 @@ class DinDinBlackboard(models.TransientModel):
                 else:
                     return {'state': False, 'msg': '获取公告失败,详情为:{}'.format(result.get('errmsg'))}
             except Exception as e:
-                return {'state': False, 'msg': "获取用户'{}'的公告失败，原因：{}".format(self.env.user.name,e)}
+                return {'state': False, 'msg': "获取用户'{}'的公告失败，原因：{}".format(self.env.user.name, e)}
         else:
             return {'state': False, 'msg': '当前登录用户不存在关联员工!'}
 
@@ -43,7 +43,8 @@ class DinDinBlackboard(models.TransientModel):
         :return:
         """
         try:
-            url = self.env['ali.dindin.system.conf'].search([('key', '=', 'get_manage_version_info')]).value
+            url = self.env['ali.dindin.system.conf'].search(
+                [('key', '=', 'get_manage_version_info')]).value
             result = requests.get(url=url, timeout=2)
             return result.text
         except Exception as e:

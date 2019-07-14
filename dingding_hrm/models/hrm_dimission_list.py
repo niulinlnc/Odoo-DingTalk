@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
-import time
-import requests
-from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client, list_cut, stamp_to_time
@@ -32,17 +28,22 @@ class DingDingHrmDimissionList(models.Model):
         ('2', '试用期'),
         ('3', '正式'),
     ]
-    emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True)
+    emp_id = fields.Many2one(comodel_name='hr.employee',
+                             string=u'员工', required=True)
     last_work_day = fields.Datetime(string=u'最后工作时间')
     department_id = fields.Many2many(comodel_name='hr.department', relation='hrm_dimission_and_depatment_rel',
                                      column1='list_id', column2='dept_id', string=u'部门')
     reason_memo = fields.Text(string=u"离职原因")
     reason_type = fields.Selection(string=u'离职类型', selection=REASONTYPE)
     pre_status = fields.Selection(string=u'离职前工作状态', selection=PRESTATUS)
-    handover_userid = fields.Many2one(comodel_name='hr.employee', string=u'离职交接人')
-    status = fields.Selection(string=u'离职状态', selection=[('1', '待离职'), ('2', '已离职')])
-    main_dept_name = fields.Many2one(comodel_name='hr.department', string=u'离职前主部门')
-    company_id = fields.Many2one(comodel_name='res.company', string=u'公司', default=lambda self: self.env.user.company_id.id)
+    handover_userid = fields.Many2one(
+        comodel_name='hr.employee', string=u'离职交接人')
+    status = fields.Selection(string=u'离职状态', selection=[
+                              ('1', '待离职'), ('2', '已离职')])
+    main_dept_name = fields.Many2one(
+        comodel_name='hr.department', string=u'离职前主部门')
+    company_id = fields.Many2one(
+        comodel_name='res.company', string=u'公司', default=lambda self: self.env.user.company_id.id)
 
 
 class GetDingDingHrmDimissionList(models.TransientModel):
@@ -56,7 +57,8 @@ class GetDingDingHrmDimissionList(models.TransientModel):
     @api.onchange('is_all_emp')
     def onchange_all_emp(self):
         if self.is_all_emp:
-            emps = self.env['hr.employee'].search([('din_id', '!=', ''), ('work_status', '=', '3')])
+            emps = self.env['hr.employee'].search(
+                [('din_id', '!=', ''), ('work_status', '=', '3')])
             self.emp_ids = [(6, 0, emps.ids)]
 
     @api.multi
@@ -67,15 +69,15 @@ class GetDingDingHrmDimissionList(models.TransientModel):
         logging.info(">>>获取钉钉获取离职员工信息start")
         din_ids = list()
         for user in self.emp_ids:
-            din_ids.append(user.din_id)         
+            din_ids.append(user.din_id)
         user_list = list_cut(din_ids, 50)
         for u in user_list:
             self.dimission_list(u)
         logging.info(">>>获取钉钉获取离职员工信息end")
-        action = self.env.ref('dingding_hrm.dingding_hrm_dimission_list_action')
+        action = self.env.ref(
+            'dingding_hrm.dingding_hrm_dimission_list_action')
         action_dict = action.read()[0]
         return action_dict
-
 
     @api.model
     def dimission_list(self, user_ids):
@@ -96,13 +98,17 @@ class GetDingDingHrmDimissionList(models.TransientModel):
             if len(result) < 1:
                 raise UserError("选择的员工未离职!")
             for res in result.get('emp_dimission_info_vo'):
-                emp = self.env['hr.employee'].search([('din_id', '=', res.get('userid'))])
+                emp = self.env['hr.employee'].search(
+                    [('din_id', '=', res.get('userid'))])
                 if emp:
-                    hrm = self.env['dingding.hrm.dimission.list'].search([('emp_id', '=', emp[0].id)])
-                    main_dept = self.env['hr.department'].search([('din_id', '=', res.get('main_dept_id'))])
+                    hrm = self.env['dingding.hrm.dimission.list'].search(
+                        [('emp_id', '=', emp[0].id)])
+                    main_dept = self.env['hr.department'].search(
+                        [('din_id', '=', res.get('main_dept_id'))])
                     dept_list = list()
                     for depti in res['dept_list']['emp_dept_v_o']:
-                        hr_dept = self.env['hr.department'].search([('din_id', '=', depti.get('dept_id'))])
+                        hr_dept = self.env['hr.department'].search(
+                            [('din_id', '=', depti.get('dept_id'))])
                         if hr_dept:
                             dept_list.append(hr_dept.id)
                     data = {
@@ -116,7 +122,8 @@ class GetDingDingHrmDimissionList(models.TransientModel):
                         'main_dept_name': main_dept.id if main_dept else False,
                     }
                     if res.get('handover_userid'):
-                        handover_userid = self.env['hr.employee'].search([('din_id', '=', res.get('handover_userid'))])
+                        handover_userid = self.env['hr.employee'].search(
+                            [('din_id', '=', res.get('handover_userid'))])
                         data.update({'handover_userid': handover_userid.id})
                     if hrm:
                         hrm.write(data)

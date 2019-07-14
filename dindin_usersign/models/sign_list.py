@@ -17,7 +17,8 @@ class DinDinSignList(models.Model):
     _description = "签到记录列表"
     _rec_name = 'emp_id'
 
-    emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True)
+    emp_id = fields.Many2one(comodel_name='hr.employee',
+                             string=u'员工', required=True)
     checkin_time = fields.Datetime(string=u'签到时间')
     place = fields.Char(string='签到地址')
     detail_place = fields.Char(string='签到详细地址')
@@ -49,11 +50,13 @@ class DinDinSignList(models.Model):
         size = 100
 
         try:
-            result = client.checkin.record_get(userid_list, start_time, end_time, offset=cursor, size=size)
+            result = client.checkin.record_get(
+                userid_list, start_time, end_time, offset=cursor, size=size)
             logging.info(">>>获取多个用户的签到记录结果{}".format(result))
             r_result = result.get('result')
             for data in r_result['page_list']['checkin_record_vo']:
-                emp = self.env['hr.employee'].sudo().search([('din_id', '=', data.get('userid'))])
+                emp = self.env['hr.employee'].sudo().search(
+                    [('din_id', '=', data.get('userid'))])
                 self.env['dindin.signs.list'].create({
                     'emp_id': emp.id if emp else False,
                     'checkin_time': stamp_to_time(data.get('checkin_time')),

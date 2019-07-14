@@ -11,12 +11,12 @@ class ChangeMobile(models.TransientModel):
     _name = 'change.mobile'
     _description = 'Change Mobile'
 
-    name = fields.Char('员工姓名', required=True, readonly= True)
-    din_id = fields.Char('钉钉ID', required=True, readonly= True)
-    dep_din_id = fields.Char('所属部门ID列表', required=True, readonly= True)
-    old_mobile = fields.Char('原手机号', readonly= True)
-    new_mobile = fields.Char('新手机号', required= True)
-    din_active = fields.Boolean('是否激活', required= True)
+    name = fields.Char('员工姓名', required=True, readonly=True)
+    din_id = fields.Char('钉钉ID', required=True, readonly=True)
+    dep_din_id = fields.Char('所属部门ID列表', required=True, readonly=True)
+    old_mobile = fields.Char('原手机号', readonly=True)
+    new_mobile = fields.Char('新手机号', required=True)
+    din_active = fields.Boolean('是否激活', required=True)
 
     def _sanitization(self, record, field_name):
         value = record[field_name]
@@ -40,11 +40,11 @@ class ChangeMobile(models.TransientModel):
         records = self._get_records(model)
         for record in records:
             result = {
-                'name': self._sanitization(record,'name'),
-                'din_id': self._sanitization(record,'din_id'),
-                'dep_din_id': self._sanitization(record,'department_id').din_id,
-                'old_mobile': self._sanitization(record,'mobile_phone'),
-                'din_active': self._sanitization(record,'din_active')
+                'name': self._sanitization(record, 'name'),
+                'din_id': self._sanitization(record, 'din_id'),
+                'dep_din_id': self._sanitization(record, 'department_id').din_id,
+                'old_mobile': self._sanitization(record, 'mobile_phone'),
+                'din_active': self._sanitization(record, 'din_active')
             }
         return result
 
@@ -71,10 +71,12 @@ class ChangeMobile(models.TransientModel):
         try:
             result = client.user.update(data)
             if result.get('errcode') == 0:
-                employee = self.env['hr.employee'].search([('din_id', '=', self.din_id)])
+                employee = self.env['hr.employee'].search(
+                    [('din_id', '=', self.din_id)])
                 if employee:
                     employee.sudo().write({'mobile_phone': self.new_mobile})
-                    employee.message_post(body="通过直接更新手机号为:{}".format(self.new_mobile), message_type='notification')
+                    employee.message_post(body="通过直接更新手机号为:{}".format(
+                        self.new_mobile), message_type='notification')
             else:
                 # 如果手机号已经激活或者新手机号注册过钉钉，先删除钉钉号再新建
                 data = {
@@ -82,13 +84,16 @@ class ChangeMobile(models.TransientModel):
                 }
                 try:
                     result = client.user.delete(data)
-                    logging.info("user_delete:{}".format(result)) 
-                    employee = self.env['hr.employee'].search([('din_id', '=', self.din_id)])
+                    logging.info("user_delete:{}".format(result))
+                    employee = self.env['hr.employee'].search(
+                        [('din_id', '=', self.din_id)])
                     if employee:
                         if result.get('errcode') == 0:
-                            employee.message_post(body="原号码已经在钉钉上删除，等待新建钉钉号", message_type='notification')
+                            employee.message_post(
+                                body="原号码已经在钉钉上删除，等待新建钉钉号", message_type='notification')
                         else:
-                            employee.message_post(body="原号码在钉钉已经不存在，等待新建钉钉号", message_type='notification')
+                            employee.message_post(
+                                body="原号码在钉钉已经不存在，等待新建钉钉号", message_type='notification')
                 except Exception as e:
                     raise UserError(e)
                 # 不管是否删除成功，只要保证原号码在钉钉上已经不存在，马上新建钉钉号
@@ -101,14 +106,18 @@ class ChangeMobile(models.TransientModel):
                 try:
                     result = client.user.create(data)
                     if result.get('errcode') == 0:
-                        employee = self.env['hr.employee'].search([('din_id', '=', self.din_id)])
+                        employee = self.env['hr.employee'].search(
+                            [('din_id', '=', self.din_id)])
                         if employee:
-                            employee.sudo().write({'mobile_phone': self.new_mobile})
-                            employee.update_ding_employee() # 换号码后把员工其他信息同步到钉钉
-                            employee.update_employee_from_dingding() # 换号码后从钉钉获取新手机的激活状态
-                            employee.message_post(body="通过删除后重建更换手机号为:{}".format(self.new_mobile), message_type='notification')
+                            employee.sudo().write(
+                                {'mobile_phone': self.new_mobile})
+                            employee.update_ding_employee()  # 换号码后把员工其他信息同步到钉钉
+                            employee.update_employee_from_dingding()  # 换号码后从钉钉获取新手机的激活状态
+                            employee.message_post(body="通过删除后重建更换手机号为:{}".format(
+                                self.new_mobile), message_type='notification')
                     else:
-                        raise UserError('上传钉钉系统时发生错误，详情为:{}'.format(result.get('errmsg')))
+                        raise UserError(
+                            '上传钉钉系统时发生错误，详情为:{}'.format(result.get('errmsg')))
                 except Exception as e:
                     raise UserError(e)
         except Exception as e:

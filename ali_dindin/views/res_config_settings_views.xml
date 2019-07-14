@@ -7,8 +7,7 @@
         <field name="inherit_id" ref="base.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[hasclass('settings')]" position="inside">
-                <div class="app_settings_block dindin_settings_block" string="钉钉" data-string="钉钉" data-key="ali_dindin"
-                     groups="ali_dindin.dd_setting_group">
+                <div class="app_settings_block dindin_settings_block" string="钉钉" data-string="钉钉" data-key="ali_dindin" groups="ali_dindin.dd_setting_group">
                     <h2>钉钉API应用信息</h2>
                     <div class="row mt16 o_settings_container">
                         <div class="col-12 col-lg-6 o_setting_box">
@@ -87,7 +86,7 @@
                         </div>
                     </div>
 
-                     <h2>钉钉-模块安装</h2>
+                    <h2>钉钉-模块安装</h2>
                     <div class="row mt16 o_settings_container">
 
                         <div class="col-12 col-lg-6 o_setting_box">
@@ -328,11 +327,6 @@
         <field name="context">{'module' : 'ali_dindin'}</field>
     </record>
 
-    <menuitem id="dingding_settings_menu" name="基础设置"
-              parent="ali_dindin.configure_menu"
-              sequence="1"
-              action="dingding_settings_configuration_action"
-              groups="ali_dindin.dd_setting_group"
-    />
+    <menuitem id="dingding_settings_menu" name="基础设置" parent="ali_dindin.configure_menu" sequence="1" action="dingding_settings_configuration_action" groups="ali_dindin.dd_setting_group" />
 
 </odoo>

@@ -7,11 +7,11 @@ odoo.define('ali_dindin.multiple_tags', function (require) {
     var _t = core._t;
 
     rel_fields.FieldMany2One.include({
-        _searchCreatePopup: function(view, ids, context) {
+        _searchCreatePopup: function (view, ids, context) {
             var self = this;
 
             // Don't include already selected instances in the search domain
-            var domain = self.record.getDomain({fieldName: self.name});
+            var domain = self.record.getDomain({ fieldName: self.name });
             if (self.field.type === 'many2many') {
                 var selected_ids = self._getSearchBlacklist();
                 if (selected_ids.length > 0) {
@@ -24,10 +24,10 @@ odoo.define('ali_dindin.multiple_tags', function (require) {
                 domain: domain,
                 context: _.extend({}, self.record.getContext(self.recordParams), context || {}),
                 title: (view === 'search' ? _t("Search: ") : _t("Create: ")) + self.string,
-                initial_ids: ids ? _.map(ids, function(x) {return x[0];}) : undefined,
+                initial_ids: ids ? _.map(ids, function (x) { return x[0]; }) : undefined,
                 initial_view: view,
                 disable_multiple_selection: self.field.type !== 'many2many',
-                on_selected: function(records) {
+                on_selected: function (records) {
                     if (self.field.type !== 'many2many') {
                         self.reinitialize(records[0]);
                     } else {

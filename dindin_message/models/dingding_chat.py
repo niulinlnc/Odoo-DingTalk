@@ -20,7 +20,8 @@ class DingDingChat(models.Model):
 
     @api.model
     def _default_image(self):
-        image_path = get_module_resource('dindin_message', 'static/src/img', 'default_image.png')
+        image_path = get_module_resource(
+            'dindin_message', 'static/src/img', 'default_image.png')
         return tools.image_resize_image_big(base64.b64encode(open(image_path, 'rb').read()))
 
     chat_id = fields.Char(string='群会话Id')
@@ -28,14 +29,20 @@ class DingDingChat(models.Model):
     name = fields.Char(string='群名称', required=True)
     company_id = fields.Many2one(comodel_name='res.company', string=u'公司',
                                  default=lambda self: self.env.user.company_id.id)
-    employee_id = fields.Many2one(comodel_name='hr.employee', string=u'群主', required=True)
+    employee_id = fields.Many2one(
+        comodel_name='hr.employee', string=u'群主', required=True)
     show_history_type = fields.Selection(string=u'聊天历史消息', selection=[('0', '否'), ('1', '是'), ], default='0',
                                          help="新成员是否可查看聊天历史消息,新成员入群是否可查看最近100条聊天记录")
-    searchable = fields.Selection(string=u'群可搜索', selection=[('0', '否'), ('1', '是'), ], default='0')
-    validation_type = fields.Selection(string=u'入群验证', selection=[('0', '否'), ('1', '是'), ], default='0')
-    mention_all_authority = fields.Selection(string=u'@all 权限', selection=[('0', '所有人'), ('1', '仅群主'), ], default='0')
-    chat_banned_type = fields.Selection(string=u'群禁言', selection=[('0', '不禁言'), ('1', '全员禁言'), ], default='0')
-    management_ype = fields.Selection(string=u'管理类型', selection=[('0', '所有人可管理'), ('1', '仅群主可管理')], default='1')
+    searchable = fields.Selection(string=u'群可搜索', selection=[
+                                  ('0', '否'), ('1', '是'), ], default='0')
+    validation_type = fields.Selection(string=u'入群验证', selection=[
+                                       ('0', '否'), ('1', '是'), ], default='0')
+    mention_all_authority = fields.Selection(string=u'@all 权限', selection=[
+                                             ('0', '所有人'), ('1', '仅群主'), ], default='0')
+    chat_banned_type = fields.Selection(
+        string=u'群禁言', selection=[('0', '不禁言'), ('1', '全员禁言'), ], default='0')
+    management_ype = fields.Selection(string=u'管理类型', selection=[
+                                      ('0', '所有人可管理'), ('1', '仅群主可管理')], default='1')
     useridlist = fields.Many2many(comodel_name='hr.employee', relation='dingding_chat_and_hr_employee_rel',
                                   column1='chat_id', column2='emp_id', string=u'群成员', required=True)
     state = fields.Selection(string=u'状态', selection=[('new', '新建'), ('normal', '已建立'), ('close', '解散')],
@@ -67,7 +74,8 @@ class DingDingChat(models.Model):
         :return:
         """
         for res in self:
-            res.robot_count = self.env['dingding.robot'].search_count([('chat_id', '=', res.id)])
+            res.robot_count = self.env['dingding.robot'].search_count(
+                [('chat_id', '=', res.id)])
 
     @api.multi
     def action_view_robot(self):
@@ -100,22 +108,24 @@ class DingDingChat(models.Model):
         for res in self:
             user_list = self.check_employee_din_id(res)
             logging.info(">>>开始钉钉创建群会话")
-            name=res.name
-            owner=res.employee_id.din_id
-            showHistoryType=res.show_history_type
-            searchable=res.searchable
-            validationType=res.validation_type
-            mentionAllAuthority=res.mention_all_authority
-            chatBannedType=res.chat_banned_type
-            managementType=res.management_ype
-            useridlist=user_list
+            name = res.name
+            owner = res.employee_id.din_id
+            showHistoryType = res.show_history_type
+            searchable = res.searchable
+            validationType = res.validation_type
+            mentionAllAuthority = res.mention_all_authority
+            chatBannedType = res.chat_banned_type
+            managementType = res.management_ype
+            useridlist = user_list
             try:
                 result = client.chat.create(name, owner, useridlist, show_history_type=showHistoryType, searchable=searchable,
-                    validation_type=validationType, mention_all_authority=mentionAllAuthority, chat_banned_type=chatBannedType, management_type=managementType)
-                logging.info(">>>创建会话返回结果{}".format(result)) 
+                                            validation_type=validationType, mention_all_authority=mentionAllAuthority, chat_banned_type=chatBannedType, management_type=managementType)
+                logging.info(">>>创建会话返回结果{}".format(result))
                 if result.get('errcode') == 0:
-                    res.write({'chat_id': result.get('chatid'), 'state': 'normal'})
-                    res.message_post(body=u"群会话已创建!群会话的ID:{}".format(result.get('chatid')), message_type='notification')
+                    res.write({'chat_id': result.get(
+                        'chatid'), 'state': 'normal'})
+                    res.message_post(body=u"群会话已创建!群会话的ID:{}".format(
+                        result.get('chatid')), message_type='notification')
                 else:
                     raise UserError('创建失败，详情为:{}'.format(result.get('errmsg')))
             except Exception as e:
@@ -157,10 +167,11 @@ class DingDingChat(models.Model):
 
             try:
                 result = client.chat.update(chatid, name=name, owner=owner, add_useridlist=(), del_useridlist=(), icon='', chat_banned_type=chatBannedType,
-                    searchable=searchable, validation_type=validationType, mention_all_authority=mentionAllAuthority, show_history_type=showHistoryType, management_type=managementType)
-                logging.info(">>>修改会话返回结果{}".format(result)) 
+                                            searchable=searchable, validation_type=validationType, mention_all_authority=mentionAllAuthority, show_history_type=showHistoryType, management_type=managementType)
+                logging.info(">>>修改会话返回结果{}".format(result))
                 if result.get('errcode') == 0:
-                    res.message_post(body=u"群会话已修改!", message_type='notification')
+                    res.message_post(
+                        body=u"群会话已修改!", message_type='notification')
                 else:
                     raise UserError('修改失败，详情为:{}'.format(result.get('errmsg')))
             except Exception as e:
@@ -185,11 +196,13 @@ class DingDingChat(models.Model):
         :return:
         """
         print(msg)
-        chat = self.env['dingding.chat'].sudo().search([('chat_id', '=', msg.get('ChatId'))])
+        chat = self.env['dingding.chat'].sudo().search(
+            [('chat_id', '=', msg.get('ChatId'))])
         # 群会话更换群主
         if msg.get('EventType') == 'chat_update_owner':
             if chat:
-                employee = self.env['hr.employee'].sudo().search([('din_id', '=', msg.get('Owner'))])
+                employee = self.env['hr.employee'].sudo().search(
+                    [('din_id', '=', msg.get('Owner'))])
                 if employee:
                     chat.sudo().write({'employee_id': employee[0].id})
         # 群会话更换群名称
@@ -202,28 +215,33 @@ class DingDingChat(models.Model):
             for user in chat.useridlist:
                 new_users.append(user.id)
             for user in msg.get('UserId'):
-                employee = self.env['hr.employee'].sudo().search([('din_id', '=', user)])
+                employee = self.env['hr.employee'].sudo().search(
+                    [('din_id', '=', user)])
                 if employee:
                     new_users.append(employee[0].id)
             chat.sudo().write({'useridlist': [(6, 0, new_users)]})
         # 群会话删除人员
         elif msg.get('EventType') == 'chat_remove_member':
             for user in msg.get('UserId'):
-                employee = self.env['hr.employee'].sudo().search([('din_id', '=', user)])
+                employee = self.env['hr.employee'].sudo().search(
+                    [('din_id', '=', user)])
                 if employee:
                     chat.sudo().write({'useridlist': [(3, employee[0].id)]})
         # 群会话用户主动退群
         elif msg.get('EventType') == 'chat_quit':
-            employee = self.env['hr.employee'].sudo().search([('din_id', '=', msg.get('Operator'))])
+            employee = self.env['hr.employee'].sudo().search(
+                [('din_id', '=', msg.get('Operator'))])
             if employee:
                 chat.sudo().write({'useridlist': [(3, employee[0].id)]})
         # 群会话解散群
         elif msg.get('EventType') == 'chat_disband':
             if chat:
-                emp = self.env['hr.employee'].sudo().search([('din_id', '=', msg.get('Operator'))])
+                emp = self.env['hr.employee'].sudo().search(
+                    [('din_id', '=', msg.get('Operator'))])
                 chat.sudo().write({'state': 'close'})
                 if emp:
-                    chat.sudo().message_post(body=u"群会话已被解散，操作人: {}!".format(emp[0].name), message_type='notification')
+                    chat.sudo().message_post(body=u"群会话已被解散，操作人: {}!".format(
+                        emp[0].name), message_type='notification')
         return True
 
 
@@ -241,9 +259,9 @@ class DingDingChatUserModelAdd(models.TransientModel):
         """待添加人员下拉列表不显示当前群内成员
         """
         if self.on_user_ids:
-            domain = [('id','not in', self.on_user_ids.ids)]
+            domain = [('id', 'not in', self.on_user_ids.ids)]
             return {
-            'domain': {'user_ids': domain}
+                'domain': {'user_ids': domain}
             }
 
     @api.model
@@ -273,8 +291,9 @@ class DingDingChatUserModelAdd(models.TransientModel):
             chatid = ding_chat.chat_id
             add_useridlist = user_list
             try:
-                result = client.chat.update(chatid, add_useridlist=add_useridlist)
-                logging.info(">>>添加群成员返回结果{}".format(result)) 
+                result = client.chat.update(
+                    chatid, add_useridlist=add_useridlist)
+                logging.info(">>>添加群成员返回结果{}".format(result))
                 if result.get('errcode') == 0:
                     new_user_list = list()
                     for user in res.on_user_ids:
@@ -282,12 +301,13 @@ class DingDingChatUserModelAdd(models.TransientModel):
                     for user in res.user_ids:
                         new_user_list.append(user.id)
                     ding_chat.write({'useridlist': [(6, 0, new_user_list)]})
-                    ding_chat.message_post(body=u"群成员已增加!", message_type='notification')
+                    ding_chat.message_post(
+                        body=u"群成员已增加!", message_type='notification')
                 else:
-                    raise UserError('群成员更新失败，详情为:{}'.format(result.get('errmsg')))
+                    raise UserError(
+                        '群成员更新失败，详情为:{}'.format(result.get('errmsg')))
             except Exception as e:
                 raise UserError(e)
-
 
 
 class DingDingChatUserModelDel(models.TransientModel):
@@ -305,9 +325,9 @@ class DingDingChatUserModelDel(models.TransientModel):
         """待删除人员下拉列表只显示当前群内成员
         """
         if self.old_user_ids:
-            domain = [('id','in', self.old_user_ids.ids)]
+            domain = [('id', 'in', self.old_user_ids.ids)]
             return {
-            'domain': {'user_ids': domain}
+                'domain': {'user_ids': domain}
             }
 
     @api.model
@@ -337,14 +357,17 @@ class DingDingChatUserModelDel(models.TransientModel):
             chatid = ding_chat.chat_id
             del_useridlist = user_list
             try:
-                result = client.chat.update(chatid, del_useridlist=del_useridlist)
+                result = client.chat.update(
+                    chatid, del_useridlist=del_useridlist)
                 logging.info(">>>删除群成员返回结果{}".format(result))
                 if result.get('errcode') == 0:
                     for user in res.user_ids:
                         ding_chat.write({'useridlist': [(3, user.id)]})
-                    ding_chat.message_post(body=u"群成员已删除!", message_type='notification')
+                    ding_chat.message_post(
+                        body=u"群成员已删除!", message_type='notification')
                 else:
-                    raise UserError('群成员更新失败，详情为:{}'.format(result.get('errmsg')))
+                    raise UserError(
+                        '群成员更新失败，详情为:{}'.format(result.get('errmsg')))
             except Exception as e:
                 raise UserError(e)
 
@@ -374,7 +397,8 @@ class DingDingSendChatMessage(models.TransientModel):
         try:
             result = client.chat.send(chatid, msg)
             logging.info(">>>发送群消息返回结果{}".format(result))
-            ding_chat.message_post(body="消息已成功发送!".format(self.message), message_type='notification')
+            ding_chat.message_post(body="消息已成功发送!".format(
+                self.message), message_type='notification')
         except Exception as e:
             raise UserError(e)
 
@@ -409,7 +433,8 @@ class DingDingSendChatMessage(models.TransientModel):
         :return:
         """
         client = get_client(self)
-        agentid = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid')
+        agentid = self.env['ir.config_parameter'].sudo(
+        ).get_param('ali_dindin.din_agentid')
         userid_list = userstr
         msg_body = {
             "msgtype": "markdown",
@@ -419,7 +444,8 @@ class DingDingSendChatMessage(models.TransientModel):
             }
         }
         try:
-            result = client.message.send(agentid, msg_body, touser_list=userid_list, toparty_list=())
+            result = client.message.send(
+                agentid, msg_body, touser_list=userid_list, toparty_list=())
             logging.info(">>>发送待办消息返回结果{}".format(result))
         except Exception as e:
             raise UserError(e)
@@ -445,12 +471,14 @@ class DingDingChatList(models.TransientModel):
             try:
                 result = client.chat.get(chatid)
                 logging.info(">>>获取群会话返回结果{}".format(result))
-                employee = self.env['hr.employee'].sudo().search([('din_id', '=', result.get('owner'))])
+                employee = self.env['hr.employee'].sudo().search(
+                    [('din_id', '=', result.get('owner'))])
                 if not employee:
                     raise UserError("返回的群管理员在Odoo系统中不存在!")
                 user_list = list()
                 for userlist in result.get('useridlist'):
-                    user = self.env['hr.employee'].sudo().search([('din_id', '=', userlist)])
+                    user = self.env['hr.employee'].sudo().search(
+                        [('din_id', '=', userlist)])
                     if user:
                         user_list.append(user[0].id)
                 data = {
@@ -466,7 +494,8 @@ class DingDingChatList(models.TransientModel):
                     'useridlist': [(6, 0, user_list)],
                     'state': 'normal'
                 }
-                chat = self.env['dingding.chat'].sudo().search([('chat_id', '=', res.chat_id)])
+                chat = self.env['dingding.chat'].sudo().search(
+                    [('chat_id', '=', res.chat_id)])
                 if chat:
                     chat.write(data)
                 else:

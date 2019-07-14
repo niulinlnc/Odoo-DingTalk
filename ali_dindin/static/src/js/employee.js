@@ -14,9 +14,9 @@ odoo.define('dingding.res.employee.synchronous.button', function (require) {
             method: 'synchronous_dingding_employee',
             args: [],
         }).then(function (result) {
-            if(result.state){
+            if (result.state) {
                 location.reload();
-            }else{
+            } else {
                 alert(result.msg);
             }
         });
@@ -48,7 +48,7 @@ odoo.define('dingding.res.employee.synchronous.button', function (require) {
                         close: true
                     }
                 ],
-                $content: $(QWeb.render('SynchronousDingEmployeeTemplate', {widget: this, data: []}))
+                $content: $(QWeb.render('SynchronousDingEmployeeTemplate', { widget: this, data: [] }))
             }).open();
         },
     });
@@ -79,7 +79,7 @@ odoo.define('dingding.res.employee.synchronous.button', function (require) {
                         close: true
                     }
                 ],
-                $content: $(QWeb.render('SynchronousDingEmployeeTemplate', {widget: this, data: []}))
+                $content: $(QWeb.render('SynchronousDingEmployeeTemplate', { widget: this, data: [] }))
             }).open();
         },
     });

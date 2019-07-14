@@ -22,12 +22,15 @@ class DingDingHealth(models.Model):
 
     @api.model
     def _default_image(self):
-        image_path = get_module_resource('hr', 'static/src/img', 'default_image.png')
+        image_path = get_module_resource(
+            'hr', 'static/src/img', 'default_image.png')
         return tools.image_resize_image_big(base64.b64encode(open(image_path, 'rb').read()))
 
     active = fields.Boolean(string=u'active', default=True)
-    company_id = fields.Many2one('res.company', string=u'公司', default=lambda self: self.env.user.company_id.id)
-    department_id = fields.Many2one('hr.department', string=u'部门', required=True)
+    company_id = fields.Many2one(
+        'res.company', string=u'公司', default=lambda self: self.env.user.company_id.id)
+    department_id = fields.Many2one(
+        'hr.department', string=u'部门', required=True)
     emp_id = fields.Many2one('hr.employee', string=u'员工', required=True)
     health_date = fields.Date(string=u'日期', required=True)
     health_count = fields.Integer(string=u'运动步数')
@@ -57,9 +60,9 @@ class GetDingDingHealthList(models.TransientModel):
     @api.onchange('is_all_emp')
     def onchange_all_emp(self):
         if self.is_all_emp:
-            emps = self.env['hr.employee'].search([('din_id', '!=', ''), ('health_state', '=', 'open')])
+            emps = self.env['hr.employee'].search(
+                [('din_id', '!=', ''), ('health_state', '=', 'open')])
             self.emp_ids = [(6, 0, emps.ids)]
-
 
     @api.multi
     def get_health_list_v1(self):
@@ -89,7 +92,7 @@ class GetDingDingHealthList(models.TransientModel):
         logging.info(">>>获取钉钉员工运动数据start")
         din_ids = list()
         for user in self.emp_ids:
-            din_ids.append(user.din_id)         
+            din_ids.append(user.din_id)
         user_list = list_cut(din_ids, 50)
         for u in user_list:
             self.get_health(u)
@@ -97,7 +100,6 @@ class GetDingDingHealthList(models.TransientModel):
         action = self.env.ref('dingding_health.dingding_health_action')
         action_dict = action.read()[0]
         return action_dict
-
 
     @api.model
     def get_health(self, userids):
@@ -124,14 +126,16 @@ class GetDingDingHealthList(models.TransientModel):
                         'health_count': stepinfo_list['step_count'],
                         'health_date': datetime.datetime.strptime(str(stepinfo_list['stat_date']), "%Y%m%d"),
                     }
-                    emp = self.env['hr.employee'].sudo().search([('din_id', '=', stepinfo_list.get('userid'))])
+                    emp = self.env['hr.employee'].sudo().search(
+                        [('din_id', '=', stepinfo_list.get('userid'))])
                     if emp:
-                        data.update({'emp_id': emp.id, 'department_id': emp.department_id.id})
-                        partner = self.env['dingding.health'].sudo().search([('emp_id', '=', emp.id)])
+                        data.update(
+                            {'emp_id': emp.id, 'department_id': emp.department_id.id})
+                        partner = self.env['dingding.health'].sudo().search(
+                            [('emp_id', '=', emp.id)])
                         if partner:
                             partner.sudo().write(data)
                         else:
                             self.env['dingding.health'].sudo().create(data)
         except Exception as e:
             logging.info(">>>获取失败,该员工可能已离职，详情：{}".format(e))
-

@@ -14,9 +14,9 @@ odoo.define('dingding.res.partner.synchronous.button', function (require) {
             method: 'synchronous_dingding_res_partner',
             args: [],
         }).then(function (result) {
-            if(result.state){
+            if (result.state) {
                 location.reload();
-            }else{
+            } else {
                 alert(result.msg);
             }
         });
@@ -48,7 +48,7 @@ odoo.define('dingding.res.partner.synchronous.button', function (require) {
                         close: true
                     }
                 ],
-                $content: $(QWeb.render('SynchronousDingPartnerTemplate', {widget: this, data: []}))
+                $content: $(QWeb.render('SynchronousDingPartnerTemplate', { widget: this, data: [] }))
             }).open();
         },
     });
@@ -79,7 +79,7 @@ odoo.define('dingding.res.partner.synchronous.button', function (require) {
                         close: true
                     }
                 ],
-                $content: $(QWeb.render('SynchronousDingPartnerTemplate', {widget: this, data: []}))
+                $content: $(QWeb.render('SynchronousDingPartnerTemplate', { widget: this, data: [] }))
             }).open();
         },
     });
