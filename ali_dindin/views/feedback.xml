@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <record id="dingding_user_feedback_tree_view" model="ir.ui.view">
         <field name="name">问题反馈</field>
         <field name="model">dingding.user.feedback</field>
@@ -70,5 +69,5 @@
     <!-- sequence="1"-->
     <!-- action="dingding_user_feedback_action"-->
     <!--    />-->
-
+    
 </odoo>

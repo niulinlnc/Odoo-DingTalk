@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import base64
 import logging
+
 import requests
+
 from odoo import api, fields, models, tools
-from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 

@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
-# ----------------------------------------------------------
-# OpenERP HTTP layer
-# ----------------------------------------------------------
-
-import logging
 import json
+
 import odoo
-from odoo.tools import date_utils
 from odoo.http import Response
+from odoo.tools import date_utils
 
 
 def _json_response(self, result=None, error=None):

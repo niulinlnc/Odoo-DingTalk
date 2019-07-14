@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
+
 import requests
+
 from odoo import api, fields, models, tools
+from odoo.addons.ali_dindin.dingtalk.main import (get_client, stamp_to_time,
+                                                  time_to_stamp)
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.dingtalk.main import get_client, time_to_stamp, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 try:

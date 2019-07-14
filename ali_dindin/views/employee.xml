@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-
     <record id="ali_dindin.view_employee_form_inherit" model="ir.ui.view">
         <field name="name">hr.employee.form</field>
         <field name="model">hr.employee</field>
