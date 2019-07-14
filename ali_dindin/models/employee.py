@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
 import time
-import requests
-import redis
 from odoo import api, fields, models, tools
 from odoo.exceptions import UserError
-from dingtalk.client import AppKeyClient
-from dingtalk.storage.kvstorage import KvStorage
-from odoo.addons.ali_dindin.dingtalk.utils import time_to_stamp, stamp_to_time
+from odoo.addons.ali_dindin.dingtalk.main import get_client, time_to_stamp, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 try:
@@ -40,28 +35,10 @@ class HrEmployee(models.Model):
     dingding_type = fields.Selection(string=u'钉钉状态', selection=[('no', '不存在'), ('yes', '存在')], compute="_compute_dingding_type")
     department_ids = fields.Many2many('hr.department', 'employee_department_rel', 'emp_id', 'department_id', string='所属部门')
 
-    def get_client(self):
-        """钉钉客户端实例
-        安装 pip3 install dingtalk-sdk
-        升级 pip3 install -U dingtalk-sdk
-        从master升级：pip3 install -U https://github.com/007gzs/dingtalk-sdk/archive/master.zip
-        """
-        din_corpid = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_corpId')
-        din_appkey = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_appkey')
-        din_appsecret = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_appsecret')
-        dingtalk_redis_ip = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_ip')
-        dingtalk_redis_port = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_port')
-        dingtalk_redis_db = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_db')
-        session_manager = redis.Redis(host=dingtalk_redis_ip, port=dingtalk_redis_port, db=dingtalk_redis_db)
-        if not din_appkey and not din_appsecret and not din_corpid:
-            raise UserError('钉钉设置项中的CorpId、AppKey和AppSecret不能为空')
-        else:
-            return AppKeyClient(din_corpid, din_appkey, din_appsecret, storage=KvStorage(session_manager))
-
     # 上传员工到钉钉
     @api.multi
     def create_ding_employee(self):
-        client = self.get_client()
+        client = get_client(self)
         for res in self:
             # 获取部门din_id
             department_list = list()
@@ -95,7 +72,7 @@ class HrEmployee(models.Model):
     @api.multi
     def update_ding_employee(self):
         """修改员工时同步至钉钉"""
-        client = self.get_client()
+        client = get_client(self)
         for res in self:
             # 获取部门din_id
             department_list = list()
@@ -148,7 +125,7 @@ class HrEmployee(models.Model):
         从钉钉获取用户详情
         :return:
         """
-        client = self.get_client()
+        client = get_client(self)
         for employee in self:
             userid = employee.din_id
             try:
@@ -204,7 +181,7 @@ class HrEmployee(models.Model):
         通讯录回调事件时触发更新或新增
         :return:
         """
-        client = self.get_client()
+        client = get_client(self)
         try:
             result = client.user.get(userid)
             if result.get('errcode') == 0:
@@ -263,7 +240,7 @@ class HrEmployee(models.Model):
         从钉钉获取用户人脸
         :return:
         """
-        client = self.get_client()
+        client = get_client(self)
         for employee in self:
             userid = employee.din_id
             try:
@@ -282,7 +259,7 @@ class HrEmployee(models.Model):
 
         :param userid_list: 查询用userid列表
         """
-        client = self.get_client()
+        client = get_client(self)
         userlist = list()
         for employee in self:
             emp = self.env['hr.employee'].sudo().search([('din_id', '=', employee.din_id)])
@@ -308,7 +285,7 @@ class HrEmployee(models.Model):
     @api.model
     def delete_din_employee(self, userid):
         """删除钉钉用户"""
-        client = self.get_client()
+        client = get_client(self)
         try:
             result = client.user.delete(userid)
             logging.info("user_delete:{}".format(result))

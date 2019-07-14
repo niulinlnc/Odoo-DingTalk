@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
-import logging
 import time
 import redis
+from odoo import fields
+from odoo.exceptions import UserError
 from datetime import datetime, timedelta
-from odoo import api, fields, models
 from dingtalk.client import AppKeyClient
 from dingtalk.storage.kvstorage import KvStorage
-from odoo.exceptions import UserError
-
-_logger = logging.getLogger(__name__)
 
 
 def get_client(obj):
@@ -74,13 +71,13 @@ def stamp_to_time(time_num):
     time_array = time.localtime(time_stamp)
     return time.strftime("%Y-%m-%d %H:%M:%S", time_array)
 
-def time_to_stamp(time):
+def time_to_stamp(mytime):
     """
     将时间转成13位时间戳
     :param date:
     :return:
     """
-    time_str = fields.Datetime.to_string(time)
+    time_str = fields.Datetime.to_string(mytime)
     time_stamp = time.mktime(time.strptime(time_str, "%Y-%m-%d %H:%M:%S"))
     time_stamp = time_stamp * 1000
     return time_stamp

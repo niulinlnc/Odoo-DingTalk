@@ -9,7 +9,7 @@ from requests import ReadTimeout
 from odoo import api, fields, models, tools
 from odoo.modules import get_module_resource
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client, list_cut
+from odoo.addons.ali_dindin.dingtalk.main import get_client, list_cut
 import base64
 
 _logger = logging.getLogger(__name__)

@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
-import requests
-import json
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from ..models.dingtalk_client import get_client
-from dingtalk.core.exceptions import DingTalkClientException
+from odoo.addons.ali_dindin.dingtalk.main import get_client
 
 _logger = logging.getLogger(__name__)
 
@@ -92,7 +89,7 @@ class ChangeMobile(models.TransientModel):
                             employee.message_post(body="原号码已经在钉钉上删除，等待新建钉钉号", message_type='notification')
                         else:
                             employee.message_post(body="原号码在钉钉已经不存在，等待新建钉钉号", message_type='notification')
-                except DingTalkClientException as e:
+                except Exception as e:
                     raise UserError(e)
                 # 不管是否删除成功，只要保证原号码在钉钉上已经不存在，马上新建钉钉号
                 data = {
@@ -112,7 +109,7 @@ class ChangeMobile(models.TransientModel):
                             employee.message_post(body="通过删除后重建更换手机号为:{}".format(self.new_mobile), message_type='notification')
                     else:
                         raise UserError('上传钉钉系统时发生错误，详情为:{}'.format(result.get('errmsg')))
-                except DingTalkClientException as e:
+                except Exception as e:
                     raise UserError(e)
-        except DingTalkClientException as e:
+        except Exception as e:
             raise UserError(e)

@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
-import time
-import requests
 from requests import ReadTimeout
 from datetime import datetime, timedelta
 from odoo.exceptions import UserError
 from odoo import models, fields, api
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client, stamp_to_time, list_cut, day_cut
+from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time, list_cut, day_cut
 
 class HrEmployee(models.Model):
     _inherit = "hr.employee"

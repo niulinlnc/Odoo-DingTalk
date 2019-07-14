@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
 import requests
-from requests import ReadTimeout
 from odoo import api, models
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client
+from odoo.addons.ali_dindin.dingtalk.main import get_client
 
 _logger = logging.getLogger(__name__)
 
