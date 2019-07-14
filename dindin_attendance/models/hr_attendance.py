@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-from requests import ReadTimeout
-from datetime import datetime, timedelta
 from odoo.exceptions import UserError
 from odoo import models, fields, api
 from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time, list_cut, day_cut
@@ -57,7 +55,6 @@ class DingDingAttendance(models.Model):
     attendance_id = fields.Char(string='钉钉id')
 
 
-
 class HrAttendanceTransient(models.TransientModel):
     _name = 'hr.attendance.tran'
     _description = '获取钉钉考勤信息'
@@ -95,8 +92,8 @@ class HrAttendanceTransient(models.TransientModel):
         :param user:
         :return:
         """
-        # logging.info(">>>开始清空数据（仅用于测试）...")
-        # self.clear_attendance() 
+        logging.info(">>>开始清空数据（仅用于测试）...")
+        self.clear_attendance() 
         client = get_client(self)
         logging.info(">>>开始获取员工打卡信息...")
         din_ids = list()

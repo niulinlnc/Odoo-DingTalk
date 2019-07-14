@@ -20,7 +20,7 @@ class ResConfigSettings(models.TransientModel):
     din_create_department = fields.Boolean(string=u'添加部门')
     din_update_department = fields.Boolean(string=u'修改部门')
     din_delete_department = fields.Boolean(string=u'删除部门')
-    din_unsynchronized_hidden_departments = fields.Boolean(string=u'不同步隐藏部门')
+    din_not_get_hidden_department = fields.Boolean(string=u'不同步隐藏部门')
     din_login_appid = fields.Char(string=u'钉钉登录appId')
     din_login_appsecret = fields.Char(string=u'钉钉登录appSecret')
     dingtalk_redis_ip = fields.Char(string=u'Redis服务器IP')
@@ -109,7 +109,7 @@ class ResConfigSettings(models.TransientModel):
             din_create_department=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_create_department'),
             din_update_department=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_update_department'),
             din_delete_department=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_delete_department'),
-            din_unsynchronized_hidden_departments=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_unsynchronized_hidden_departments'),
+            din_not_get_hidden_department=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_not_get_hidden_department'),
             din_login_appid=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_login_appid'),
             din_login_appsecret=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_login_appsecret'),
             dingtalk_redis_ip=self.env['ir.config_parameter'].sudo().get_param('ali_dindin.dingtalk_redis_ip', default = '127.0.0.1'),
@@ -131,7 +131,7 @@ class ResConfigSettings(models.TransientModel):
         self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_create_department', self.din_create_department)
         self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_update_department', self.din_update_department)
         self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_delete_department', self.din_delete_department)
-        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_unsynchronized_hidden_departments', self.din_unsynchronized_hidden_departments)
+        self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_not_get_hidden_department', self.din_not_get_hidden_department)
         self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_login_appid', self.din_login_appid)
         self.env['ir.config_parameter'].sudo().set_param('ali_dindin.din_login_appsecret', self.din_login_appsecret)
         self.env['ir.config_parameter'].sudo().set_param('ali_dindin.dingtalk_redis_ip', self.dingtalk_redis_ip)

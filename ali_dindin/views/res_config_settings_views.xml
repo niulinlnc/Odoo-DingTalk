@@ -281,10 +281,10 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
-                                <field name="din_unsynchronized_hidden_departments"/>
+                                <field name="din_not_get_hidden_department"/>
                             </div>
                             <div class="o_setting_right_pane">
-                                <label for="din_unsynchronized_hidden_departments"/>
+                                <label for="din_not_get_hidden_department"/>
                                 <div class="text-muted">
                                     不同步钉钉通讯录中隐藏的部门
                                 </div>
