@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
-import time
 import requests
 from odoo import api, fields, models, tools
 from odoo.exceptions import UserError
-from .dingtalk_client import get_client, time_to_stamp, stamp_to_time
+from odoo.addons.ali_dindin.dingtalk.main import get_client, time_to_stamp, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 try:
@@ -37,9 +35,11 @@ class HrEmployee(models.Model):
     dingding_type = fields.Selection(string=u'钉钉状态', selection=[('no', '不存在'), ('yes', '存在')], compute="_compute_dingding_type")
     department_ids = fields.Many2many('hr.department', 'employee_department_rel', 'emp_id', 'department_id', string='所属部门')
 
-    # 上传员工到钉钉
     @api.multi
     def create_ding_employee(self):
+        """
+        上传员工到钉钉
+        """
         client = get_client(self)
         for res in self:
             # 获取部门din_id
@@ -70,10 +70,11 @@ class HrEmployee(models.Model):
             except Exception as e:
                 raise UserError(e)
 
-    # 修改员工同步到钉钉
     @api.multi
     def update_ding_employee(self):
-        """修改员工时同步至钉钉"""
+        """
+        修改员工时同步至钉钉
+        """
         client = get_client(self)
         for res in self:
             # 获取部门din_id
@@ -175,12 +176,13 @@ class HrEmployee(models.Model):
             except Exception as e:
                 raise UserError(e)
 
-    # 从钉钉手动获取用户详情（更新或新建）
     @api.multi
     def syn_employee_from_dingding(self, event_type, userid):
         """
-        从钉钉获取用户详情
+        从钉钉获取用户详情（更新或新建）
         通讯录回调事件时触发更新或新增
+        :param event_type: 回调事件类型
+        :param userid: 钉钉ID
         :return:
         """
         client = get_client(self)
@@ -234,8 +236,6 @@ class HrEmployee(models.Model):
         except Exception as e:
             raise UserError(e)
 
-
-    # 从钉钉手动获取用户人脸
     @api.multi
     def get_face_from_dingding(self):
         """
@@ -251,7 +251,6 @@ class HrEmployee(models.Model):
             except Exception as e:
                 raise UserError(e)
 
-    # 检查是否录入人脸
     @api.multi
     def has_face_from_dingding(self):
         """
@@ -273,9 +272,11 @@ class HrEmployee(models.Model):
             except Exception as e:
                 raise UserError(e)
 
-    # 重写删除方法
     @api.multi
     def unlink(self):
+        """
+        重写删除方法
+        """
         for res in self:
             userid = res.din_id
             super(HrEmployee, self).unlink()
@@ -286,7 +287,9 @@ class HrEmployee(models.Model):
 
     @api.model
     def delete_din_employee(self, userid):
-        """删除钉钉用户"""
+        """
+        删除钉钉用户
+        """
         client = get_client(self)
         try:
             result = client.user.delete(userid)
@@ -298,18 +301,21 @@ class HrEmployee(models.Model):
         for res in self:
             res.dingding_type = 'yes' if res.din_id else 'no'
 
-    # 单独获取钉钉头像设为员工头像
     @api.multi
     def using_dingding_avatar(self):
+        """
+        单独获取钉钉头像设为员工头像
+        """
         for emp in self:
             if emp.din_avatar:
                 binary_data = tools.image_resize_image_big(base64.b64encode(requests.get(emp.din_avatar).content))
                 emp.sudo().write({'image': binary_data})
 
-
-    # 单独获取M2人脸设为员工头像
     @api.multi
     def using_dingding_m2(self):
+        """
+        单独获取M2人脸设为员工头像
+        """
         for emp in self:
             if emp.din_face:
                 binary_data = tools.image_resize_image_big(emp.din_face)

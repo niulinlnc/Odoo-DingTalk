@@ -11,7 +11,7 @@ from requests import ReadTimeout
 from odoo import http, _
 from odoo.addons.web.controllers.main import ensure_db, Home
 from odoo.http import request
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client
+from odoo.addons.ali_dindin.dingtalk.main import get_client
 
 import odoo
 

@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
-import logging
 import time
 import redis
-from odoo import api, fields, models
+from odoo import fields
+from odoo.exceptions import UserError
+from datetime import datetime, timedelta
 from dingtalk.client import AppKeyClient
 from dingtalk.storage.kvstorage import KvStorage
-from odoo.exceptions import UserError
-
-_logger = logging.getLogger(__name__)
 
 
 def get_client(obj):
     """钉钉客户端初始化
        安装 pip3 install dingtalk-sdk
-       手动尝新：pip3 install -U https://github.com/007gzs/dingtalk-sdk/archive/master.zip
+       升级 pip3 install -U dingtalk-sdk
+       从master升级：pip3 install -U https://github.com/007gzs/dingtalk-sdk/archive/master.zip
     """
     din_corpid = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_corpId')
     din_appkey = obj.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_appkey')
@@ -27,31 +26,40 @@ def get_client(obj):
     else:
         return AppKeyClient(din_corpid, din_appkey, din_appsecret, storage=KvStorage(session_manager))
 
-def grouped_list(all_list, limit):
+def list_cut(mylist, limit):
     """
-    根据输入的列表和单个列表限制元素个数，对列表进行分组后输出
-    :param all_data_list:列表集
-    :param limit: 单个列表最大包含元素数量
+    列表分段
+    :param mylist:列表集
+    :param limit: 子列表元素限制数量
     :return:
     """
-    user_list = list()
-    if len(all_list) > limit:
-        n = 1
-        e_list = list()
-        for user in all_list:
-            if n <= limit:
-                e_list.append(user)
-                n = n + 1
-            else:
-                user_list.append(e_list)
-                e_list = list()
-                e_list.append(user)
-                n = 2
-        user_list.append(e_list)
-    else:
-        for user in all_list:
-            user_list.append(user)
-    return user_list
+    length = len(mylist)
+    cut_list = [mylist[i:i+limit] for i in range(0, length, limit)]
+    return cut_list
+
+def day_cut(begin_time, end_time, days):
+    """
+    日期分段
+    :param begin_date:开始日期
+    :param end_date:结束日期
+    :param days: 最大间隔时间
+    :return:
+    """
+    cut_day = []
+    begin_time = datetime.strptime(str(begin_time), "%Y-%m-%d %H:%M:%S")
+    end_time = datetime.strptime(str(end_time), "%Y-%m-%d %H:%M:%S")
+    delta = timedelta(days=days)
+    t1 = begin_time
+    while t1 <= end_time:
+        if end_time < t1 + delta:
+            t2 = end_time
+        else:
+            t2 = t1 + delta
+        t1_str = t1.strftime("%Y-%m-%d %H:%M:%S")
+        t2_str = t2.strftime("%Y-%m-%d %H:%M:%S")
+        cut_day.append([t1_str, t2_str])
+        t1 = t2 + timedelta(seconds=1)
+    return cut_day
 
 def stamp_to_time(time_num):
     """
@@ -63,13 +71,13 @@ def stamp_to_time(time_num):
     time_array = time.localtime(time_stamp)
     return time.strftime("%Y-%m-%d %H:%M:%S", time_array)
 
-def time_to_stamp(time):
+def time_to_stamp(mytime):
     """
     将时间转成13位时间戳
     :param date:
     :return:
     """
-    time_str = fields.Datetime.to_string(time)
+    time_str = fields.Datetime.to_string(mytime)
     time_stamp = time.mktime(time.strptime(time_str, "%Y-%m-%d %H:%M:%S"))
     time_stamp = time_stamp * 1000
     return time_stamp

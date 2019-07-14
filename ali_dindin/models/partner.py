@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
-import requests
-from odoo import api, fields, models
+from odoo import api, fields, models, tools
 from odoo.exceptions import UserError
-from .dingtalk_client import get_client
+from odoo.addons.ali_dindin.dingtalk.main import get_client
 
 _logger = logging.getLogger(__name__)
 

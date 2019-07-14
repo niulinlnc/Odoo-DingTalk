@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 import base64
-import json
 import logging
-import time
 import requests
 from odoo import api, fields, models, tools
 from odoo.exceptions import UserError
-from .dingtalk_client import get_client, stamp_to_time
+from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
 
 _logger = logging.getLogger(__name__)
-
-
 
 class DingDingSynchronous(models.TransientModel):
     _name = 'dingding.bash.data.synchronous'
@@ -21,6 +17,7 @@ class DingDingSynchronous(models.TransientModel):
     employee = fields.Boolean(string=u'同步钉钉员工', default=True)
     employee_avatar = fields.Boolean(string=u'是否替换为钉钉员工头像', default=False)
     partner = fields.Boolean(string=u'同步钉钉联系人', default=True)
+
 
     @api.multi
     def start_synchronous_data(self):
@@ -62,13 +59,13 @@ class DingDingSynchronous(models.TransientModel):
                 if h_department:
                     h_department.sudo().write(data)
                 else:
-                    # 从钉钉同步部门时，排除同步隐藏的部门
                     dep = client.department.get(res.get('id'))
-                    if dep.get('deptHiding') == False:
-                        self.env['hr.department'].create(data)
+                    not_get_hiding_dep = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_not_get_hidden_department')
+                    is_hiding_dep = dep.get('deptHiding')
+                    if not_get_hiding_dep and is_hiding_dep:
+                        pass # 不创建钉钉通讯录中隐藏的部门
                     else:
-                        if self.env['ir.config_parameter'].sudo().get_param('din_unsynchronized_hidden_departments') == False: 
-                            self.env['hr.department'].create(data)
+                        self.env['hr.department'].create(data)
             return True
         except Exception as e:
             raise UserError(e)

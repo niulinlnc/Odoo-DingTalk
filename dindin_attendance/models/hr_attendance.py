@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
-import time
-import requests
-from requests import ReadTimeout
-from datetime import datetime, timedelta
 from odoo.exceptions import UserError
 from odoo import models, fields, api
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client, stamp_to_time
+from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time, list_cut, day_cut
 
 class HrEmployee(models.Model):
     _inherit = "hr.employee"
@@ -78,8 +73,86 @@ class HrAttendanceTransient(models.TransientModel):
                 raise UserError("员工钉钉Id不存在！也许是你的员工未同步导致的！")
             self.emp_ids = [(6, 0, emps.ids)]
 
+    @api.model
+    def clear_attendance(self):
+        """
+        清除已下载的所有钉钉出勤记录（仅用于测试，生产环境慎用）
+        """
+        self._cr.execute("""
+            delete from dingding_attendance
+        """)
+
     @api.multi
     def get_attendance_list(self):
+        """
+        根据日期获取员工打卡信息，当user存在时将获取指定user的打卡，若不存在时，将获取所有员工的打卡信息，
+        钉钉限制每次传递员工数最大为50个
+        :param start_date:
+        :param end_date:
+        :param user:
+        :return:
+        """
+        logging.info(">>>开始清空数据（仅用于测试）...")
+        self.clear_attendance() 
+        client = get_client(self)
+        logging.info(">>>开始获取员工打卡信息...")
+        din_ids = list()
+        for user in self.emp_ids:
+            din_ids.append(user.din_id)         
+        user_list = list_cut(din_ids, 50)
+        for u in user_list:
+            logging.info(">>>开始获取{}员工段数据".format(u))
+            date_list = day_cut(self.start_date, self.stop_date, 7)
+            for d in date_list:
+                logging.info(">>>开始获取{}时间段数据".format(d))
+                offset=0
+                limit=50
+                while True:
+                    try:
+                        result = client.attendance.list(d[0], d[1], user_ids=u, offset=offset, limit=limit)
+                        if result.get('errcode') == 0:
+                            for rec in result.get('recordresult'):
+                                    data = {
+                                        'recordId': rec.get('recordId'),
+                                        'workDate': stamp_to_time(rec.get('workDate')),  # 工作日
+                                        'timeResult': rec.get('timeResult'),  # 时间结果
+                                        'locationResult': rec.get('locationResult'),  # 考勤结果
+                                        'baseCheckTime': stamp_to_time(rec.get('baseCheckTime')),  # 基准时间
+                                        'sourceType': rec.get('sourceType'),  # 数据来源
+                                        'checkType': rec.get('checkType'),
+                                        'check_in': stamp_to_time(rec.get('userCheckTime')),
+                                        'attendance_id': rec.get('id'),
+                                    }
+                                    groups = self.env['dindin.simple.groups'].sudo().search(
+                                        [('group_id', '=', rec.get('groupId'))])
+                                    data.update({'ding_group_id': groups[0].id if groups else False})
+                                    emp_id = self.env['hr.employee'].sudo().search([('din_id', '=', rec.get('userId'))])
+                                    data.update({'emp_id': emp_id[0].id if emp_id else False})
+                                    attendance = self.env['dingding.attendance'].sudo().search(
+                                        [('emp_id', '=', emp_id[0].id),
+                                        ('check_in', '=', stamp_to_time(rec.get('userCheckTime'))),
+                                        ('checkType', '=', rec.get('checkType'))])
+                                    if not attendance:
+                                        self.env['dingding.attendance'].sudo().create(data)
+                            logging.info(">>>是否还有剩余数据：{}".format(result.get('hasMore')))
+                            if result.get('hasMore'):
+                                offset = offset + limit
+                                logging.info(">>>准备获取剩余数据中的第{}至{}条".format(offset+1, offset+limit))
+                            else:
+                                break
+                        else:
+                            raise UserError('请求失败,原因为:{}'.format(result.get('errmsg')))
+                    except Exception as e:
+                        raise UserError(e)
+                    
+        logging.info(">>>根据日期获取员工打卡信息结束...")
+        action = self.env.ref('dindin_attendance.dingding_attendance_action')
+        action_dict = action.read()[0]
+        return action_dict
+
+
+    @api.multi
+    def get_attendance_list_v2(self):
         """
         根据日期获取员工打卡信息，当user存在时将获取指定user的打卡，若不存在时，将获取所有员工的打卡信息，钉钉限制每次传递员工数最大为50个
         :param start_date:
@@ -87,86 +160,27 @@ class HrAttendanceTransient(models.TransientModel):
         :param user:
         :return:
         """
-        global has_more
         logging.info(">>>开始获取员工打卡信息...")
-        for res in self:
-            user_list = list()
-            emp_len = len(res.emp_ids)
-            if emp_len > 50:
-                n = 1
-                e_list = list()
-                for emp in res.emp_ids:
-                    if n <= 50:
-                        e_list.append(emp.din_id)
-                        n = n + 1
-                    else:
-                        user_list.append(e_list)
-                        e_list = list()
-                        e_list.append(emp.din_id)
-                        n = 2
-                user_list.append(e_list)
-            else:
-                for emp in res.emp_ids:
-                    if not emp.din_id:
-                        raise UserError("员工{}的钉钉ID无效,请输入其他员工或不填！".format(emp.name))
-                    user_list.append(emp.din_id)
-            logging.info(user_list)
-            for u in user_list:
-                if isinstance(u, str):
-                    offset = 0
-                    limit = 50
-                    while True:
-                        work_data_from = datetime.strptime(str(res.start_date), "%Y-%m-%d %H:%M:%S")
-                        work_data_to = datetime.strptime(str(res.stop_date), "%Y-%m-%d %H:%M:%S")
-                        delta = timedelta(days=7)
-                        if work_data_to < work_data_from  + delta:
-                            work_data_to_mid = work_data_to
-                        else:
-                            work_data_to_mid = work_data_from + delta
-                        while (work_data_from < work_data_to):
-
-                            workDateFrom=str(work_data_from) 
-                            workDateTo=str(work_data_to_mid) 
-                            userIdList=user_list
-                            offset=offset
-                            limit=limit
-
-                            has_more = self.attendance_list(workDateFrom, workDateTo, user_ids=userIdList, offset=offset, limit=limit)
-                            work_data_from = work_data_to_mid + timedelta(days=1)
-                            work_data_to_mid += delta
-
-                        if not has_more:
-                            break
-                        else:
-                            offset = offset + limit
+        din_ids = list()
+        for user in self.emp_ids:
+            din_ids.append(user.din_id)         
+        user_list = list_cut(din_ids, 50)
+        for u in user_list:
+            logging.info(">>>开始获取{}员工段数据".format(u))
+            date_list = day_cut(self.start_date, self.stop_date, 7)
+            for d in date_list:
+                logging.info(">>>开始获取{}时间段数据".format(d))
+                offset=0
+                limit=50
+                while True:
+                    has_more = self.attendance_list(d[0], d[1], user_ids=u, offset=offset, limit=limit)
+                    logging.info(">>>是否还有剩余数据：{}".format(has_more))
+                    if not has_more:
                         break
-                elif isinstance(u, list):
-                    offset = 0
-                    limit = 50
-                    while True:
-                        work_data_from = datetime.strptime(str(res.start_date), "%Y-%m-%d %H:%M:%S")
-                        work_data_to = datetime.strptime(str(res.stop_date), "%Y-%m-%d %H:%M:%S")
-                        delta = timedelta(days=7)
-                        if work_data_to < work_data_from  + delta:
-                            work_data_to_mid = work_data_to
-                        else:
-                            work_data_to_mid = work_data_from + delta
-                        while (work_data_from < work_data_to):
-
-                            workDateFrom = str(work_data_from)
-                            workDateTo = str(work_data_to_mid)
-                            userIdList = u 
-                            offset = offset
-                            limit = limit
-
-                            has_more = self.self.attendance_list(workDateFrom, workDateTo, user_ids=userIdList, offset=offset, limit=limit)
-                            work_data_from = work_data_to_mid + timedelta(days=1)
-                            work_data_to_mid += delta
-                        if not has_more:
-                            break
-                        else:
-                            offset = offset + limit
-            logging.info(">>>根据日期获取员工打卡信息结束...")
+                    else:
+                        offset = offset + limit
+                        logging.info(">>>准备获取剩余数据中的第{}至{}条".format(offset+1, offset+limit))
+        logging.info(">>>根据日期获取员工打卡信息结束...")
         action = self.env.ref('dindin_attendance.dingding_attendance_action')
         action_dict = action.read()[0]
         return action_dict
@@ -185,7 +199,7 @@ class HrAttendanceTransient(models.TransientModel):
         client = get_client(self)
         try:
             result = client.attendance.list(work_date_from, work_date_to, user_ids=user_ids, offset=offset, limit=limit)
-            logging.info(">>>获取考勤返回结果{}".format(result))
+            # logging.info(">>>获取考勤返回结果{}".format(result))
             if result.get('errcode') == 0:
                 for rec in result.get('recordresult'):
                         data = {
@@ -218,3 +232,4 @@ class HrAttendanceTransient(models.TransientModel):
                 raise UserError('请求失败,原因为:{}'.format(result.get('errmsg')))
         except Exception as e:
             raise UserError(e)
+ 

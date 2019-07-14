@@ -6,7 +6,7 @@ import time
 from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client, stamp_to_time
+from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 

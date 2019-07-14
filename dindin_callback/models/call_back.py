@@ -7,7 +7,7 @@ import requests
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.http import request
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client
+from odoo.addons.ali_dindin.dingtalk.main import get_client
 
 _logger = logging.getLogger(__name__)
 

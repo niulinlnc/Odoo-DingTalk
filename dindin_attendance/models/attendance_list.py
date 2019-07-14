@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
-import time
-import requests
-from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.models.dingtalk_client import get_client, stamp_to_time
+from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 # 已弃用，已经钉钉考勤整合至odoo考勤
