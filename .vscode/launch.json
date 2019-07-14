@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Odoo",
+            "name": "Python: Dingtalk",
             "type": "python",
             "request": "launch",
             "stopOnEntry": false,
