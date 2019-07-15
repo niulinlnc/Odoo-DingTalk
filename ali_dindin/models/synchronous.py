@@ -161,7 +161,7 @@ class DingDingSynchronous(models.TransientModel):
                         data.update({'image': binary_data})
                     except Exception as e:
                         logging.info(">>>--------------------------------")
-                        logging.info(">>>SSL异常:{}".format(e))
+                        logging.info(">>>SSL异常:%s", e)
                         logging.info(">>>--------------------------------")
                 if user.get('department'):
                     dep_din_ids = user.get('department')

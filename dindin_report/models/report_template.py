@@ -38,7 +38,7 @@ class DingDingReportTemplate(models.Model):
             raise UserError("不好意思，你没有权限进行本操作！")
         try:
             result = client.report.template_listbyuserid()
-            logging.info(">>>获取日志模板返回结果:{}".format(result))
+            logging.info(">>>获取日志模板返回结果:%s", result)
             d_res = result['template_list']['report_template_top_vo']
             for report in d_res:
                 data = {
@@ -72,7 +72,7 @@ class DingDingReportTemplate(models.Model):
         if emp and emp.din_id:
             try:
                 result = client.report.getunreadcount(emp.din_id)
-                logging.info(">>>查询员工未读日志数返回结果:{}".format(result))
+                logging.info(">>>查询员工未读日志数返回结果:%s", result)
                 if result.get('errcode') == 0:
                     return {'state': True, 'number': result.get('count')}
                 else:

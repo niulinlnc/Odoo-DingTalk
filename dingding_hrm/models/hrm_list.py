@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client, list_cut
 
@@ -79,10 +79,10 @@ class GetDingDingHrmList(models.TransientModel):
         """
         client = get_client(self)
         if len(userid_list) > 20:
-            raise UserError("钉钉仅支持批量查询小于等于20个员工!")
+            raise UserError(_("钉钉仅支持批量查询小于等于20个员工!"))
         try:
             result = client.employeerm.list(userid_list, field_filter_list=())
-            # logging.info(">>>批量获取员工花名册返回结果{}".format(result))
+            # logging.info(">>>批量获取员工花名册返回结果%s", result)
             if result.get('emp_field_info_v_o'):
                 for res in result.get('emp_field_info_v_o'):
                     line_list = list()

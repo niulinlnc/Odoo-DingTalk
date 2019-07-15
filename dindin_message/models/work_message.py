@@ -233,7 +233,7 @@ class DinDinWorkMessage(models.Model):
         try:
             result = client.message.asyncsend_v2(
                 msg, agent_id, userid_list=userid_list, dept_id_list=dept_id_list, to_all_user=to_all_user)
-            logging.info(">>>发送工作消息返回结果{}".format(result))
+            logging.info(">>>发送工作消息返回结果%s", result)
             return result
         except Exception as e:
             raise UserError(e)
@@ -253,7 +253,7 @@ class DinDinWorkMessage(models.Model):
         task_id = self.task_id
         try:
             result = client.message.getsendprogress(agent_id, task_id)
-            logging.info(">>>查询工作消息状态返回结果{}".format(result))
+            logging.info(">>>查询工作消息状态返回结果%s", result)
             self.write({'state': str(result.get('status'))})
             self.message_post(body="查询消息进度成功，返回值:{}!".format(
                 result), message_type='notification')
@@ -277,7 +277,7 @@ class DinDinWorkMessage(models.Model):
         try:
             result = client.message.getsendresult(
                 agent_id=agent_id, task_id=task_id)
-            logging.info(">>>查询工作消息状态返回结果{}".format(result))
+            logging.info(">>>查询工作消息状态返回结果%s", result)
             send_result = result
             if send_result['failed_user_id_list']:
                 # 失败的用户列表
@@ -329,7 +329,7 @@ class DinDinWorkMessage(models.Model):
             task_id = msg.task_id
             try:
                 result = client.message.recall(agent_id, task_id)
-                logging.info(">>>撤回工作消息返回结果{}".format(result))
+                logging.info(">>>撤回工作消息返回结果%s", result)
                 msg.write({'state': '0'})
                 if msg.user_ids:
                     for user in msg.user_ids:

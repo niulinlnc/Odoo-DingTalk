@@ -52,7 +52,7 @@ class DinDinSignList(models.Model):
         try:
             result = client.checkin.record_get(
                 userid_list, start_time, end_time, offset=cursor, size=size)
-            logging.info(">>>获取多个用户的签到记录结果{}".format(result))
+            logging.info(">>>获取多个用户的签到记录结果%s", result)
             r_result = result.get('result')
             for data in r_result['page_list']['checkin_record_vo']:
                 emp = self.env['hr.employee'].sudo().search(

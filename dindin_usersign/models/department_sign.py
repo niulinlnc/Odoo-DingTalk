@@ -48,7 +48,7 @@ class DinDinDepartmentSign(models.Model):
             try:
                 result = client.checkin.record(
                     department_id, start_time, end_time, offset=0, size=100, order_asc=True)
-                logging.info(">>>获得签到数据返回结果{}".format(result))
+                logging.info(">>>获得签到数据返回结果%s", result)
                 line_list = list()
                 for data in result:
                     emp = self.env['hr.employee'].sudo().search(

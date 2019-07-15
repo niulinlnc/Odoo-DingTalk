@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
-from odoo import api, fields, models
+
+from odoo import api, fields, models, _
+from odoo.addons.ali_dindin.dingtalk.main import (get_client, list_cut,
+                                                  stamp_to_time)
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.dingtalk.main import get_client, list_cut, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 
@@ -90,13 +92,13 @@ class GetDingDingHrmDimissionList(models.TransientModel):
         client = get_client(self)
         logging.info(">>>获取钉钉获取离职员工信息start")
         if len(user_ids) > 50:
-            raise UserError("钉钉仅支持批量查询小于等于50个员工!")
+            raise UserError(_("钉钉仅支持批量查询小于等于50个员工!"))
         try:
             result = client.employeerm.listdimission(userid_list=user_ids)
-            logging.info(">>>批量获取员工离职信息返回结果{}".format(result))
+            logging.info(">>>批量获取员工离职信息返回结果%s", result)
 
             if len(result) < 1:
-                raise UserError("选择的员工未离职!")
+                raise UserError(_("选择的员工未离职!"))
             for res in result.get('emp_dimission_info_vo'):
                 emp = self.env['hr.employee'].search(
                     [('din_id', '=', res.get('userid'))])

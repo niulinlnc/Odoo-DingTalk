@@ -88,7 +88,7 @@ class DinDinCallback(models.Model):
             try:
                 result = client.callback.register_call_back(
                     call_back_tags, token, aes_key, url)
-                logging.info(">>>注册回调事件返回结果:{}".format(result))
+                logging.info(">>>注册回调事件返回结果:%s", result)
                 if result.get('errcode') == 0:
                     self.write({'state': '01'})
                     self.message_post(body="注册事件成功")
@@ -116,7 +116,7 @@ class DinDinCallback(models.Model):
             try:
                 result = client.callback.update_call_back(
                     call_back_tags, token, aes_key, url)
-                logging.info(">>>更新回调事件返回结果:{}".format(result))
+                logging.info(">>>更新回调事件返回结果:%s", result)
                 if result.get('errcode') == 0:
                     self.write({'state': '01'})
                     self.message_post(body="更新事件成功")
@@ -142,7 +142,7 @@ class DinDinCallback(models.Model):
         logging.info(">>>删除事件...")
         try:
             result = client.callback.delete_call_back()
-            logging.info(">>>删除回调事件返回结果:{}".format(result))
+            logging.info(">>>删除回调事件返回结果:%s", result)
             if result.get('errcode') == 0:
                 logging.info("已删除token为{}的回调事件".format(call_token))
             else:
@@ -162,7 +162,7 @@ class DinDinCallback(models.Model):
         client = get_client(self)
         try:
             result = client.callback.get_call_back()
-            logging.info(">>>获取所有回调事件返回结果:{}".format(result))
+            logging.info(">>>获取所有回调事件返回结果:%s", result)
             if result.get('errcode') != 0:
                 return {'state': False, 'msg': result.get('errmsg')}
             else:

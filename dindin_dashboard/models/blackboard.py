@@ -23,7 +23,7 @@ class DinDinBlackboard(models.TransientModel):
         if emp:
             try:
                 result = client.blackboard.listtopten(emp.din_id)
-                logging.info(">>>获取公告返回结果:{}".format(result))
+                logging.info(">>>获取公告返回结果:%s", result)
                 if result.get('errcode') == 0:
                     line_list = list()
                     for line in result.get('blackboard_list'):
@@ -48,4 +48,4 @@ class DinDinBlackboard(models.TransientModel):
             result = requests.get(url=url, timeout=2)
             return result.text
         except Exception as e:
-            return {"获取更新公告信息失败!,详情:{}".format(e)}
+            return {"获取更新公告信息失败!,详情:%s", e}

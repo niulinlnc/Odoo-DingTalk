@@ -74,7 +74,7 @@ class GetDingDingHealthList(models.TransientModel):
         """
         logging.info(">>>获取钉钉员工运动数据start")
         for user in self.emp_ids:
-            logging.info(">>>查询{}".format(user.name))
+            logging.info(">>>查询: %s", user.name)
             self.get_health(user.din_id)
         logging.info(">>>获取钉钉员工运动数据end")
         action = self.env.ref('dingding_health.dingding_health_action')
@@ -118,7 +118,7 @@ class GetDingDingHealthList(models.TransientModel):
         stat_dates = formatted_today
         try:
             result = client.health.stepinfo_listbyuserid(userids, stat_dates)
-            logging.info(">>>批量获取员工运动数据返回结果{}".format(result))
+            logging.info(">>>批量获取员工运动数据返回结果%s", result)
             if result['stepinfo_list']:
                 basic_step_info_vo = result['stepinfo_list']['basic_step_info_vo']
                 for stepinfo_list in basic_step_info_vo:
@@ -138,4 +138,4 @@ class GetDingDingHealthList(models.TransientModel):
                         else:
                             self.env['dingding.health'].sudo().create(data)
         except Exception as e:
-            logging.info(">>>获取失败,该员工可能已离职，详情：{}".format(e))
+            logging.info(">>>获取失败,该员工可能已离职，详情：%s", e)

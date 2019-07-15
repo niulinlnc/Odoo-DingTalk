@@ -91,7 +91,7 @@ class ResPartner(models.Model):
                                                   company_name=company_name,
                                                   share_user_ids=share_user_ids
                                                   )
-                logging.info("创建联系人返回结果:{}".format(result))
+                logging.info("创建联系人返回结果:%s", result)
                 res.write({'din_userid': result})
                 res.message_post(body=_("钉钉消息：联系人信息已上传至钉钉"),
                                  message_type='notification')
@@ -147,7 +147,7 @@ class ResPartner(models.Model):
             try:
                 result = client.extcontact.update(user_id, name, follower_user_id, label_ids, mobile, state_code='86',
                                                   title=title, share_dept_ids=share_dept_ids, remark=remark, address=address, company_name=company_name, share_user_ids=share_user_ids)
-                logging.info("更新联系人返回结果:{}".format(result))
+                logging.info("更新联系人返回结果:%s", result)
                 res.message_post(body="钉钉消息：联系人信息已更新至钉钉",
                                  message_type='notification')
             except Exception as e:
@@ -169,7 +169,7 @@ class ResPartner(models.Model):
         client = get_client(self)
         try:
             result = client.extcontact.delete(din_userid)
-            logging.info("删除钉钉联系人结果:{}".format(result))
+            logging.info("删除钉钉联系人结果:%s", result)
         except Exception as e:
             raise UserError(e)
 
@@ -202,7 +202,7 @@ class ResPartner(models.Model):
             userid = partner.din_userid
             try:
                 result = client.extcontact.get(userid)
-                logging.info(">>>获取外部联系人返回结果:{}".format(result))
+                logging.info(">>>获取外部联系人返回结果:%s", result)
                 if result.get('ding_open_errcode') == 0:
                     result = result['result']
                     # 获取标签
@@ -248,8 +248,7 @@ class ResPartner(models.Model):
                     partner.message_post(
                         body="钉钉消息：已从钉钉同步联系人信息", message_type='notification')
                 else:
-                    _logger.info("从钉钉同步联系人时发生意外，原因为:{}".format(
-                        result.get('errmsg')))
+                    _logger.info("从钉钉同步联系人时发生意外，原因为:%s", result.get('errmsg'))
                     partner.message_post(body="从钉钉同步联系人失败:{}".format(
                         result.get('errmsg')), message_type='notification')
             except Exception as e:

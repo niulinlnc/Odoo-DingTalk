@@ -144,7 +144,7 @@ class DinDinAttendanceList(models.Model):
         try:
             result = client.attendance.list(
                 work_date_from, work_date_to, user_ids=user_ids, offset=offset, limit=limit)
-            logging.info(">>>获取考勤返回结果{}".format(result))
+            logging.info(">>>获取考勤返回结果%s", result)
             if result.get('errcode') == 0:
                 for rec in result.get('recordresult'):
                     data = {
@@ -168,7 +168,7 @@ class DinDinAttendanceList(models.Model):
                     if emp_id:
                         data.update({'emp_id': emp_id[0].id})
                     a_list = self.env['dindin.attendance.list'].search(
-                        [('recordId', '=', rec.get('recordId')), ('emp_id', '=',  emp_id[0].id),  ('baseCheckTime', '=', stamp_to_time(rec.get('baseCheckTime')))])
+                        [('recordId', '=', rec.get('recordId')), ('emp_id', '=', emp_id[0].id), ('baseCheckTime', '=', stamp_to_time(rec.get('baseCheckTime')))])
                     if a_list:
                         a_list.sudo().write(data)
                     else:

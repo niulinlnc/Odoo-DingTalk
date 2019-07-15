@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 import datetime
-import json
 import logging
-import requests
-from requests import ReadTimeout
+
+
 from odoo import api, fields, models
-from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -35,7 +34,7 @@ class HrDepartment(models.Model):
                     try:
                         result = client.health.stepinfo_list(
                             _type, object_id, stat_dates)
-                        logging.info(">>>获取部门在今日的步数返回结果:{}".format(result))
+                        logging.info(">>>获取部门在今日的步数返回结果:%s", result)
                         if result['stepinfo_list']:
                             for stepinfo_list in result['stepinfo_list']['basic_step_info_vo']:
                                 res.update(

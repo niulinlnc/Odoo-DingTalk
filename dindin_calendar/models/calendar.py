@@ -81,7 +81,7 @@ class DinDinCalendarEvent(models.Model):
         }
         try:
             result = client.calendar.create(create_vo)
-            logging.info(">>>创建日程返回结果:{}".format(result))
+            logging.info(">>>创建日程返回结果:%s", result)
             return result.get('dingtalk_calendar_id')
         except Exception as e:
             raise UserError(e)
@@ -111,7 +111,7 @@ class DinDinCalendarEvent(models.Model):
         try:
             result = client.calendar.delete(
                 userid=userid, calendar_id=calendar_id)
-            logging.info(">>>删除日程返回结果:{}".format(result))
+            logging.info(">>>删除日程返回结果:%s", result)
         except Exception as e:
             raise UserError(e)
 
@@ -143,7 +143,7 @@ class DinDinCalendarEvent(models.Model):
         try:
             result = client.calendar.list(user_id, calendar_folder_id=calendar_folder_id, time_min=time_min, i_cal_uid=i_cal_uid,
                                           single_events=single_events, page_token=page_token, max_results=max_results, time_max=time_max)
-            logging.info(">>>查询日程返回结果:{}".format(result))
+            logging.info(">>>查询日程返回结果:%s", result)
             # 测试接口，待完善
         except Exception as e:
             raise UserError(e)

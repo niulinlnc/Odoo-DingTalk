@@ -72,7 +72,7 @@ class DinDinApprovalMain(models.Model):
             result = client.bpms.processinstance_create(process_code, user_id, dept_id, approvers, form_values,
                                                         agent_id=None, cc_list=cc_list, cc_start=False, cc_finish=False, approvers_v2=())
 
-            logging.info(">>>提交审批到钉钉返回结果{}".format(result))
+            logging.info(">>>提交审批到钉钉返回结果%s", result)
             if result.get('errcode') == 0:
                 return result.get('process_instance_id')
             else:

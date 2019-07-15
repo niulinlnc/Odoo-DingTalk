@@ -89,7 +89,7 @@ class DinDinWorkRecord(models.Model):
         try:
             result = client.workrecord.add(
                 userid, create_time, title, url, formItemList, originator_user_id='', source_name='')
-            logging.info(">>>新增待办事项返回结果{}".format(result))
+            logging.info(">>>新增待办事项返回结果%s", result)
             self.write({'state': '01', 'record_id': result})
         except Exception as e:
             raise UserError(e)
@@ -136,7 +136,7 @@ class DinDinWorkRecord(models.Model):
         try:
             result = client.message.send(
                 agentid, msg_body, touser_list=userid_list, toparty_list=())
-            logging.info(">>>发送待办消息返回结果{}".format(result))
+            logging.info(">>>发送待办消息返回结果%s", result)
             if result.get('errcode') == 0:
                 return result.get('message_id')
             else:
@@ -204,7 +204,7 @@ class DinDinWorkRecord(models.Model):
         try:
             result = client.workrecord.getbyuserid(
                 user_id, status, offset=offset, limit=limit)
-            logging.info(">>>获取用户待办事项返回结果{}".format(result))
+            logging.info(">>>获取用户待办事项返回结果%s", result)
             return result
         except Exception as e:
             raise UserError(e)
@@ -224,7 +224,7 @@ class DinDinWorkRecord(models.Model):
             record_id = res.record_id
             try:
                 result = client.workrecord.update(userid, record_id)
-                logging.info(">>>获更新代办事项返回结果{}".format(result))
+                logging.info(">>>获更新代办事项返回结果%s", result)
                 if result:
                     res.message_post(body="待办状态已更新!",
                                      message_type='notification')
@@ -257,7 +257,7 @@ class DinDinWorkRecord(models.Model):
         :param timeNum:
         :return:
         """
-        timeStamp = float(timeNum/1000)
+        timeStamp = float(timeNum / 1000)
         timeArray = time.localtime(timeStamp)
         otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
         return otherStyleTime
@@ -338,7 +338,7 @@ class GetUserDingDingWorkRecord(models.TransientModel):
         try:
             result = client.workrecord.getbyuserid(
                 user_id, status, offset=offset, limit=limit)
-            logging.info(">>>获取用户待办事项返回结果{}".format(result))
+            logging.info(">>>获取用户待办事项返回结果%s", result)
             return result
         except Exception as e:
             raise UserError(e)

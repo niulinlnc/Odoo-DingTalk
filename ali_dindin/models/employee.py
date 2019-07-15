@@ -71,7 +71,7 @@ class HrEmployee(models.Model):
             }
             try:
                 result = client.user.create(data)
-                logging.info(">>>新增员工返回结果:{}".format(result))
+                logging.info(">>>新增员工返回结果:%s", result)
                 res.write({'din_id': result})
                 res.message_post(body="钉钉消息：员工信息已上传至钉钉",
                                  message_type='notification')
@@ -185,8 +185,7 @@ class HrEmployee(models.Model):
                         data.update({'department_ids': [(6, 0, dep_list.ids)]})
                     employee.sudo().write(data)
                 else:
-                    _logger.info("从钉钉同步员工时发生意外，原因为:{}".format(
-                        result.get('errmsg')))
+                    _logger.info("从钉钉同步员工时发生意外，原因为:%s", result.get('errmsg'))
                     employee.message_post(body="从钉钉同步员工失败:{}".format(
                         result.get('errmsg')), message_type='notification')
 
@@ -251,8 +250,7 @@ class HrEmployee(models.Model):
                 if not employee and event_type == 'user_add_org':
                     self.env['hr.employee'].sudo().create(data)
             else:
-                _logger.info("从钉钉同步员工时发生意外，原因为:{}".format(
-                    result.get('errmsg')))
+                _logger.info("从钉钉同步员工时发生意外，原因为:%s", result.get('errmsg'))
                 employee.message_post(body="从钉钉同步员工失败:{}".format(
                     result.get('errmsg')), message_type='notification')
 
@@ -271,7 +269,7 @@ class HrEmployee(models.Model):
             try:
                 result = client.tbdingding.dingtalk_corp_smartdevice_getface(
                     userid)
-                logging.info("获取人脸返回结果:{}".format(result))
+                logging.info("获取人脸返回结果:%s", result)
             except Exception as e:
                 raise UserError(e)
 
@@ -294,7 +292,7 @@ class HrEmployee(models.Model):
             try:
                 result = client.tbdingding.dingtalk_corp_smartdevice_hasface(
                     userlist)
-                logging.info("查询人脸返回结果:{}".format(result))
+                logging.info("查询人脸返回结果:%s", result)
             except Exception as e:
                 raise UserError(e)
 
@@ -320,7 +318,7 @@ class HrEmployee(models.Model):
         client = get_client(self)
         try:
             result = client.user.delete(userid)
-            logging.info("user_delete:{}".format(result))
+            logging.info("user_delete:%s", result)
         except Exception as e:
             raise UserError(e)
 

@@ -91,7 +91,7 @@ class DinDinMessageTemplate(models.Model):
         document = self.env[model].sudo().browse(res_id).copy_data()  # 当前单据
         message_dict = self.create_message_dict(
             model_type, template, document[0])
-        logging.info(">>>msg:{}".format(message_dict))
+        logging.info(">>>msg:%s",message_dict)
         # 调用消息函数发送
         try:
             if template.msg_type == '03':
@@ -116,7 +116,7 @@ class DinDinMessageTemplate(models.Model):
                 self.env['dindin.work.message'].sudo().send_work_message(
                     deptstr=dept_str, msg=message_dict)
         except Exception as e:
-            logging.info("发送消息失败!错误消息为:{}".format(e))
+            logging.info("发送消息失败!错误消息为:%s", e)
 
     def create_message_dict(self, model_type, template, res_dict):
         """

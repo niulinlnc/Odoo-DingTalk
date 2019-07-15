@@ -52,7 +52,7 @@ class DinDinUsersSign(models.Model):
             try:
                 result = client.checkin.record_get(
                     userid_list, start_time, end_time, cursor=cursor, size=size)
-                logging.info(">>>获取多个用户的签到记录结果{}".format(result))
+                logging.info(">>>获取多个用户的签到记录结果%s", result)
 
                 line_list = list()
                 r_result = result.get('result')

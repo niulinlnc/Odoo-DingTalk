@@ -24,14 +24,14 @@ class HrEmployeeReport(models.Model):
         tools.drop_view_if_exists(self._cr, 'hr_employee_dingding_report')
         self._cr.execute("""
             CREATE VIEW hr_employee_dingding_report AS (
-                SELECT 
+                SELECT
                     emp.id as id,
                     emp.company_id as company_id,
                     emp.id as employee_id,
                     emp.department_id as department_id,
                     emp.work_status as work_status
-                FROM 
-                    hr_employee emp 
+                FROM
+                    hr_employee emp
         )""")
 
 
@@ -65,7 +65,7 @@ class GetHrEmployeeStauts(models.TransientModel):
                 headers = {'Content-Type': 'application/json'}
                 result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data), timeout=3)
                 result = json.loads(result.text)
-                logging.info("待入职员工:{}".format(result))
+                logging.info("待入职员工:%s", result)
                 if result.get('errcode') == 0:
                     d_res = result['result']
                     for data_list in d_res['data_list']:
@@ -101,13 +101,15 @@ class GetHrEmployeeStauts(models.TransientModel):
                 }
                 try:
                     headers = {'Content-Type': 'application/json'}
-                    result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data), timeout=2)
+                    result = requests.post(url="{}{}".format(url, token), headers=headers,
+                                           data=json.dumps(data), timeout=2)
                     result = json.loads(result.text)
-                    logging.info("在职员工:{}".format(result))
+                    logging.info("在职员工:%s", result)
                     if result.get('errcode') == 0:
                         d_res = result['result']
                         for data_list in d_res['data_list']:
-                            sql = """UPDATE hr_employee SET work_status='2',office_status={} WHERE din_id='{}'""".format(data_list, arr)
+                            sql = """UPDATE hr_employee SET work_status='2',office_status={} WHERE din_id='{}'""".format(
+                                data_list, arr)
                             self._cr.execute(sql)
                         if 'next_cursor' in d_res:
                             offset = d_res['next_cursor']
@@ -130,12 +132,12 @@ class GetHrEmployeeStauts(models.TransientModel):
         offset = 0
         size = 50
         while True:
-            data = {'offset': offset,'size': size}
+            data = {'offset': offset, 'size': size}
             try:
                 headers = {'Content-Type': 'application/json'}
                 result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data), timeout=2)
                 result = json.loads(result.text)
-                logging.info("离职员工:{}".format(result))
+                logging.info("离职员工:%s", result)
                 if result.get('errcode') == 0:
                     d_res = result['result']
                     for data_list in d_res['data_list']:
@@ -150,4 +152,3 @@ class GetHrEmployeeStauts(models.TransientModel):
             except ReadTimeout:
                 raise UserError("网络连接超时")
         return True
-

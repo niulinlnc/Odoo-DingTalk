@@ -38,7 +38,7 @@ class HrEmployee(models.Model):
                     try:
                         result = client.health.stepinfo_list(
                             _type, object_id, stat_dates)
-                        logging.info(">>>获取员工在今日的步数返回结果:{}".format(result))
+                        logging.info(">>>获取员工在今日的步数返回结果:%s", result)
                         if result['stepinfo_list']:
                             for stepinfo_list in result['stepinfo_list']['basic_step_info_vo']:
                                 res.update(
@@ -96,4 +96,4 @@ class HrEmployee(models.Model):
             logging.info(">>>获取id{}钉钉运动开启状态返回结果:{}".format(userid, result))
             return result
         except Exception as e:
-            logging.info(">>>获取失败，原因：{}".format(e))
+            logging.info(">>>获取失败，原因：%s", e)

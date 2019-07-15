@@ -27,7 +27,7 @@ class DinDinApprovalTemplate(models.Model):
         client = get_client(self)
         try:
             result = client.bpms.process_listbyuserid(userid='')
-            logging.info(">>>获取审批模板返回结果{}".format(result))
+            logging.info(">>>获取审批模板返回结果%s", result)
             d_res = result.get('process_list')
             for process in d_res.get('process_top_vo'):
                 data = {
@@ -61,7 +61,7 @@ class DinDinApprovalTemplate(models.Model):
                 client = get_client(self)
                 result = client.bpms.dingtalk_oapi_process_gettodonum(
                     emp.din_id)
-                logging.info(">>>获取待审批数量返回结果{}".format(result))
+                logging.info(">>>获取待审批数量返回结果%s", result)
                 if result.get('errcode') == 0:
                     return {'state': True, 'number': result.get('count')}
                 else:
@@ -83,7 +83,7 @@ class DinDinApprovalTemplate(models.Model):
         client = get_client(self)
         try:
             result = client.bpms.processinstance_get(pid)
-            logging.info(">>>获取审批实例详情返回结果{}".format(result))
+            logging.info(">>>获取审批实例详情返回结果%s", result)
             if result.get('errcode') == 0:
                 process_instance = result.get('process_instance')
                 temp = self.env['dindin.approval.template'].sudo().search(

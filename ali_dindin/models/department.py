@@ -37,7 +37,7 @@ class HrDepartment(models.Model):
                 raise UserError("请选择上级部门!")
             try:
                 result = client.department.create(data)
-                logging.info(">>>新增部门返回结果:{}".format(result))
+                logging.info(">>>新增部门返回结果:%s", result)
 
                 if result.get('errcode') == 0:
                     res.write({'din_id': result.get('id')})
@@ -63,7 +63,7 @@ class HrDepartment(models.Model):
             }
             try:
                 result = client.department.update(data)
-                logging.info(">>>修改部门时钉钉返回结果:{}".format(result))
+                logging.info(">>>修改部门时钉钉返回结果:%s", result)
                 if result.get('errcode') == 0:
                     res.message_post(body="钉钉消息：新的信息已同步更新至钉钉",
                                      message_type='notification')
@@ -92,7 +92,7 @@ class HrDepartment(models.Model):
         client = get_client(self)
         try:
             result = client.department.delete(din_id)
-            logging.info(">>>删除钉钉部门返回结果:{}".format(result))
+            logging.info(">>>删除钉钉部门返回结果:%s", result)
             if result.get('errcode') != 0:
                 raise UserError(
                     '删除钉钉部门时发生错误，详情为:{}'.format(result.get('errmsg')))

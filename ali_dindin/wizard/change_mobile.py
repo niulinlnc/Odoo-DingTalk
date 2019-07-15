@@ -84,7 +84,7 @@ class ChangeMobile(models.TransientModel):
                 }
                 try:
                     result = client.user.delete(data)
-                    logging.info("user_delete:{}".format(result))
+                    logging.info("user_delete:%s", result)
                     employee = self.env['hr.employee'].search(
                         [('din_id', '=', self.din_id)])
                     if employee:

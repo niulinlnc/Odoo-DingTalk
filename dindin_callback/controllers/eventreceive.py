@@ -26,7 +26,7 @@ class CallBack(Home, http.Controller):
         call_back, din_corpId = self.get_bash_attr()
         msg = self.encrypt_result(json_str.get(
             'encrypt'), call_back.aes_key, din_corpId)
-        logging.info(">>>解密消息结果:{}".format(msg))
+        logging.info(">>>解密消息结果:%s", msg)
         msg = json.loads(msg)
         event_type = msg.get('EventType')
         success = self.result_success(

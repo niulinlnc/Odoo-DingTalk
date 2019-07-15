@@ -65,9 +65,9 @@ class DinDinLogin(Home, http.Controller):
         code = request.params['code']
         if not code:
             return self._do_err_redirect("错误的访问地址,请输入正确的访问地址")
-        logging.info(">>>获取的code为：{}".format(code))
+        logging.info(">>>获取的code为：%s", code)
         result = self.getUserInfobyDincode(code)
-        logging.info(">>>result:{}".format(result))
+        logging.info(">>>result:%s", result)
         if not result['state']:
             logging.info(result['msg'])
             return self._do_err_redirect(result['msg'])
@@ -144,7 +144,7 @@ class DinDinLogin(Home, http.Controller):
             result = requests.post(
                 url=new_url, headers=headers, data=json.dumps(data), timeout=15)
             result = json.loads(result.text)
-            logging.info(">>>钉钉登录获取用户信息返回结果{}".format(result))
+            logging.info(">>>钉钉登录获取用户信息返回结果%s", result)
             if result.get('errcode') == 0:
                 user_info = result.get('user_info')
                 # 通过unionid获取userid并得到系统的user
@@ -219,9 +219,9 @@ class DinDinLogin(Home, http.Controller):
         code = request.params['code']
         if not code:
             return self._do_err_redirect("错误的访问地址,请输入正确的访问地址")
-        logging.info(">>>获取的code为：{}".format(code))
+        logging.info(">>>获取的code为：%s", code)
         result = self.getUserInfobyDincode(code)
-        logging.info(">>>result:{}".format(result))
+        logging.info(">>>result:%s", result)
         if not result['state']:
             logging.info(result['msg'])
         return self._do_post_login(result['user'], redirect)

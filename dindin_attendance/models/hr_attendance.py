@@ -152,8 +152,7 @@ class HrAttendanceTransient(models.TransientModel):
                                 if not attendance:
                                     self.env['dingding.attendance'].sudo().create(
                                         data)
-                            logging.info(">>>是否还有剩余数据：{}".format(
-                                result.get('hasMore')))
+                            logging.info(">>>是否还有剩余数据：%s", result.get('hasMore'))
                             if result.get('hasMore'):
                                 offset = offset + limit
                                 logging.info(">>>准备获取剩余数据中的第{}至{}条".format(
@@ -195,7 +194,7 @@ class HrAttendanceTransient(models.TransientModel):
                 while True:
                     has_more = self.attendance_list(
                         d[0], d[1], user_ids=u, offset=offset, limit=limit)
-                    logging.info(">>>是否还有剩余数据：{}".format(has_more))
+                    logging.info(">>>是否还有剩余数据：%s", hasMore)
                     if not has_more:
                         break
                     else:
@@ -222,7 +221,7 @@ class HrAttendanceTransient(models.TransientModel):
         try:
             result = client.attendance.list(
                 work_date_from, work_date_to, user_ids=user_ids, offset=offset, limit=limit)
-            # logging.info(">>>获取考勤返回结果{}".format(result))
+            # logging.info(">>>获取考勤返回结果%s", result)
             if result.get('errcode') == 0:
                 for rec in result.get('recordresult'):
                     data = {

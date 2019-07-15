@@ -42,7 +42,7 @@ class DinDinSimpleGroups(models.Model):
         logging.info(">>>获取考勤组...")
         try:
             result = client.attendance.getsimplegroups()
-            logging.info(">>>获取考勤组列表返回结果{}".format(result))
+            logging.info(">>>获取考勤组列表返回结果%s", result)
 
             if result.get('ding_open_errcode') == 0:
                 result = result.get('result')
@@ -88,7 +88,7 @@ class DinDinSimpleGroups(models.Model):
             userid = emp.din_id
             try:
                 result = client.attendance.getusergroup(userid)
-                logging.info(">>>获取考勤组成员返回结果{}".format(result))
+                logging.info(">>>获取考勤组成员返回结果%s", result)
                 if result.get('ding_open_errcode') == 0:
                     res = result.get('result')
                     groups = self.env['dindin.simple.groups'].sudo().search(

@@ -120,7 +120,7 @@ class DingDingChat(models.Model):
             try:
                 result = client.chat.create(name, owner, useridlist, show_history_type=showHistoryType, searchable=searchable,
                                             validation_type=validationType, mention_all_authority=mentionAllAuthority, chat_banned_type=chatBannedType, management_type=managementType)
-                logging.info(">>>创建会话返回结果{}".format(result))
+                logging.info(">>>创建会话返回结果%s", result)
                 if result.get('errcode') == 0:
                     res.write({'chat_id': result.get(
                         'chatid'), 'state': 'normal'})
@@ -168,7 +168,7 @@ class DingDingChat(models.Model):
             try:
                 result = client.chat.update(chatid, name=name, owner=owner, add_useridlist=(), del_useridlist=(), icon='', chat_banned_type=chatBannedType,
                                             searchable=searchable, validation_type=validationType, mention_all_authority=mentionAllAuthority, show_history_type=showHistoryType, management_type=managementType)
-                logging.info(">>>修改会话返回结果{}".format(result))
+                logging.info(">>>修改会话返回结果%s", result)
                 if result.get('errcode') == 0:
                     res.message_post(
                         body="群会话已修改!", message_type='notification')
@@ -293,7 +293,7 @@ class DingDingChatUserModelAdd(models.TransientModel):
             try:
                 result = client.chat.update(
                     chatid, add_useridlist=add_useridlist)
-                logging.info(">>>添加群成员返回结果{}".format(result))
+                logging.info(">>>添加群成员返回结果%s", result)
                 if result.get('errcode') == 0:
                     new_user_list = list()
                     for user in res.on_user_ids:
@@ -359,7 +359,7 @@ class DingDingChatUserModelDel(models.TransientModel):
             try:
                 result = client.chat.update(
                     chatid, del_useridlist=del_useridlist)
-                logging.info(">>>删除群成员返回结果{}".format(result))
+                logging.info(">>>删除群成员返回结果%s", result)
                 if result.get('errcode') == 0:
                     for user in res.user_ids:
                         ding_chat.write({'useridlist': [(3, user.id)]})
@@ -396,7 +396,7 @@ class DingDingSendChatMessage(models.TransientModel):
         }
         try:
             result = client.chat.send(chatid, msg)
-            logging.info(">>>发送群消息返回结果{}".format(result))
+            logging.info(">>>发送群消息返回结果%s", result)
             ding_chat.message_post(body="消息已成功发送!".format(
                 self.message), message_type='notification')
         except Exception as e:
@@ -419,7 +419,7 @@ class DingDingSendChatMessage(models.TransientModel):
         }
         try:
             result = client.chat.send(chatid, msg)
-            logging.info(">>>发送群消息返回结果{}".format(result))
+            logging.info(">>>发送群消息返回结果%s", result)
         except Exception as e:
             raise UserError(e)
         return True
@@ -446,7 +446,7 @@ class DingDingSendChatMessage(models.TransientModel):
         try:
             result = client.message.send(
                 agentid, msg_body, touser_list=userid_list, toparty_list=())
-            logging.info(">>>发送待办消息返回结果{}".format(result))
+            logging.info(">>>发送待办消息返回结果%s", result)
         except Exception as e:
             raise UserError(e)
         return True
@@ -470,7 +470,7 @@ class DingDingChatList(models.TransientModel):
             chatid = res.chat_id
             try:
                 result = client.chat.get(chatid)
-                logging.info(">>>获取群会话返回结果{}".format(result))
+                logging.info(">>>获取群会话返回结果%s", result)
                 employee = self.env['hr.employee'].sudo().search(
                     [('din_id', '=', result.get('owner'))])
                 if not employee:

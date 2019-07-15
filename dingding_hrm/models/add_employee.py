@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+import base64
 import logging
+
 from odoo import api, fields, models, tools
+from odoo.addons.ali_dindin.dingtalk.main import get_client
 from odoo.exceptions import UserError
 from odoo.modules import get_module_resource
-from odoo.addons.ali_dindin.dingtalk.main import get_client
-import base64
 
 _logger = logging.getLogger(__name__)
 
@@ -70,7 +71,7 @@ class AddDingDingEmployee(models.Model):
         try:
             result = client.employeerm.addpreentry(
                 name, mobile, pre_entry_time=pre_entry_time, op_userid=op_userid, extend_info=extend_info)
-            logging.info(">>>添加待入职员工返回结果{}".format(result))
+            logging.info(">>>添加待入职员工返回结果%s", result)
             self.write({
                 'user_id': result.get('userid'),
                 'state': 'lod'
@@ -91,7 +92,7 @@ class AddDingDingEmployee(models.Model):
         client = get_client(self)
         try:
             result = client.employeerm.querypreentry(offset=0, size=50)
-            logging.info(">>>查询待入职员工列表返回结果{}".format(result))
+            logging.info(">>>查询待入职员工列表返回结果%s" % (result))
             if result['data_list']['string']:
                 pre_entry_list = result['data_list']['string']
                 return len(pre_entry_list)

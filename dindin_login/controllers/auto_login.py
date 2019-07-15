@@ -38,7 +38,7 @@ class AutoLoginController(http.Controller):
             if not get_result.get('state'):
                 return self._post_error_message(get_result.get('msg'))
             userid = get_result.get('userid')
-            logging.info(">>>获取的user_id为：{}".format(userid))
+            logging.info(">>>获取的user_id为：%s", userid)
             if userid:
                 employee = request.env['hr.employee'].sudo().search(
                     [('din_id', '=', userid)])
@@ -74,7 +74,7 @@ class AutoLoginController(http.Controller):
         try:
             client = get_client(request)
             result = client.user.getuserinfo(auth_code)
-            logging.info(">>>获取用户信息返回结果:{}".format(result))
+            logging.info(">>>获取用户信息返回结果:%s", result)
 
             if result.get('errcode') != 0:
                 return {'state': False, 'msg': "钉钉接口错误:{}".format(result.get('errmsg'))}

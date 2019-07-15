@@ -51,7 +51,7 @@ class DingDingReportUser(models.Model):
             report_id = res.report_id
             try:
                 result = client.report.statistics(report_id)
-                logging.info(">>>获取日志统计数据返回结果{}".format(result))
+                logging.info(">>>获取日志统计数据返回结果%s", result)
                 d_res = result
                 data = {
                     'read_num': d_res.get('read_num'),
@@ -83,7 +83,7 @@ class DingDingReportUser(models.Model):
         try:
             result = client.report.statistics_listbytype(
                 report_id, _type, offset=0, size=100)
-            logging.info(">>>获取已读人员列表返回结果{}".format(result))
+            logging.info(">>>获取已读人员列表返回结果%s", result)
             d_res = result.get('userid_list')
             if d_res:
                 people_read_list = list()
@@ -101,7 +101,7 @@ class DingDingReportUser(models.Model):
         try:
             result = client.report.statistics_listbytype(
                 report_id, _type, offset=0, size=100)
-            logging.info(">>>获取点赞人员列表返回结果{}".format(result))
+            logging.info(">>>获取点赞人员列表返回结果%s", result)
             d_res = result.get('userid_list')
             if d_res:
                 people_like_list = list()
@@ -126,7 +126,7 @@ class DingDingReportUser(models.Model):
         report_id = res.report_id
         try:
             result = client.report.receiver_list(report_id, offset=0, size=100)
-            logging.info(">>>获取分享人员列表返回结果{}".format(result))
+            logging.info(">>>获取分享人员列表返回结果%s", result)
             d_res = result.get('userid_list')
             if d_res:
                 people_receive_list = list()
@@ -152,7 +152,7 @@ class DingDingReportUser(models.Model):
         report_id = res.report_id
         try:
             result = client.report.comment_list(report_id, offset=0, size=20)
-            logging.info(">>>获取日志评论详情返回结果{}".format(result))
+            logging.info(">>>获取日志评论详情返回结果%s", result)
             d_res = result.get('comments')
             if d_res:
                 comment_list = list()
@@ -226,11 +226,11 @@ class GetUserDingDingReportList(models.TransientModel):
                 size = size
                 userid = res.employee_id.din_id if res.employee_id else ''
                 template_name = res.report_type.name if res.report_type else ''
-                logging.info(">>>查询游标返回结果:{}".format(cursor))
+                logging.info(">>>查询游标返回结果:%s", cursor)
                 try:
                     result = client.report.list(
                         start_time, end_time, cursor=cursor, size=size, template_name=template_name, userid=userid)
-                    logging.info(">>>获取日志列表返回结果:{}".format(result))
+                    logging.info(">>>获取日志列表返回结果:%s", result)
                     d_res = result.get('data_list')
                     for data_list in d_res['report_oapi_vo']:
                         emp = self.env['hr.employee'].search(
