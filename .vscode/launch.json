@@ -7,7 +7,7 @@
             "request": "launch",
             "stopOnEntry": false,
             "pythonPath": "${config:python.pythonPath}",
-            "console": "externalTerminal",
+            "console": "integratedTerminal",
             "program": "${workspaceRoot}\\..\\odoo\\odoo-bin",
             "args": [
                 "--config=${workspaceRoot}\\..\\..\\odoo.conf",
@@ -19,6 +19,5 @@
                 "RedirectOutput"
             ]
         }
-     
     ]
 }

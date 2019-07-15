@@ -97,40 +97,41 @@ class GetDingDingHrmDimissionList(models.TransientModel):
             result = client.employeerm.listdimission(userid_list=user_ids)
             logging.info(">>>批量获取员工离职信息返回结果%s", result)
 
-            if len(result) < 1:
-                raise UserError(_("选择的员工未离职!"))
-            for res in result.get('emp_dimission_info_vo'):
-                emp = self.env['hr.employee'].search(
-                    [('din_id', '=', res.get('userid'))])
-                if emp:
-                    hrm = self.env['dingding.hrm.dimission.list'].search(
-                        [('emp_id', '=', emp[0].id)])
-                    main_dept = self.env['hr.department'].search(
-                        [('din_id', '=', res.get('main_dept_id'))])
-                    dept_list = list()
-                    for depti in res['dept_list']['emp_dept_v_o']:
-                        hr_dept = self.env['hr.department'].search(
-                            [('din_id', '=', depti.get('dept_id'))])
-                        if hr_dept:
-                            dept_list.append(hr_dept.id)
-                    data = {
-                        'emp_id': emp[0].id,
-                        'last_work_day': stamp_to_time(res.get('last_work_day')),
-                        'department_id': [(6, 0, dept_list)],
-                        'reason_memo': res.get('reason_memo'),
-                        'reason_type': res.get('reason_type'),
-                        'pre_status': res.get('pre_status'),
-                        'status': res.get('status'),
-                        'main_dept_name': main_dept.id if main_dept else False,
-                    }
-                    if res.get('handover_userid'):
-                        handover_userid = self.env['hr.employee'].search(
-                            [('din_id', '=', res.get('handover_userid'))])
-                        data.update({'handover_userid': handover_userid.id})
-                    if hrm:
-                        hrm.write(data)
-                    else:
-                        self.env['dingding.hrm.dimission.list'].create(data)
+            # if len(result) < 1:
+            #     raise UserError(_("选择的员工未离职!"))
+            if result.get('emp_dimission_info_vo'):
+                for res in result.get('emp_dimission_info_vo'):
+                    emp = self.env['hr.employee'].search(
+                        [('din_id', '=', res.get('userid'))])
+                    if emp:
+                        hrm = self.env['dingding.hrm.dimission.list'].search(
+                            [('emp_id', '=', emp[0].id)])
+                        main_dept = self.env['hr.department'].search(
+                            [('din_id', '=', res.get('main_dept_id'))])
+                        dept_list = list()
+                        for depti in res['dept_list']['emp_dept_v_o']:
+                            hr_dept = self.env['hr.department'].search(
+                                [('din_id', '=', depti.get('dept_id'))])
+                            if hr_dept:
+                                dept_list.append(hr_dept.id)
+                        data = {
+                            'emp_id': emp[0].id,
+                            'last_work_day': stamp_to_time(res.get('last_work_day')),
+                            'department_id': [(6, 0, dept_list)],
+                            'reason_memo': res.get('reason_memo'),
+                            'reason_type': str(res.get('reason_type')) if res.get('reason_type') else '9',
+                            'pre_status': str(res.get('pre_status')),
+                            'status': str(res.get('status')),
+                            'main_dept_name': main_dept.id if main_dept else False,
+                        }
+                        if res.get('handover_userid'):
+                            handover_userid = self.env['hr.employee'].search(
+                                [('din_id', '=', res.get('handover_userid'))])
+                            data.update({'handover_userid': handover_userid.id})
+                        if hrm:
+                            hrm.write(data)
+                        else:
+                            self.env['dingding.hrm.dimission.list'].create(data)
         except Exception as e:
             raise UserError(e)
         logging.info(">>>获取获取离职员工信息end")

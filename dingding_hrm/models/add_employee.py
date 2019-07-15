@@ -92,7 +92,7 @@ class AddDingDingEmployee(models.Model):
         client = get_client(self)
         try:
             result = client.employeerm.querypreentry(offset=0, size=50)
-            logging.info(">>>查询待入职员工列表返回结果%s" % (result))
+            logging.info(">>>查询待入职员工列表返回结果%s", result)
             if result['data_list']['string']:
                 pre_entry_list = result['data_list']['string']
                 return len(pre_entry_list)

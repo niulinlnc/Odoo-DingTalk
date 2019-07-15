@@ -4,6 +4,7 @@ import logging
 from odoo import api, fields, models, tools
 from odoo.addons.ali_dindin.dingtalk.main import get_client
 from odoo.exceptions import UserError
+from ..models.hrm_dimission_list import GetDingDingHrmDimissionList
 
 _logger = logging.getLogger(__name__)
 
@@ -122,6 +123,7 @@ class GetHrEmployeeStauts(models.TransientModel):
                 logging.info(">>>获取离职员工列表返回结果%s", result)
                 if result['data_list']:
                     result_list = result['data_list']['string']
+                    GetDingDingHrmDimissionList.dimission_list(self, result_list)
                     for data_list in result_list:
                         sql = """UPDATE hr_employee SET work_status='3' WHERE din_id='{}'""".format(data_list)
                         self._cr.execute(sql)
