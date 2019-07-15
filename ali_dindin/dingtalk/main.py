@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
 import redis
-from odoo import fields
+from odoo import fields, _
 from odoo.exceptions import UserError
 from datetime import datetime, timedelta
 from dingtalk.client import AppKeyClient
@@ -29,7 +29,7 @@ def get_client(obj):
     session_manager = redis.Redis(
         host=dingtalk_redis_ip, port=dingtalk_redis_port, db=dingtalk_redis_db)
     if not din_appkey and not din_appsecret and not din_corpid:
-        raise UserError('钉钉设置项中的CorpId、AppKey和AppSecret不能为空')
+        raise UserError(_('钉钉设置项中的CorpId、AppKey和AppSecret不能为空'))
     else:
         return AppKeyClient(din_corpid, din_appkey, din_appsecret, storage=KvStorage(session_manager))
 
@@ -41,8 +41,7 @@ def list_cut(mylist, limit):
     :param limit: 子列表元素限制数量
     :return:
     """
-    length = len(mylist)
-    cut_list = [mylist[i:i+limit] for i in range(0, length, limit)]
+    cut_list = [mylist[i:i + limit] for i in range(0, len(mylist), limit)]
     return cut_list
 
 

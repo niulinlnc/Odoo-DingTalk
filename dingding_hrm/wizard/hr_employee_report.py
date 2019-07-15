@@ -1,9 +1,8 @@
 # -*- coding:utf-8 -*-
-from odoo import fields, models, tools, api
-import json
 import logging
-import requests
-from requests import ReadTimeout
+
+from odoo import api, fields, models, tools
+from odoo.addons.ali_dindin.dingtalk.main import get_client
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -43,7 +42,7 @@ class GetHrEmployeeStauts(models.TransientModel):
     def get_hrm_employee_state(self):
         self.ensure_one()
         # 更新待入职员工
-        self.get_query_preentry()
+        # self.get_query_preentry()
         # 更新在职员工
         self.get_queryonjob()
         # 更新离职员工
@@ -55,30 +54,26 @@ class GetHrEmployeeStauts(models.TransientModel):
         更新待入职员工
         :return:
         """
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'hrm_querypreentry')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
+        client = get_client(self)
         offset = 0
         size = 50
         while True:
-            data = {'offset': offset, 'size': size}
             try:
-                headers = {'Content-Type': 'application/json'}
-                result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data), timeout=3)
-                result = json.loads(result.text)
-                logging.info("待入职员工:%s", result)
-                if result.get('errcode') == 0:
-                    d_res = result['result']
-                    for data_list in d_res['data_list']:
-                        sql = """UPDATE hr_employee SET work_status='1' WHERE din_id='{}'""".format(data_list)
-                        self._cr.execute(sql)
-                    if 'next_cursor' in d_res:
-                        offset = d_res['next_cursor']
-                    else:
-                        break
-                else:
-                    raise UserError("更新失败,原因:{}\r".format(result.get('errmsg')))
-            except ReadTimeout:
-                raise UserError("网络连接超时")
+                result = client.employeerm.querypreentry(offset=offset, size=size)
+                logging.info(">>>查询待入职员工列表返回结果%s", result)
+                # if result['data_list']['string']:
+                #     pre_entry_list = result['data_list']['string']
+                #     for data_list in pre_entry_list:
+                #         sql = """UPDATE hr_employee SET work_status='1' WHERE din_id='{}'""".format(data_list)
+                #         self._cr.execute(sql)
+                #     if 'next_cursor' in result['data_list']:
+                #         offset = result['data_list']['next_cursor']
+                #     else:
+                #         break
+                # else:
+                #     raise UserError(_("更新失败,原因:{}\r").format(result.get('errmsg')))
+            except Exception as e:
+                raise UserError(e)
         return True
 
     @api.model
@@ -87,38 +82,29 @@ class GetHrEmployeeStauts(models.TransientModel):
         更新在职员工,在职员工子状态筛选: 2，试用期；3，正式；5，待离职；-1，无状态
         :return:
         """
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'hrm_queryonjob')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
+        client = get_client(self)
         status_arr = ['2', '3', '5', '-1']
-        offset = 0
-        size = 20
         for arr in status_arr:
+            offset = 0
+            size = 20
             while True:
-                data = {
-                    'status_list': arr,
-                    'offset': offset,
-                    'size': size
-                }
                 try:
-                    headers = {'Content-Type': 'application/json'}
-                    result = requests.post(url="{}{}".format(url, token), headers=headers,
-                                           data=json.dumps(data), timeout=2)
-                    result = json.loads(result.text)
-                    logging.info("在职员工:%s", result)
-                    if result.get('errcode') == 0:
-                        d_res = result['result']
-                        for data_list in d_res['data_list']:
+                    result = client.employeerm.queryonjob(status_list=arr, offset=offset, size=size)
+                    logging.info(">>>更新在职员工子状态[%s]返回结果%s", arr, result)
+                    if result['data_list']:
+                        result_list = result['data_list']['string']
+                        for data_list in result_list:
                             sql = """UPDATE hr_employee SET work_status='2',office_status={} WHERE din_id='{}'""".format(
-                                data_list, arr)
+                                arr, data_list)
                             self._cr.execute(sql)
-                        if 'next_cursor' in d_res:
-                            offset = d_res['next_cursor']
+                        if 'next_cursor' in result:
+                            offset = result['next_cursor']
                         else:
                             break
                     else:
-                        raise UserError("更新失败,原因:{}\r".format(result.get('errmsg')))
-                except ReadTimeout:
-                    raise UserError("网络连接超时")
+                        break
+                except Exception as e:
+                    raise UserError(e)
         return True
 
     @api.model
@@ -127,28 +113,24 @@ class GetHrEmployeeStauts(models.TransientModel):
         更新离职员工
         :return:
         """
-        url = self.env['ali.dindin.system.conf'].search([('key', '=', 'hrm_querydimission')]).value
-        token = self.env['ali.dindin.system.conf'].search([('key', '=', 'token')]).value
+        client = get_client(self)
         offset = 0
         size = 50
         while True:
-            data = {'offset': offset, 'size': size}
             try:
-                headers = {'Content-Type': 'application/json'}
-                result = requests.post(url="{}{}".format(url, token), headers=headers, data=json.dumps(data), timeout=2)
-                result = json.loads(result.text)
-                logging.info("离职员工:%s", result)
-                if result.get('errcode') == 0:
-                    d_res = result['result']
-                    for data_list in d_res['data_list']:
+                result = client.employeerm.querydimission(offset=offset, size=size)
+                logging.info(">>>获取离职员工列表返回结果%s", result)
+                if result['data_list']:
+                    result_list = result['data_list']['string']
+                    for data_list in result_list:
                         sql = """UPDATE hr_employee SET work_status='3' WHERE din_id='{}'""".format(data_list)
                         self._cr.execute(sql)
-                    if 'next_cursor' in d_res:
-                        offset = d_res['next_cursor']
+                    if 'next_cursor' in result:
+                        offset = result['next_cursor']
                     else:
                         break
                 else:
-                    raise UserError("更新失败,原因:{}\r".format(result.get('errmsg')))
-            except ReadTimeout:
-                raise UserError("网络连接超时")
+                    break
+            except Exception as e:
+                raise UserError(e)
         return True

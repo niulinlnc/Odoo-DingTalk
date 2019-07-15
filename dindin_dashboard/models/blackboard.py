@@ -3,6 +3,7 @@ import logging
 import requests
 from odoo import api, models
 from odoo.addons.ali_dindin.dingtalk.main import get_client
+from dingtalk.core.exceptions import DingTalkClientException
 
 _logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class DinDinBlackboard(models.TransientModel):
                     return {'state': True, 'data': line_list, 'msg': '', 'number': len(line_list)}
                 else:
                     return {'state': False, 'msg': '获取公告失败,详情为:{}'.format(result.get('errmsg'))}
-            except Exception as e:
+            except DingTalkClientException as e:
                 return {'state': False, 'msg': "获取用户'{}'的公告失败，原因：{}".format(self.env.user.name, e)}
         else:
             return {'state': False, 'msg': '当前登录用户不存在关联员工!'}
