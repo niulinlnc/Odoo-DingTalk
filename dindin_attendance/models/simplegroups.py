@@ -95,7 +95,7 @@ class DinDinSimpleGroups(models.Model):
                         [('group_id', '=', res.get('group_id'))])
                     if groups:
                         self._cr.execute(
-                            """UPDATE hr_employee SET din_group_id = {} WHERE id = {}""".format(groups[0].id, emp.id))
+                            """UPDATE hr_employee SET din_group_id = %s WHERE id = %s""", (groups[0].id, emp.id,))
                     else:
                         pass
                 else:

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import logging
+
 import requests
+from dingtalk.core.exceptions import DingTalkClientException
+
 from odoo import api, models
 from odoo.addons.ali_dindin.dingtalk.main import get_client
-from dingtalk.core.exceptions import DingTalkClientException
 
 _logger = logging.getLogger(__name__)
 

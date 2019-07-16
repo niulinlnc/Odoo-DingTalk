@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 import base64
 import hashlib
+import hmac
 import json
 import logging
 import time
-import hmac
 from urllib.parse import quote
+
 import requests
 from requests import ReadTimeout
-from odoo import http, _
-from odoo.addons.web.controllers.main import ensure_db, Home
-from odoo.http import request
-from odoo.addons.ali_dindin.dingtalk.main import get_client
 
 import odoo
+from odoo import _, http
+from odoo.addons.web.controllers.main import Home, ensure_db
+from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 
@@ -104,7 +104,7 @@ class DinDinLogin(Home, http.Controller):
             return self._do_err_redirect("'{}'密码已重置为123,再次扫描进行登录!".format(user.login))
         uid = request.session.authenticate(
             request.session.db, user.login, password)
-        logging.info(u'>>>:获取的用户uid: {}'.format(uid))
+        logging.info(u'>>>:获取的用户uid: %s', uid)
         if uid is not False:
             request.params['login_success'] = True
             if not redirect:

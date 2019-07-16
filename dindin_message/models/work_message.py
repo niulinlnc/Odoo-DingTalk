@@ -62,10 +62,10 @@ class DinDinWorkMessage(models.Model):
     def check_length(self):
         if len(self.user_ids) > 6:
             if not self.to_all_user:
-                raise UserError('用户列表最大支持20个，请不要超过20个用户')
+                raise UserError(_('用户列表最大支持20个，请不要超过20个用户'))
         if len(self.dep_ids) > 6:
             if not self.to_all_user:
-                raise UserError('接受消息部门列表最大支持20')
+                raise UserError(_('接受消息部门列表最大支持20'))
 
     @api.onchange('to_all_user')
     def onchange_to_all_users(self):
@@ -209,12 +209,12 @@ class DinDinWorkMessage(models.Model):
         client = get_client(self)
         logging.info(">>>开始钉钉发送工作消息")
         if not toall and not userstr and not deptstr:
-            raise UserError("是否发送全部员工、用户列表、部门列表三个参数必须有一个有值！")
+            raise UserError(_("是否发送全部员工、用户列表、部门列表三个参数必须有一个有值！"))
         if msg:
             if not isinstance(msg, dict):
-                raise UserError("需要发送的消息体msg参数格式不正确！")
+                raise UserError(_("需要发送的消息体msg参数格式不正确！"))
         else:
-            raise UserError("需要发送的消息体不存在！")
+            raise UserError(_("需要发送的消息体不存在！"))
         agent_id = self.env['ir.config_parameter'].sudo(
         ).get_param('ali_dindin.din_agentid')  # 应用id
         msg = msg if msg else {}
@@ -336,7 +336,7 @@ class DinDinWorkMessage(models.Model):
                     for dept in msg.dep_ids:
                         dept.write({'msg_type': '04'})
                 else:
-                    msg.message_post(body="全体工作通知消息撤回成功，返回值:{}!".format(
+                    msg.message_post(body=_("全体工作通知消息撤回成功，返回值:{}!").format(
                         result), message_type='notification')
             except Exception as e:
                 raise UserError(e)

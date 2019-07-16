@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import datetime
-import json
 import logging
 import time
-import requests
-from requests import ReadTimeout
-from odoo import api, fields, models
-from odoo.exceptions import UserError
+
+from odoo import _, api, fields, models
 from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -77,24 +75,24 @@ class DinDinWorkRecord(models.Model):
         self.ensure_one()
         client = get_client(self)
         if len(self.line_ids) < 1:
-            raise UserError('待办表单列表不能为空!')
+            raise UserError(_('待办表单列表不能为空!'))
         else:
-            formItemList = {}
+            form_item_list = {}
             for line in self.line_ids:
-                formItemList.update({'{}'.format(line.title): line.content})
+                form_item_list.update({'{}'.format(line.title): line.content})
         userid = self.emp_id.din_id
         create_time = self.record_time
         title = self.name
         url = self.record_url if self.record_url else ''
         try:
             result = client.workrecord.add(
-                userid, create_time, title, url, formItemList, originator_user_id='', source_name='')
+                userid, create_time, title, url, form_item_list, originator_user_id='', source_name='')
             logging.info(">>>新增待办事项返回结果%s", result)
             self.write({'state': '01', 'record_id': result})
         except Exception as e:
             raise UserError(e)
         self.send_message_to_emp()
-        self.message_post(body="待办事项已推送到钉钉!", message_type='notification')
+        self.message_post(body=_("待办事项已推送到钉钉!"), message_type='notification')
 
     @api.multi
     def send_message_to_emp(self):
@@ -226,11 +224,11 @@ class DinDinWorkRecord(models.Model):
                 result = client.workrecord.update(userid, record_id)
                 logging.info(">>>获更新代办事项返回结果%s", result)
                 if result:
-                    res.message_post(body="待办状态已更新!",
+                    res.message_post(body=_("待办状态已更新!"),
                                      message_type='notification')
                     res.write({'record_state': '01'})
                 else:
-                    res.message_post(body="待办状态更新失败!",
+                    res.message_post(body=_("待办状态更新失败!"),
                                      message_type='notification')
             except Exception as e:
                 raise UserError(e)
@@ -288,7 +286,7 @@ class GetUserDingDingWorkRecord(models.TransientModel):
         din_id = self.env['hr.employee'].search_read(
             [('user_id', '=', self.env.user.id)], fields=['din_id'])
         if len(din_id) > 1:
-            raise UserError("当前用户关联了多个员工，请纠正！")
+            raise UserError(_("当前用户关联了多个员工，请纠正！"))
         offset = 0  # 分页游标
         limit = 50  # 分页大小
         for emp in din_id:

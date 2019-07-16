@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 import base64
-import json
 import logging
 import random
-import requests
+
 from odoo import http
-from odoo.http import request
 from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 

@@ -65,7 +65,7 @@ class GetHrEmployeeStauts(models.TransientModel):
                 # if result['data_list']['string']:
                 #     pre_entry_list = result['data_list']['string']
                 #     for data_list in pre_entry_list:
-                #         sql = """UPDATE hr_employee SET work_status='1' WHERE din_id='{}'""".format(data_list)
+                #         sql = """UPDATE hr_employee SET work_status='1' WHERE din_id='%s'""", (data_list,)
                 #         self._cr.execute(sql)
                 #     if 'next_cursor' in result['data_list']:
                 #         offset = result['data_list']['next_cursor']
@@ -95,8 +95,7 @@ class GetHrEmployeeStauts(models.TransientModel):
                     if result['data_list']:
                         result_list = result['data_list']['string']
                         for data_list in result_list:
-                            sql = """UPDATE hr_employee SET work_status='2',office_status={} WHERE din_id='{}'""".format(
-                                arr, data_list)
+                            sql = """UPDATE hr_employee SET work_status='2',office_status=%s WHERE din_id='%s'""", (arr, data_list,)
                             self._cr.execute(sql)
                         if 'next_cursor' in result:
                             offset = result['next_cursor']
@@ -125,7 +124,7 @@ class GetHrEmployeeStauts(models.TransientModel):
                     result_list = result['data_list']['string']
                     GetDingDingHrmDimissionList.dimission_list(self, result_list)
                     for data_list in result_list:
-                        sql = """UPDATE hr_employee SET work_status='3' WHERE din_id='{}'""".format(data_list)
+                        sql = """UPDATE hr_employee SET work_status='3' WHERE din_id='%s'""", (data_list,)
                         self._cr.execute(sql)
                     if 'next_cursor' in result:
                         offset = result['next_cursor']

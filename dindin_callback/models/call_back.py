@@ -3,7 +3,7 @@ import logging
 import random
 import string
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.addons.ali_dindin.dingtalk.main import get_client
 from odoo.exceptions import UserError
 from odoo.http import request
@@ -90,7 +90,7 @@ class DinDinCallback(models.Model):
                 logging.info(">>>注册回调事件返回结果:%s", result)
                 if result.get('errcode') == 0:
                     self.write({'state': '01'})
-                    self.message_post(body="注册事件成功")
+                    self.message_post(body=_("注册事件成功"))
                 else:
                     raise UserError(_("注册失败！原因:{}").format(result.get('errmsg')))
             except Exception as e:

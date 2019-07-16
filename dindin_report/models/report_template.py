@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
-from odoo import api, fields, models
+
+from odoo import api, fields, models, _
 from odoo.addons.ali_dindin.dingtalk.main import get_client
 from odoo.exceptions import UserError
 
@@ -35,7 +36,7 @@ class DingDingReportTemplate(models.Model):
         group = self.env.user.has_group(
             'dindin_report.dd_get_report_templategroup')
         if not group:
-            raise UserError("不好意思，你没有权限进行本操作！")
+            raise UserError(_("不好意思，你没有权限进行本操作！"))
         try:
             result = client.report.template_listbyuserid()
             logging.info(">>>获取日志模板返回结果:%s", result)
