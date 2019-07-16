@@ -16,9 +16,8 @@ class DingTalkApprovalList(models.Model):
     process_code = fields.Char(string='模板唯一标识')
     process_instance_id = fields.Char(string='审批实例id')
     company_id = fields.Many2one(comodel_name='res.company',
-                                 string=u'公司', default=lambda self: self.env.user.company_id.id)
+                                 string='公司', default=lambda self: self.env.user.company_id.id)
 
- 
     @api.model
     def get_processinstance(self, pid):
         """

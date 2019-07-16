@@ -27,14 +27,16 @@ class DinDinApprovalMain(models.Model):
     ]
 
     process_code = fields.Char(string='单据编号')
-    company_id = fields.Many2one(comodel_name='res.company', string=u'公司',
+    company_id = fields.Many2one(comodel_name='res.company', string='公司',
                                  default=lambda self: self.env.user.company_id.id)
-    originator_user_id = fields.Many2one(comodel_name='hr.employee', string=u'发起人', required=True)
-    oa_state = fields.Selection(string=u'单据状态', selection=OASTATE, default='00')
+    originator_user_id = fields.Many2one(
+        comodel_name='hr.employee', string='发起人', required=True)
+    oa_state = fields.Selection(
+        string='单据状态', selection=OASTATE, default='00')
     oa_message = fields.Char(string='审批消息')
     process_instance_id = fields.Char(string='钉钉审批实例id')
-    reason_leave = fields.Text(string=u'事由')
-    oa_result = fields.Selection(string=u'审批结果', selection=OARESULT)
+    reason_leave = fields.Text(string='事由')
+    oa_result = fields.Selection(string='审批结果', selection=OARESULT)
     oa_url = fields.Char(string='钉钉单据url')
     title = fields.Char(string='标题')
 
@@ -68,9 +70,9 @@ class DinDinApprovalMain(models.Model):
         client = get_client(self)
         try:
             result = client.bpms.processinstance_create(process_code, user_id, dept_id, approvers, form_values,
-                               agent_id=None, cc_list=cc_list, cc_start=False, cc_finish=False, approvers_v2=())
+                                                        agent_id=None, cc_list=cc_list, cc_start=False, cc_finish=False, approvers_v2=())
 
-            logging.info(">>>提交审批到钉钉返回结果{}".format(result))
+            logging.info(">>>提交审批到钉钉返回结果%s", result)
             if result.get('errcode') == 0:
                 return result.get('process_instance_id')
             else:
@@ -85,8 +87,10 @@ class DinDinApprovalMain(models.Model):
         :param model_name:
         :return:
         """
-        model_id = self.env['ir.model'].sudo().search([('model', '=', model_name)]).id
-        dac = self.env['dindin.approval.control'].search([('oa_model_id', '=', model_id)])
+        model_id = self.env['ir.model'].sudo().search(
+            [('model', '=', model_name)]).id
+        dac = self.env['dindin.approval.control'].search(
+            [('oa_model_id', '=', model_id)])
         if not dac:
             raise UserError("没有对应的审批关联！请前往钉钉->审批关联中进行配置!")
         return dac[0].template_id.process_code
@@ -145,10 +149,12 @@ class DinDinApproversUsers(models.Model):
 
     number = fields.Integer(string='序号')
     sequence = fields.Integer(string='序列')
-    emp_id = fields.Many2one(comodel_name='hr.employee', string=u'审批人', required=True)
+    emp_id = fields.Many2one(comodel_name='hr.employee',
+                             string='审批人', required=True)
     mobile_phone = fields.Char(string='电话')
     job_title = fields.Char(string='职位')
-    department_id = fields.Many2one(comodel_name='hr.department', string=u'部门', ondelete='cascade')
+    department_id = fields.Many2one(
+        comodel_name='hr.department', string='部门', ondelete='cascade')
 
     @api.onchange('emp_id')
     def onchange_emp(self):
@@ -169,10 +175,12 @@ class DinDinApproversCc(models.Model):
 
     number = fields.Integer(string='序号')
     sequence = fields.Integer(string='序列')
-    emp_id = fields.Many2one(comodel_name='hr.employee', string=u'抄送人', required=True)
+    emp_id = fields.Many2one(comodel_name='hr.employee',
+                             string='抄送人', required=True)
     mobile_phone = fields.Char(string='电话')
     job_title = fields.Char(string='职位')
-    department_id = fields.Many2one(comodel_name='hr.department', string=u'部门', ondelete='cascade')
+    department_id = fields.Many2one(
+        comodel_name='hr.department', string='部门', ondelete='cascade')
 
     @api.onchange('emp_id')
     def onchange_emp(self):

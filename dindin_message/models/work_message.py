@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
-import requests
-from requests import ReadTimeout
-from odoo import api, fields, models
+
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client
 
@@ -27,22 +25,23 @@ class DinDinWorkMessage(models.Model):
     _inherit = ['mail.thread']
     _rec_name = 'name'
 
-    company_id = fields.Many2one(comodel_name='res.company', string=u'公司',
+    company_id = fields.Many2one(comodel_name='res.company', string='公司',
                                  default=lambda self: self.env.user.company_id.id)
     name = fields.Char(string='标题', required=True)
-    to_all_user = fields.Boolean(string=u'发送给企业全部用户')
+    to_all_user = fields.Boolean(string='发送给企业全部用户')
     user_ids = fields.One2many(comodel_name='dindin.work.message.user.list', inverse_name='message_id',
-                               string=u'接受消息用户列表')
+                               string='接受消息用户列表')
     dep_ids = fields.One2many(comodel_name='dindin.work.message.dept.list', inverse_name='message_id',
-                              string=u'接受部门消息列表')
-    msg_type = fields.Selection(string=u'消息类型', selection=MESSAGETYPE, default='text', required=True)
+                              string='接受部门消息列表')
+    msg_type = fields.Selection(
+        string='消息类型', selection=MESSAGETYPE, default='text', required=True)
     task_id = fields.Char(string='任务Id')
-    state = fields.Selection(string=u'发送状态', selection=[('0', '未开始'), ('1', '处理中'), ('2', '处理完毕')],
+    state = fields.Selection(string='发送状态', selection=[('0', '未开始'), ('1', '处理中'), ('2', '处理完毕')],
                              default='0')
     text_message = fields.Text(string='文本消息内容')
     card_message = fields.Text(string='卡片消息内容', help="支持markdown语法")
     card_message_ids = fields.One2many(comodel_name='dindin.work.card.message.list', inverse_name='message_id',
-                                       string=u'按钮列表')
+                                       string='按钮列表')
     markdown_message = fields.Text(string='Markdown消息内容', help="支持markdown语法")
     link_url = fields.Char(string='链接URL', help="点击消息时链接URL")
     link_image_url = fields.Char(string='链接图片URL', help="链接图片URL")
@@ -54,7 +53,7 @@ class DinDinWorkMessage(models.Model):
     oa_body_title = fields.Char(string='正文标题')
     oa_body_content = fields.Text(string='正文内容')
     oa_message_ids = fields.One2many(comodel_name='dindin.work.oa.message.list', inverse_name='message_id',
-                                     string=u'OA表单列表')
+                                     string='OA表单列表')
     oa_richunit = fields.Char(string='富文本单位')
     oa_richnum = fields.Float(string='富文本数量')
 
@@ -63,16 +62,17 @@ class DinDinWorkMessage(models.Model):
     def check_length(self):
         if len(self.user_ids) > 6:
             if not self.to_all_user:
-                raise UserError('用户列表最大支持20个，请不要超过20个用户')
+                raise UserError(_('用户列表最大支持20个，请不要超过20个用户'))
         if len(self.dep_ids) > 6:
             if not self.to_all_user:
-                raise UserError('接受消息部门列表最大支持20')
+                raise UserError(_('接受消息部门列表最大支持20'))
 
     @api.onchange('to_all_user')
     def onchange_to_all_users(self):
         if self.to_all_user:
             self.user_ids = False
-            emps = self.env['hr.employee'].sudo().search([('din_id', '!=', '')])
+            emps = self.env['hr.employee'].sudo().search(
+                [('din_id', '!=', '')])
             user_list = list()
             for emp in emps:
                 user_list.append({
@@ -117,8 +117,10 @@ class DinDinWorkMessage(models.Model):
             else:
                 btn_json_list = list()
                 for val in self.card_message_ids:
-                    btn_json_list.append({'title': val.title, 'action_url': val.value})
-                btn_orientation = "1" if len(self.card_message_ids) == 2 else "0"
+                    btn_json_list.append(
+                        {'title': val.title, 'action_url': val.value})
+                btn_orientation = "1" if len(
+                    self.card_message_ids) == 2 else "0"
                 msg = {
                     "msgtype": "action_card",
                     "action_card": {
@@ -160,7 +162,8 @@ class DinDinWorkMessage(models.Model):
             """OA消息"""
             msg_list = list()
             for line in self.oa_message_ids:
-                msg_list.append({'key': "{}: ".format(line.key), 'value': line.value})
+                msg_list.append(
+                    {'key': "{}: ".format(line.key), 'value': line.value})
             msg = {
                 "msgtype": "oa",
                 "oa": {
@@ -183,12 +186,14 @@ class DinDinWorkMessage(models.Model):
                 }
             }
         # 调用发送工作消息函数
-        task_id = self.send_work_message(toall=self.to_all_user, userstr=user_str, deptstr=dept_str, msg=msg)
+        task_id = self.send_work_message(
+            toall=self.to_all_user, userstr=user_str, deptstr=dept_str, msg=msg)
         self.write({
             'task_id': task_id,
             'state': '1'
         })
-        self.message_post(body=u"消息信息已推送到钉钉，正在加急处理中!", message_type='notification')
+        self.message_post(body=_("消息信息已推送到钉钉，正在加急处理中!"),
+                          message_type='notification')
 
     @api.model
     def send_work_message(self, toall=None, userstr=None, deptstr=None, msg=None):
@@ -204,13 +209,14 @@ class DinDinWorkMessage(models.Model):
         client = get_client(self)
         logging.info(">>>开始钉钉发送工作消息")
         if not toall and not userstr and not deptstr:
-            raise UserError("是否发送全部员工、用户列表、部门列表三个参数必须有一个有值！")
+            raise UserError(_("是否发送全部员工、用户列表、部门列表三个参数必须有一个有值！"))
         if msg:
             if not isinstance(msg, dict):
-                raise UserError("需要发送的消息体msg参数格式不正确！")
+                raise UserError(_("需要发送的消息体msg参数格式不正确！"))
         else:
-            raise UserError("需要发送的消息体不存在！")
-        agent_id = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid')  # 应用id
+            raise UserError(_("需要发送的消息体不存在！"))
+        agent_id = self.env['ir.config_parameter'].sudo(
+        ).get_param('ali_dindin.din_agentid')  # 应用id
         msg = msg if msg else {}
         to_all_user = 'false'
         userid_list = ()
@@ -223,8 +229,9 @@ class DinDinWorkMessage(models.Model):
             else:
                 dept_id_list = (deptstr,)
         try:
-            result = client.message.asyncsend_v2(msg, agent_id, userid_list=userid_list, dept_id_list = dept_id_list, to_all_user=to_all_user)
-            logging.info(">>>发送工作消息返回结果{}".format(result))
+            result = client.message.asyncsend_v2(
+                msg, agent_id, userid_list=userid_list, dept_id_list=dept_id_list, to_all_user=to_all_user)
+            logging.info(">>>发送工作消息返回结果%s", result)
             return result
         except Exception as e:
             raise UserError(e)
@@ -239,13 +246,15 @@ class DinDinWorkMessage(models.Model):
         :return:
         """
         client = get_client(self)
-        agent_id = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid')  # 应用id
+        agent_id = self.env['ir.config_parameter'].sudo(
+        ).get_param('ali_dindin.din_agentid')  # 应用id
         task_id = self.task_id
         try:
             result = client.message.getsendprogress(agent_id, task_id)
-            logging.info(">>>查询工作消息状态返回结果{}".format(result))
+            logging.info(">>>查询工作消息状态返回结果%s", result)
             self.write({'state': str(result.get('status'))})
-            self.message_post(body=u"查询消息进度成功，返回值:{}!".format(result), message_type='notification')
+            self.message_post(body=_("查询消息进度成功，返回值:{}!").format(
+                result), message_type='notification')
         except Exception as e:
             raise UserError(e)
 
@@ -260,37 +269,44 @@ class DinDinWorkMessage(models.Model):
         """
         client = get_client(self)
         logging.info(">>>开始查询工作通知消息的发送结果")
-        agent_id = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid')  # 应用id
+        agent_id = self.env['ir.config_parameter'].sudo(
+        ).get_param('ali_dindin.din_agentid')  # 应用id
         task_id = self.task_id
         try:
-            result = client.message.getsendresult(agent_id=agent_id, task_id=task_id)
-            logging.info(">>>查询工作消息状态返回结果{}".format(result))
+            result = client.message.getsendresult(
+                agent_id=agent_id, task_id=task_id)
+            logging.info(">>>查询工作消息状态返回结果%s", result)
             send_result = result
             if send_result['failed_user_id_list']:
-                failed_user_id_list = send_result['failed_user_id_list']['string']  # 失败的用户列表
+                # 失败的用户列表
+                failed_user_id_list = send_result['failed_user_id_list']['string']
                 for failed in failed_user_id_list:
                     for user in self.user_ids:
                         if user.emp_id.din_id == failed:
                             user.write({'msg_type': '00'})
             if send_result['read_user_id_list']:
-                read_user_id_list = send_result['read_user_id_list']['string']  # 已读消息的用户id
+                # 已读消息的用户id
+                read_user_id_list = send_result['read_user_id_list']['string']
                 for read in read_user_id_list:
                     for user in self.user_ids:
                         if user.emp_id.din_id == read:
                             user.write({'msg_type': '02'})
             if send_result['unread_user_id_list']:
-                unread_user_id_list = send_result['unread_user_id_list']['string']  # 未读消息的用户id
+                # 未读消息的用户id
+                unread_user_id_list = send_result['unread_user_id_list']['string']
                 for unread in unread_user_id_list:
                     for user in self.user_ids:
                         if user.emp_id.din_id == unread:
                             user.write({'msg_type': '01'})
             if send_result['invalid_dept_id_list']:
-                invalid_dept_id_list = send_result['invalid_dept_id_list']['string']  # 无效的部门id
+                # 无效的部门id
+                invalid_dept_id_list = send_result['invalid_dept_id_list']['string']
                 for invalid in invalid_dept_id_list:
                     for dept in self.dep_ids:
                         if dept.dept_id.din_id == invalid:
                             dept.write({'msg_type': '00'})
-            self.message_post(body=u"查询工作通知消息的发送结果成功", message_type='notification')
+            self.message_post(body=_("查询工作通知消息的发送结果成功"),
+                              message_type='notification')
         except Exception as e:
             raise UserError(e)
 
@@ -306,11 +322,12 @@ class DinDinWorkMessage(models.Model):
         """
         client = get_client(self)
         for msg in self:
-            agent_id = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_agentid')  # 应用id
+            agent_id = self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_agentid')  # 应用id
             task_id = msg.task_id
             try:
                 result = client.message.recall(agent_id, task_id)
-                logging.info(">>>撤回工作消息返回结果{}".format(result))
+                logging.info(">>>撤回工作消息返回结果%s", result)
                 msg.write({'state': '0'})
                 if msg.user_ids:
                     for user in msg.user_ids:
@@ -319,9 +336,11 @@ class DinDinWorkMessage(models.Model):
                     for dept in msg.dep_ids:
                         dept.write({'msg_type': '04'})
                 else:
-                    msg.message_post(body=u"全体工作通知消息撤回成功，返回值:{}!".format(result), message_type='notification')
+                    msg.message_post(body=_("全体工作通知消息撤回成功，返回值:{}!").format(
+                        result), message_type='notification')
             except Exception as e:
                 raise UserError(e)
+
 
 class DinDinWorkMessageUserList(models.Model):
     _name = 'dindin.work.message.user.list'
@@ -336,12 +355,16 @@ class DinDinWorkMessageUserList(models.Model):
         ('04', '已撤回')
     ]
 
-    emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True)
+    emp_id = fields.Many2one(comodel_name='hr.employee',
+                             string='员工', required=True)
     mobile_phone = fields.Char(string='电话')
     job_title = fields.Char(string='职位')
-    department_id = fields.Many2one(comodel_name='hr.department', string=u'部门', ondelete='cascade')
-    msg_type = fields.Selection(string=u'消息状态', selection=MESSGAETYPE, default='03')
-    message_id = fields.Many2one(comodel_name='dindin.work.message', string=u'消息', ondelete='cascade')
+    department_id = fields.Many2one(
+        comodel_name='hr.department', string='部门', ondelete='cascade')
+    msg_type = fields.Selection(
+        string='消息状态', selection=MESSGAETYPE, default='03')
+    message_id = fields.Many2one(
+        comodel_name='dindin.work.message', string='消息', ondelete='cascade')
 
     @api.onchange('emp_id')
     def onchange_emp(self):
@@ -364,9 +387,12 @@ class DinDinWorkMessageDeptList(models.Model):
         ('04', '撤回')
     ]
 
-    dept_id = fields.Many2one(comodel_name='hr.department', string=u'部门', ondelete='cascade', required=True)
-    msg_type = fields.Selection(string=u'消息状态', selection=MESSGAETYPE, default='03')
-    message_id = fields.Many2one(comodel_name='dindin.work.message', string=u'消息', ondelete='cascade')
+    dept_id = fields.Many2one(
+        comodel_name='hr.department', string='部门', ondelete='cascade', required=True)
+    msg_type = fields.Selection(
+        string='消息状态', selection=MESSGAETYPE, default='03')
+    message_id = fields.Many2one(
+        comodel_name='dindin.work.message', string='消息', ondelete='cascade')
 
 
 class CardMessageList(models.Model):
@@ -376,7 +402,8 @@ class CardMessageList(models.Model):
 
     title = fields.Char(string='标题', required=True)
     value = fields.Char(string='标题链接地址', required=True)
-    message_id = fields.Many2one(comodel_name='dindin.work.message', string=u'消息', ondelete='cascade')
+    message_id = fields.Many2one(
+        comodel_name='dindin.work.message', string='消息', ondelete='cascade')
 
 
 class OaMessageList(models.Model):
@@ -386,4 +413,5 @@ class OaMessageList(models.Model):
 
     key = fields.Char(string='关键字', required=True)
     value = fields.Char(string='内容', required=True)
-    message_id = fields.Many2one(comodel_name='dindin.work.message', string=u'消息', ondelete='cascade')
+    message_id = fields.Many2one(
+        comodel_name='dindin.work.message', string='消息', ondelete='cascade')

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client
 
@@ -11,7 +11,8 @@ _logger = logging.getLogger(__name__)
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
-    din_group_id = fields.Many2one(comodel_name='dindin.simple.groups', string=u'考勤组')
+    din_group_id = fields.Many2one(
+        comodel_name='dindin.simple.groups', string='考勤组')
 
 
 class DinDinSimpleGroups(models.Model):
@@ -21,14 +22,15 @@ class DinDinSimpleGroups(models.Model):
     name = fields.Char(string='名称')
     group_id = fields.Char(string='钉钉考勤组ID')
 
-    s_type = fields.Selection(string=u'考勤类型',
+    s_type = fields.Selection(string='考勤类型',
                               selection=[('FIXED', '固定排班'), ('TURN', '轮班排班'), ('NONE', '无班次')], default='NONE')
-    member_count = fields.Integer(string=u'成员人数')
+    member_count = fields.Integer(string='成员人数')
     manager_list = fields.Many2many(comodel_name='hr.employee', relation='dindin_simple_group_hr_emp_rel',
-                                    column1='group_id', column2='emp_id', string=u'负责人')
+                                    column1='group_id', column2='emp_id', string='负责人')
     dept_name_list = fields.Many2many(comodel_name='hr.department', relation='dindin_simple_group_hr_dept_rel',
-                                      column1='group_id', column2='dept_id', string=u'关联部门')
-    emp_ids = fields.One2many(comodel_name='hr.employee', inverse_name='din_group_id', string=u'成员列表')
+                                      column1='group_id', column2='dept_id', string='关联部门')
+    emp_ids = fields.One2many(
+        comodel_name='hr.employee', inverse_name='din_group_id', string='成员列表')
 
     @api.model
     def get_simple_groups(self):
@@ -40,7 +42,7 @@ class DinDinSimpleGroups(models.Model):
         logging.info(">>>获取考勤组...")
         try:
             result = client.attendance.getsimplegroups()
-            logging.info(">>>获取考勤组列表返回结果{}".format(result))
+            logging.info(">>>获取考勤组列表返回结果%s", result)
 
             if result.get('ding_open_errcode') == 0:
                 result = result.get('result')
@@ -54,17 +56,19 @@ class DinDinSimpleGroups(models.Model):
                     manager_ids = list()
                     if group.get('manager_list'):
                         for emp in group.get('manager_list'):
-                            emp_res = self.env['hr.employee'].sudo().search([('din_id', '=', emp)])
+                            emp_res = self.env['hr.employee'].sudo().search(
+                                [('din_id', '=', emp)])
                             if emp_res:
                                 manager_ids.append(emp_res.id)
                     data.update({'manager_list': [(6, 0, manager_ids)]})
-                    self_group = self.env['dindin.simple.groups'].search([('group_id', '=', group.get('group_id'))])
+                    self_group = self.env['dindin.simple.groups'].search(
+                        [('group_id', '=', group.get('group_id'))])
                     if self_group:
                         self_group.sudo().write(data)
                     else:
                         self.env['dindin.simple.groups'].sudo().create(data)
             else:
-                raise UserError('获取考勤组失败，详情为:{}'.format(result.get('errmsg')))
+                raise UserError(_('获取考勤组失败，详情为:{}').format(result.get('errmsg')))
         except Exception as e:
             raise UserError(e)
         logging.info(">>>获取考勤组结束...")
@@ -82,15 +86,16 @@ class DinDinSimpleGroups(models.Model):
         emps = self.env['hr.employee'].sudo().search([('din_id', '!=', '')])
         for emp in emps:
             userid = emp.din_id
-            try: 
+            try:
                 result = client.attendance.getusergroup(userid)
-                logging.info(">>>获取考勤组成员返回结果{}".format(result))
+                logging.info(">>>获取考勤组成员返回结果%s", result)
                 if result.get('ding_open_errcode') == 0:
                     res = result.get('result')
-                    groups = self.env['dindin.simple.groups'].sudo().search([('group_id', '=', res.get('group_id'))])
+                    groups = self.env['dindin.simple.groups'].sudo().search(
+                        [('group_id', '=', res.get('group_id'))])
                     if groups:
                         self._cr.execute(
-                            """UPDATE hr_employee SET din_group_id = {} WHERE id = {}""".format(groups[0].id, emp.id))
+                            """UPDATE hr_employee SET din_group_id = %s WHERE id = %s""", (groups[0].id, emp.id,))
                     else:
                         pass
                 else:
@@ -98,5 +103,3 @@ class DinDinSimpleGroups(models.Model):
             except Exception as e:
                 raise UserError(e)
         return {'state': True, 'msg': '执行成功!'}
-
-

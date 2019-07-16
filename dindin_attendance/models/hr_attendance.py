@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
 from odoo.exceptions import UserError
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time, list_cut, day_cut
+
 
 class HrEmployee(models.Model):
     _inherit = "hr.employee"
@@ -10,7 +11,8 @@ class HrEmployee(models.Model):
 
     def dingding_attendance_action_employee(self):
         for res in self:
-            action = self.env.ref('dindin_attendance.dingding_attendance_action').read()[0]
+            action = self.env.ref(
+                'dindin_attendance.dingding_attendance_action').read()[0]
             action['domain'] = [('emp_id', '=', res.id)]
             return action
 
@@ -42,16 +44,20 @@ class DingDingAttendance(models.Model):
         ('AUTO_CHECK', '自动打卡'),
         ('odoo', 'Odoo系统'),
     ]
-    emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True)
-    check_in = fields.Datetime(string="打卡时间", default=fields.Datetime.now, required=True)
-    ding_group_id = fields.Many2one(comodel_name='dindin.simple.groups', string=u'钉钉考勤组')
+    emp_id = fields.Many2one(comodel_name='hr.employee',
+                             string='员工', required=True)
+    check_in = fields.Datetime(
+        string="打卡时间", default=fields.Datetime.now, required=True)
+    ding_group_id = fields.Many2one(
+        comodel_name='dindin.simple.groups', string='钉钉考勤组')
     recordId = fields.Char(string='记录ID')
-    workDate = fields.Datetime(string=u'工作日')
-    checkType = fields.Selection(string=u'考勤类型', selection=[('OnDuty', '上班'), ('OffDuty', '下班')])
-    timeResult = fields.Selection(string=u'时间结果', selection=TimeResult)
-    locationResult = fields.Selection(string=u'位置结果', selection=LocationResult)
-    baseCheckTime = fields.Datetime(string=u'基准时间')
-    sourceType = fields.Selection(string=u'数据来源', selection=SourceType)
+    workDate = fields.Datetime(string='工作日')
+    checkType = fields.Selection(string='考勤类型', selection=[
+                                 ('OnDuty', '上班'), ('OffDuty', '下班')])
+    timeResult = fields.Selection(string='时间结果', selection=TimeResult)
+    locationResult = fields.Selection(string='位置结果', selection=LocationResult)
+    baseCheckTime = fields.Datetime(string='基准时间')
+    sourceType = fields.Selection(string='数据来源', selection=SourceType)
     attendance_id = fields.Char(string='钉钉id')
 
 
@@ -59,19 +65,22 @@ class HrAttendanceTransient(models.TransientModel):
     _name = 'hr.attendance.tran'
     _description = '获取钉钉考勤信息'
 
-    start_date = fields.Datetime(string=u'开始时间', required=True)
-    stop_date = fields.Datetime(string=u'结束时间', required=True, default=str(fields.datetime.now()))
+    start_date = fields.Datetime(string='开始时间', required=True)
+    stop_date = fields.Datetime(
+        string='结束时间', required=True, default=str(fields.datetime.now()))
     emp_ids = fields.Many2many(comodel_name='hr.employee', relation='hr_dingding_attendance_and_hr_employee_rel',
-                               column1='attendance_id', column2='emp_id', string=u'员工', required=True)
-    is_all_emp = fields.Boolean(string=u'全部员工')
+                               column1='attendance_id', column2='emp_id', string='员工', required=True)
+    is_all_emp = fields.Boolean(string='全部员工')
 
     @api.onchange('is_all_emp')
     def onchange_all_emp(self):
         if self.is_all_emp:
             emps = self.env['hr.employee'].search([('din_id', '!=', '')])
             if len(emps) <= 0:
-                raise UserError("员工钉钉Id不存在！也许是你的员工未同步导致的！")
+                raise UserError(_("员工钉钉Id不存在！也许是你的员工未同步导致的！"))
             self.emp_ids = [(6, 0, emps.ids)]
+        else:
+            self.emp_ids = False
 
     @api.model
     def clear_attendance(self):
@@ -93,63 +102,74 @@ class HrAttendanceTransient(models.TransientModel):
         :return:
         """
         logging.info(">>>开始清空数据（仅用于测试）...")
-        self.clear_attendance() 
+        self.clear_attendance()
         client = get_client(self)
         logging.info(">>>开始获取员工打卡信息...")
         din_ids = list()
         for user in self.emp_ids:
-            din_ids.append(user.din_id)         
+            din_ids.append(user.din_id)
         user_list = list_cut(din_ids, 50)
         for u in user_list:
-            logging.info(">>>开始获取{}员工段数据".format(u))
+            logging.info(">>>开始获取%s员工段数据", u)
             date_list = day_cut(self.start_date, self.stop_date, 7)
             for d in date_list:
-                logging.info(">>>开始获取{}时间段数据".format(d))
-                offset=0
-                limit=50
+                logging.info(">>>开始获取%s时间段数据", d)
+                offset = 0
+                limit = 50
                 while True:
                     try:
-                        result = client.attendance.list(d[0], d[1], user_ids=u, offset=offset, limit=limit)
+                        result = client.attendance.list(
+                            d[0], d[1], user_ids=u, offset=offset, limit=limit)
                         if result.get('errcode') == 0:
                             for rec in result.get('recordresult'):
-                                    data = {
-                                        'recordId': rec.get('recordId'),
-                                        'workDate': stamp_to_time(rec.get('workDate')),  # 工作日
-                                        'timeResult': rec.get('timeResult'),  # 时间结果
-                                        'locationResult': rec.get('locationResult'),  # 考勤结果
-                                        'baseCheckTime': stamp_to_time(rec.get('baseCheckTime')),  # 基准时间
-                                        'sourceType': rec.get('sourceType'),  # 数据来源
-                                        'checkType': rec.get('checkType'),
-                                        'check_in': stamp_to_time(rec.get('userCheckTime')),
-                                        'attendance_id': rec.get('id'),
-                                    }
-                                    groups = self.env['dindin.simple.groups'].sudo().search(
-                                        [('group_id', '=', rec.get('groupId'))])
-                                    data.update({'ding_group_id': groups[0].id if groups else False})
-                                    emp_id = self.env['hr.employee'].sudo().search([('din_id', '=', rec.get('userId'))])
-                                    data.update({'emp_id': emp_id[0].id if emp_id else False})
-                                    attendance = self.env['dingding.attendance'].sudo().search(
-                                        [('emp_id', '=', emp_id[0].id),
-                                        ('check_in', '=', stamp_to_time(rec.get('userCheckTime'))),
-                                        ('checkType', '=', rec.get('checkType'))])
-                                    if not attendance:
-                                        self.env['dingding.attendance'].sudo().create(data)
-                            logging.info(">>>是否还有剩余数据：{}".format(result.get('hasMore')))
+                                data = {
+                                    'recordId': rec.get('recordId'),
+                                    # 工作日
+                                    'workDate': stamp_to_time(rec.get('workDate')),
+                                    # 时间结果
+                                    'timeResult': rec.get('timeResult'),
+                                    # 考勤结果
+                                    'locationResult': rec.get('locationResult'),
+                                    # 基准时间
+                                    'baseCheckTime': stamp_to_time(rec.get('baseCheckTime')),
+                                    # 数据来源
+                                    'sourceType': rec.get('sourceType'),
+                                    'checkType': rec.get('checkType'),
+                                    'check_in': stamp_to_time(rec.get('userCheckTime')),
+                                    'attendance_id': rec.get('id'),
+                                }
+                                groups = self.env['dindin.simple.groups'].sudo().search(
+                                    [('group_id', '=', rec.get('groupId'))])
+                                data.update(
+                                    {'ding_group_id': groups[0].id if groups else False})
+                                emp_id = self.env['hr.employee'].sudo().search(
+                                    [('din_id', '=', rec.get('userId'))])
+                                data.update(
+                                    {'emp_id': emp_id[0].id if emp_id else False})
+                                attendance = self.env['dingding.attendance'].sudo().search(
+                                    [('emp_id', '=', emp_id[0].id),
+                                     ('check_in', '=', stamp_to_time(
+                                         rec.get('userCheckTime'))),
+                                     ('checkType', '=', rec.get('checkType'))])
+                                if not attendance:
+                                    self.env['dingding.attendance'].sudo().create(
+                                        data)
+                            logging.info(">>>是否还有剩余数据：%s", result.get('hasMore'))
                             if result.get('hasMore'):
                                 offset = offset + limit
-                                logging.info(">>>准备获取剩余数据中的第{}至{}条".format(offset+1, offset+limit))
+                                logging.info(">>>准备获取剩余数据中的第%s至%s条", offset + 1, offset + limit)
                             else:
                                 break
                         else:
-                            raise UserError('请求失败,原因为:{}'.format(result.get('errmsg')))
+                            raise UserError(
+                                _('请求失败,原因为:{}').format(result.get('errmsg')))
                     except Exception as e:
                         raise UserError(e)
-                    
+
         logging.info(">>>根据日期获取员工打卡信息结束...")
         action = self.env.ref('dindin_attendance.dingding_attendance_action')
         action_dict = action.read()[0]
         return action_dict
-
 
     @api.multi
     def get_attendance_list_v2(self):
@@ -163,23 +183,24 @@ class HrAttendanceTransient(models.TransientModel):
         logging.info(">>>开始获取员工打卡信息...")
         din_ids = list()
         for user in self.emp_ids:
-            din_ids.append(user.din_id)         
+            din_ids.append(user.din_id)
         user_list = list_cut(din_ids, 50)
         for u in user_list:
-            logging.info(">>>开始获取{}员工段数据".format(u))
+            logging.info(">>>开始获取%s员工段数据", u)
             date_list = day_cut(self.start_date, self.stop_date, 7)
             for d in date_list:
-                logging.info(">>>开始获取{}时间段数据".format(d))
-                offset=0
-                limit=50
+                logging.info(">>>开始获取%s时间段数据", d)
+                offset = 0
+                limit = 50
                 while True:
-                    has_more = self.attendance_list(d[0], d[1], user_ids=u, offset=offset, limit=limit)
-                    logging.info(">>>是否还有剩余数据：{}".format(has_more))
+                    has_more = self.attendance_list(
+                        d[0], d[1], user_ids=u, offset=offset, limit=limit)
+                    logging.info(">>>是否还有剩余数据：%s", has_more)
                     if not has_more:
                         break
                     else:
                         offset = offset + limit
-                        logging.info(">>>准备获取剩余数据中的第{}至{}条".format(offset+1, offset+limit))
+                        logging.info(">>>准备获取剩余数据中的第%s至%s条", offset + 1, offset + limit)
         logging.info(">>>根据日期获取员工打卡信息结束...")
         action = self.env.ref('dindin_attendance.dingding_attendance_action')
         action_dict = action.read()[0]
@@ -198,38 +219,42 @@ class HrAttendanceTransient(models.TransientModel):
         """
         client = get_client(self)
         try:
-            result = client.attendance.list(work_date_from, work_date_to, user_ids=user_ids, offset=offset, limit=limit)
-            # logging.info(">>>获取考勤返回结果{}".format(result))
+            result = client.attendance.list(
+                work_date_from, work_date_to, user_ids=user_ids, offset=offset, limit=limit)
+            # logging.info(">>>获取考勤返回结果%s", result)
             if result.get('errcode') == 0:
                 for rec in result.get('recordresult'):
-                        data = {
-                            'recordId': rec.get('recordId'),
-                            'workDate': stamp_to_time(rec.get('workDate')),  # 工作日
-                            'timeResult': rec.get('timeResult'),  # 时间结果
-                            'locationResult': rec.get('locationResult'),  # 考勤结果
-                            'baseCheckTime': stamp_to_time(rec.get('baseCheckTime')),  # 基准时间
-                            'sourceType': rec.get('sourceType'),  # 数据来源
-                            'checkType': rec.get('checkType'),
-                            'check_in': stamp_to_time(rec.get('userCheckTime')),
-                            'attendance_id': rec.get('id'),
-                        }
-                        groups = self.env['dindin.simple.groups'].sudo().search(
-                            [('group_id', '=', rec.get('groupId'))])
-                        data.update({'ding_group_id': groups[0].id if groups else False})
-                        emp_id = self.env['hr.employee'].sudo().search([('din_id', '=', rec.get('userId'))])
-                        data.update({'emp_id': emp_id[0].id if emp_id else False})
-                        attendance = self.env['dingding.attendance'].sudo().search(
-                            [('emp_id', '=', emp_id[0].id),
-                             ('check_in', '=', stamp_to_time(rec.get('userCheckTime'))),
-                             ('checkType', '=', rec.get('checkType'))])
-                        if not attendance:
-                            self.env['dingding.attendance'].sudo().create(data)
+                    data = {
+                        'recordId': rec.get('recordId'),
+                        'workDate': stamp_to_time(rec.get('workDate')),  # 工作日
+                        'timeResult': rec.get('timeResult'),  # 时间结果
+                        'locationResult': rec.get('locationResult'),  # 考勤结果
+                        # 基准时间
+                        'baseCheckTime': stamp_to_time(rec.get('baseCheckTime')),
+                        'sourceType': rec.get('sourceType'),  # 数据来源
+                        'checkType': rec.get('checkType'),
+                        'check_in': stamp_to_time(rec.get('userCheckTime')),
+                        'attendance_id': rec.get('id'),
+                    }
+                    groups = self.env['dindin.simple.groups'].sudo().search(
+                        [('group_id', '=', rec.get('groupId'))])
+                    data.update(
+                        {'ding_group_id': groups[0].id if groups else False})
+                    emp_id = self.env['hr.employee'].sudo().search(
+                        [('din_id', '=', rec.get('userId'))])
+                    data.update({'emp_id': emp_id[0].id if emp_id else False})
+                    attendance = self.env['dingding.attendance'].sudo().search(
+                        [('emp_id', '=', emp_id[0].id),
+                         ('check_in', '=', stamp_to_time(
+                             rec.get('userCheckTime'))),
+                         ('checkType', '=', rec.get('checkType'))])
+                    if not attendance:
+                        self.env['dingding.attendance'].sudo().create(data)
                 if result.get('hasMore'):
                     return True
                 else:
                     return False
             else:
-                raise UserError('请求失败,原因为:{}'.format(result.get('errmsg')))
+                raise UserError(_('请求失败,原因为:{}').format(result.get('errmsg')))
         except Exception as e:
             raise UserError(e)
- 

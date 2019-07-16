@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-import json
+import base64
 import logging
-import requests
-from requests import ReadTimeout
-from odoo import api, fields, models, tools
+
+from odoo import api, fields, models, tools, _
+from odoo.addons.ali_dindin.dingtalk.main import get_client
 from odoo.exceptions import UserError
 from odoo.modules import get_module_resource
-from odoo.addons.ali_dindin.dingtalk.main import get_client
-import base64
 
 _logger = logging.getLogger(__name__)
 
@@ -19,7 +17,8 @@ class AddDingDingEmployee(models.Model):
 
     @api.model
     def _default_image(self):
-        image_path = get_module_resource('hr', 'static/src/img', 'default_image.png')
+        image_path = get_module_resource(
+            'hr', 'static/src/img', 'default_image.png')
         return tools.image_resize_image_big(base64.b64encode(open(image_path, 'rb').read()))
 
     USERSTATE = [
@@ -28,17 +27,19 @@ class AddDingDingEmployee(models.Model):
         ('ing', '已入职')
     ]
 
-    active = fields.Boolean(string=u'有效', default=True)
+    active = fields.Boolean(string='有效', default=True)
     user_id = fields.Char(string='钉钉用户Id')
     name = fields.Char(string='员工姓名', required=True)
     mobile = fields.Char(string='手机号', required=True)
-    pre_entry_time = fields.Datetime(string=u'预期入职时间', required=True)
-    dept_id = fields.Many2one(comodel_name='hr.department', string=u'入职部门')
-    company_id = fields.Many2one('res.company', '公司', default=lambda self: self.env.user.company_id.id)
+    pre_entry_time = fields.Datetime(string='预期入职时间', required=True)
+    dept_id = fields.Many2one(comodel_name='hr.department', string='入职部门')
+    company_id = fields.Many2one(
+        'res.company', '公司', default=lambda self: self.env.user.company_id.id)
     image = fields.Binary("照片", default=_default_image, attachment=True)
     image_medium = fields.Binary("Medium-sized photo", attachment=True)
     image_small = fields.Binary("Small-sized photo", attachment=True)
-    state = fields.Selection(string=u'状态', selection=USERSTATE, default='new', track_visibility='onchange')
+    state = fields.Selection(
+        string='状态', selection=USERSTATE, default='new', track_visibility='onchange')
 
     @api.model
     def create(self, values):
@@ -60,15 +61,17 @@ class AddDingDingEmployee(models.Model):
         client = get_client(self)
         self.ensure_one()
         logging.info(">>>添加待入职员工start")
-        user = self.env['hr.employee'].search([('user_id', '=', self.env.user.id)])
+        user = self.env['hr.employee'].search(
+            [('user_id', '=', self.env.user.id)])
         name = self.name
         mobile = self.mobile
         pre_entry_time = self.pre_entry_time
         op_userid = user[0].din_id if user else ''
-        extend_info ={'depts': self.dept_id.din_id} if self.dept_id else ''
+        extend_info = {'depts': self.dept_id.din_id} if self.dept_id else ''
         try:
-            result = client.employeerm.addpreentry(name, mobile, pre_entry_time=pre_entry_time, op_userid=op_userid, extend_info=extend_info)
-            logging.info(">>>添加待入职员工返回结果{}".format(result))
+            result = client.employeerm.addpreentry(
+                name, mobile, pre_entry_time=pre_entry_time, op_userid=op_userid, extend_info=extend_info)
+            logging.info(">>>添加待入职员工返回结果%s", result)
             self.write({
                 'user_id': result.get('userid'),
                 'state': 'lod'
@@ -89,7 +92,7 @@ class AddDingDingEmployee(models.Model):
         client = get_client(self)
         try:
             result = client.employeerm.querypreentry(offset=0, size=50)
-            logging.info(">>>查询待入职员工列表返回结果{}".format(result))
+            logging.info(">>>查询待入职员工列表返回结果%s", result)
             if result['data_list']['string']:
                 pre_entry_list = result['data_list']['string']
                 return len(pre_entry_list)
@@ -99,4 +102,4 @@ class AddDingDingEmployee(models.Model):
     @api.multi
     def employees_have_joined(self):
         self.ensure_one()
-        raise UserError("还没有做这个功能")
+        raise UserError(_("还没有做这个功能"))

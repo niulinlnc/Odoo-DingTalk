@@ -52,7 +52,7 @@ odoo.define('dindin_calendar.pull.dindin.calendar.button', function (require) {
                         close: true
                     }
                 ],
-                $content: $(QWeb.render('PullDinDinCalendar', {widget: this, data: []}))
+                $content: $(QWeb.render('PullDinDinCalendar', { widget: this, data: [] }))
             }).open();
         },
 
@@ -84,7 +84,7 @@ odoo.define('dindin_calendar.pull.dindin.calendar.button', function (require) {
                         close: true
                     }
                 ],
-                $content: $(QWeb.render('PullDinDinCalendar', {widget: this, data: []}))
+                $content: $(QWeb.render('PullDinDinCalendar', { widget: this, data: [] }))
             }).open();
         },
     });

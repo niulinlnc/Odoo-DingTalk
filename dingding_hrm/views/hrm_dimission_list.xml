@@ -5,16 +5,17 @@
         <field name="name">dingding.hrm.dimission.list.tree</field>
         <field name="model">dingding.hrm.dimission.list</field>
         <field name="arch" type="xml">
-            <tree string="离职员工信息" js_class="dingding_hrm_dimission_list_tree" edit="false" editable="top">
+            <tree string="离职员工信息" js_class="dingding_hrm_dimission_list_tree" edit="false">
                 <field name="company_id"/>
                 <field name="emp_id"/>
+                <field name="din_id"/>
                 <field name="last_work_day"/>
                 <field name="main_dept_name"/>
                 <field name="reason_type"/>
                 <field name="pre_status"/>
                 <field name="handover_userid"/>
                 <field name="status"/>
-<!--                <field name="department_id"/>-->
+                <field name="department_ids"/>
                 <field name="reason_memo"/>
             </tree>
         </field>

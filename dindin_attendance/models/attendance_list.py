@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
 
@@ -35,18 +35,21 @@ class DinDinAttendanceList(models.Model):
         ('AUTO_CHECK', '自动打卡'),
     ]
 
-    company_id = fields.Many2one(comodel_name='res.company', string=u'公司',
+    company_id = fields.Many2one(comodel_name='res.company', string='公司',
                                  default=lambda self: self.env.user.company_id.id)
-    group_id = fields.Many2one(comodel_name='dindin.simple.groups', string=u'考勤组')
+    group_id = fields.Many2one(
+        comodel_name='dindin.simple.groups', string='考勤组')
     recordId = fields.Char(string='记录ID')
-    workDate = fields.Date(string=u'工作日')
-    emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True)
-    checkType = fields.Selection(string=u'考勤类型', selection=[('OnDuty', '上班'), ('OffDuty', '下班')])
-    timeResult = fields.Selection(string=u'时间结果', selection=TimeResult)
-    locationResult = fields.Selection(string=u'位置结果', selection=LocationResult)
-    baseCheckTime = fields.Datetime(string=u'基准时间')
-    userCheckTime = fields.Datetime(string=u'实际打卡时间')
-    sourceType = fields.Selection(string=u'数据来源', selection=SourceType)
+    workDate = fields.Date(string='工作日')
+    emp_id = fields.Many2one(comodel_name='hr.employee',
+                             string='员工', required=True)
+    checkType = fields.Selection(string='考勤类型', selection=[
+                                 ('OnDuty', '上班'), ('OffDuty', '下班')])
+    timeResult = fields.Selection(string='时间结果', selection=TimeResult)
+    locationResult = fields.Selection(string='位置结果', selection=LocationResult)
+    baseCheckTime = fields.Datetime(string='基准时间')
+    userCheckTime = fields.Datetime(string='实际打卡时间')
+    sourceType = fields.Selection(string='数据来源', selection=SourceType)
 
     @api.model
     def get_attendance_list(self, start_date, end_date, user=None):
@@ -62,7 +65,8 @@ class DinDinAttendanceList(models.Model):
         logging.info(">>>开始获取员工打卡信息...")
         user_list = list()
         if user:
-            h_emp = self.env['hr.employee'].sudo().search([('name', '=', user)])
+            h_emp = self.env['hr.employee'].sudo().search(
+                [('name', '=', user)])
             if not h_emp:
                 raise UserError("员工{}不存在！".format(user))
             for h in h_emp:
@@ -70,7 +74,8 @@ class DinDinAttendanceList(models.Model):
                     raise UserError("员工{}的钉钉ID无效,请输入其他员工或不填！".format(user))
                 user_list.append(h.din_id)
         else:
-            emps = self.env['hr.employee'].sudo().search([('din_id', '!=', '')])
+            emps = self.env['hr.employee'].sudo().search(
+                [('din_id', '!=', '')])
             emp_len = len(emps)
             if emp_len <= 50:
                 for e in emps:
@@ -99,7 +104,8 @@ class DinDinAttendanceList(models.Model):
                     userIdList = user_list  # 员工列表
                     offset = offset  # 开始日期
                     limit = limit  # 开始日期
-                    has_more = self.attendance_list(workDateFrom, workDateTo, user_ids=userIdList, offset=offset, limit=limit)
+                    has_more = self.attendance_list(
+                        workDateFrom, workDateTo, user_ids=userIdList, offset=offset, limit=limit)
                     if not has_more:
                         break
                     else:
@@ -114,7 +120,8 @@ class DinDinAttendanceList(models.Model):
                     userIdList = u  # 员工列表
                     offset = offset  # 开始日期
                     limit = limit  # 开始日期
-                    has_more = self.attendance_list(workDateFrom, workDateTo, user_ids=userIdList, offset=offset, limit=limit)
+                    has_more = self.attendance_list(
+                        workDateFrom, workDateTo, user_ids=userIdList, offset=offset, limit=limit)
                     if not has_more:
                         break
                     else:
@@ -135,8 +142,9 @@ class DinDinAttendanceList(models.Model):
         """
         client = get_client(self)
         try:
-            result = client.attendance.list(work_date_from, work_date_to, user_ids=user_ids, offset=offset, limit=limit)
-            logging.info(">>>获取考勤返回结果{}".format(result))
+            result = client.attendance.list(
+                work_date_from, work_date_to, user_ids=user_ids, offset=offset, limit=limit)
+            logging.info(">>>获取考勤返回结果%s", result)
             if result.get('errcode') == 0:
                 for rec in result.get('recordresult'):
                     data = {
@@ -145,18 +153,22 @@ class DinDinAttendanceList(models.Model):
                         'checkType': rec.get('checkType'),  # 考勤类型
                         'timeResult': rec.get('timeResult'),  # 时间结果
                         'locationResult': rec.get('locationResult'),  # 考勤类型
-                        'baseCheckTime': stamp_to_time(rec.get('baseCheckTime')),  # 基准时间
-                        'userCheckTime': stamp_to_time(rec.get('userCheckTime')),  # 实际打卡时间
+                        # 基准时间
+                        'baseCheckTime': stamp_to_time(rec.get('baseCheckTime')),
+                        # 实际打卡时间
+                        'userCheckTime': stamp_to_time(rec.get('userCheckTime')),
                         'sourceType': rec.get('sourceType'),  # 数据来源
                     }
-                    groups = self.env['dindin.simple.groups'].sudo().search([('group_id', '=', rec.get('groupId'))])
+                    groups = self.env['dindin.simple.groups'].sudo().search(
+                        [('group_id', '=', rec.get('groupId'))])
                     if groups:
                         data.update({'group_id': groups[0].id})
-                    emp_id = self.env['hr.employee'].sudo().search([('din_id', '=', rec.get('userId'))])
+                    emp_id = self.env['hr.employee'].sudo().search(
+                        [('din_id', '=', rec.get('userId'))])
                     if emp_id:
                         data.update({'emp_id': emp_id[0].id})
                     a_list = self.env['dindin.attendance.list'].search(
-                        [('recordId', '=', rec.get('recordId')),('emp_id', '=',  emp_id[0].id),  ('baseCheckTime', '=', stamp_to_time(rec.get('baseCheckTime')))])
+                        [('recordId', '=', rec.get('recordId')), ('emp_id', '=', emp_id[0].id), ('baseCheckTime', '=', stamp_to_time(rec.get('baseCheckTime')))])
                     if a_list:
                         a_list.sudo().write(data)
                     else:
@@ -166,7 +178,6 @@ class DinDinAttendanceList(models.Model):
                 else:
                     return False
             else:
-                raise UserError('请求失败,原因为:{}'.format(result.get('errmsg')))
+                raise UserError(_('请求失败,原因为:{}').format(result.get('errmsg')))
         except Exception as e:
             raise UserError(e)
-

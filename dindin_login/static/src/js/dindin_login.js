@@ -6,7 +6,7 @@ function get_decode_url() {
     $.ajax({
         async: false,
         url: "/dindin_login/get_url",
-        data: {"local_url": prot + "//" + host},
+        data: { "local_url": prot + "//" + host },
         success: function (data) {
             url_target = data.encode_url;
         },

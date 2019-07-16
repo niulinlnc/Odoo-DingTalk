@@ -49,7 +49,7 @@ odoo.define('dindin.user.callback.button', function (require) {
                         close: true
                     }
                 ],
-                $content: $(QWeb.render('PullDinDinUserCallback', {widget: this, data: []}))
+                $content: $(QWeb.render('PullDinDinUserCallback', { widget: this, data: [] }))
             }).open();
         },
     });

@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Dingtalk",
+            "type": "python",
+            "request": "launch",
+            "stopOnEntry": false,
+            "pythonPath": "${config:python.pythonPath}",
+            "console": "internalConsole",
+            "program": "${workspaceRoot}\\..\\odoo\\odoo-bin",
+            "args": [
+                "--config=${workspaceRoot}\\..\\..\\odoo.conf",
+            ],
+            "cwd": "${workspaceRoot}",
+            "env": {},
+            "envFile": "${workspaceRoot}/.env",
+
+        }
+    ]
+}

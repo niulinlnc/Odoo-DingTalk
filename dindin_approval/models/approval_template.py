@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
+
 from odoo import api, fields, models
-from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class DinDinApprovalTemplate(models.Model):
     process_code = fields.Char(string='模板唯一标识')
     url = fields.Char(string='模板跳转url')
     company_id = fields.Many2one(comodel_name='res.company',
-                                 string=u'公司', default=lambda self: self.env.user.company_id.id)
+                                 string='公司', default=lambda self: self.env.user.company_id.id)
 
     @api.model
     def get_template(self):
@@ -26,7 +27,7 @@ class DinDinApprovalTemplate(models.Model):
         client = get_client(self)
         try:
             result = client.bpms.process_listbyuserid(userid='')
-            logging.info(">>>获取审批模板返回结果{}".format(result))
+            logging.info(">>>获取审批模板返回结果%s", result)
             d_res = result.get('process_list')
             for process in d_res.get('process_top_vo'):
                 data = {
@@ -51,14 +52,16 @@ class DinDinApprovalTemplate(models.Model):
         根据当前用户获取该用户的待审批数量
         :return:
         """
-        emp = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)])
+        emp = self.env['hr.employee'].sudo().search(
+            [('user_id', '=', self.env.user.id)])
         if len(emp) > 1:
             return {'state': False, 'number': 0, 'msg': '登录用户关联了多个员工'}
         if emp and emp.din_id:
             try:
                 client = get_client(self)
-                result = client.bpms.dingtalk_oapi_process_gettodonum(emp.din_id)
-                logging.info(">>>获取待审批数量返回结果{}".format(result))
+                result = client.bpms.dingtalk_oapi_process_gettodonum(
+                    emp.din_id)
+                logging.info(">>>获取待审批数量返回结果%s", result)
                 if result.get('errcode') == 0:
                     return {'state': True, 'number': result.get('count')}
                 else:
@@ -80,17 +83,21 @@ class DinDinApprovalTemplate(models.Model):
         client = get_client(self)
         try:
             result = client.bpms.processinstance_get(pid)
-            logging.info(">>>获取审批实例详情返回结果{}".format(result))
+            logging.info(">>>获取审批实例详情返回结果%s", result)
             if result.get('errcode') == 0:
                 process_instance = result.get('process_instance')
-                temp = self.env['dindin.approval.template'].sudo().search([('process_code', '=', pcode)])
+                temp = self.env['dindin.approval.template'].sudo().search(
+                    [('process_code', '=', pcode)])
                 if temp:
-                    appro = self.env['dindin.approval.control'].sudo().search([('template_id', '=', temp[0].id)])
+                    appro = self.env['dindin.approval.control'].sudo().search(
+                        [('template_id', '=', temp[0].id)])
                     if appro:
-                        oa_model = self.env[appro.oa_model_id.model].sudo().search([('process_instance_id', '=', pid)])
+                        oa_model = self.env[appro.oa_model_id.model].sudo().search(
+                            [('process_instance_id', '=', pid)])
                         if not oa_model:
                             # 获取发起人
-                            emp = self.env['hr.employee'].sudo().search([('din_id', '=', process_instance.get("originator_userid"))])
+                            emp = self.env['hr.employee'].sudo().search(
+                                [('din_id', '=', process_instance.get("originator_userid"))])
                             data = {
                                 'title': process_instance.get('title'),
                                 'create_date': process_instance.get("create_time"),
@@ -105,6 +112,7 @@ class DinDinApprovalTemplate(models.Model):
                                 data.update({'oa_state': '02'})
 
             else:
-                logging.info('>>>获取单个审批实例-失败，原因为:{}'.format(result.get('errmsg')))
+                logging.info(
+                    '>>>获取单个审批实例-失败，原因为:{}'.format(result.get('errmsg')))
         except Exception as e:
             raise UserError(e)

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-
     <record id="ali_dindin.view_employee_form_inherit" model="ir.ui.view">
         <field name="name">hr.employee.form</field>
         <field name="model">hr.employee</field>
@@ -15,13 +14,7 @@
                             <label for="mobile_phone"/>
                             <div class="o_row">
                                 <field name="mobile_phone" widget="phone" attrs="{'readonly': [('din_active', '=', True)]}"/>
-                                <button
-                                    type="action"
-                                    string="换手机号" 
-                                    icon="fa-arrow-right" 
-                                    name="%(change_mobile_action)d"
-                                    attrs="{'invisible':[('mobile_phone', '=', False)]}"
-                                />
+                                <button type="action" string="换手机号" icon="fa-arrow-right" name="%(change_mobile_action)d" attrs="{'invisible':[('mobile_phone', '=', False)]}" />
                             </div>
                             <field name="din_hiredDate"/>
                             <field name="department_ids" widget="many2many_tags"/>
@@ -44,12 +37,9 @@
             </xpath>
 
             <button name="toggle_active" position="before">
-                <button name="create_ding_employee" string="上传至钉钉" type="object" class="oe_stat_button"
-                        icon="fa-upload" attrs="{'invisible':[('dingding_type','=', 'yes')]}"
-                        groups="ali_dindin.dd_top_group">
+                <button name="create_ding_employee" string="上传至钉钉" type="object" class="oe_stat_button" icon="fa-upload" attrs="{'invisible':[('dingding_type','=', 'yes')]}" groups="ali_dindin.dd_top_group">
                 </button>
-                <button name="update_ding_employee" string="更新至钉钉" type="object" class="oe_stat_button"
-                        icon="fa-cloud-upload" groups="ali_dindin.dd_update_group">
+                <button name="update_ding_employee" string="更新至钉钉" type="object" class="oe_stat_button" icon="fa-cloud-upload" groups="ali_dindin.dd_update_group">
                 </button>
             </button>
         </field>
@@ -75,7 +65,7 @@
         <field name="code">
 if records:
     action = records.using_dingding_avatar()
-        </field>     
+        </field>
     </record>
 
     <record id='update_employee_from_dingding_action' model='ir.actions.server'>

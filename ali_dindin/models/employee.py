@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
+
 import requests
-from odoo import api, fields, models, tools
+
+from odoo import api, fields, models, tools, _
+from odoo.addons.ali_dindin.dingtalk.main import (get_client, stamp_to_time,
+                                                  time_to_stamp)
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.dingtalk.main import get_client, time_to_stamp, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 try:
@@ -29,11 +32,15 @@ class HrEmployee(models.Model):
     din_active = fields.Boolean("是否激活", readonly=True)
     din_orderInDepts = fields.Char("所在部门序位")
     din_isLeaderInDepts = fields.Char("是否为部门主管")
-    din_sy_state = fields.Boolean(string=u'同步标识', default=False)
-    work_status = fields.Selection(string=u'入职状态', selection=[('1', '待入职'), ('2', '在职'), ('3', '离职')], default='2')
-    office_status = fields.Selection(string=u'在职子状态', selection=[('2', '试用期'), ('3', '正式'), ('5', '待离职'), ('-1', '无状态')], default='-1')
-    dingding_type = fields.Selection(string=u'钉钉状态', selection=[('no', '不存在'), ('yes', '存在')], compute="_compute_dingding_type")
-    department_ids = fields.Many2many('hr.department', 'employee_department_rel', 'emp_id', 'department_id', string='所属部门')
+    din_sy_state = fields.Boolean(string='同步标识', default=False)
+    work_status = fields.Selection(string='入职状态', selection=[(
+        '1', '待入职'), ('2', '在职'), ('3', '离职')], default='2')
+    office_status = fields.Selection(string='在职子状态', selection=[(
+        '2', '试用期'), ('3', '正式'), ('5', '待离职'), ('-1', '无状态')], default='-1')
+    dingding_type = fields.Selection(string='钉钉状态', selection=[(
+        'no', '不存在'), ('yes', '存在')], compute="_compute_dingding_type")
+    department_ids = fields.Many2many(
+        'hr.department', 'employee_department_rel', 'emp_id', 'department_id', string='所属部门')
 
     @api.multi
     def create_ding_employee(self):
@@ -45,8 +52,8 @@ class HrEmployee(models.Model):
             # 获取部门din_id
             department_list = list()
             if not res.department_id:
-                raise UserError("请选择员工部门!")
-            elif res.department_ids:
+                raise UserError(_("请选择员工部门!"))
+            if res.department_ids:
                 department_list = res.department_ids.mapped('din_id')
                 department_list.append(res.department_id.din_id)
             else:
@@ -64,9 +71,10 @@ class HrEmployee(models.Model):
             }
             try:
                 result = client.user.create(data)
-                logging.info(">>>新增员工返回结果:{}".format(result))
+                logging.info(">>>新增员工返回结果:%s", result)
                 res.write({'din_id': result})
-                res.message_post(body=u"钉钉消息：员工信息已上传至钉钉", message_type='notification')
+                res.message_post(body="钉钉消息：员工信息已上传至钉钉",
+                                 message_type='notification')
             except Exception as e:
                 raise UserError(e)
 
@@ -83,7 +91,7 @@ class HrEmployee(models.Model):
                 raise UserError("请选择员工部门!")
             elif res.department_ids:
                 department_list = res.department_ids.mapped('din_id')
-                if not res.department_id.din_id in res.department_ids.mapped('din_id'):
+                if res.department_id.din_id not in res.department_ids.mapped('din_id'):
                     department_list.append(res.department_id.din_id)
             else:
                 department_list.append(res.department_id.din_id)
@@ -107,9 +115,11 @@ class HrEmployee(models.Model):
             try:
                 result = client.user.update(data)
                 if result.get('errcode') == 0:
-                    res.message_post(body=u"新的信息已同步更新至钉钉", message_type='notification')
+                    res.message_post(body="新的信息已同步更新至钉钉",
+                                     message_type='notification')
                 else:
-                    raise UserError('上传钉钉系统时发生错误，详情为:{}'.format(result.get('errmsg')))
+                    raise UserError(
+                        _('上传钉钉系统时发生错误，详情为:{}').format(result.get('errmsg')))
             except Exception as e:
                 raise UserError(e)
 
@@ -117,9 +127,10 @@ class HrEmployee(models.Model):
     def constrains_dingding_user_id(self):
         """当选择了相关用户时，需要检查系统用户是否只对应一个员工"""
         if self.user_id:
-            emps = self.env['hr.employee'].sudo().search([('user_id', '=', self.user_id.id)])
+            emps = self.env['hr.employee'].sudo().search(
+                [('user_id', '=', self.user_id.id)])
             if len(emps) > 1:
-                raise UserError("Sorry!，关联的相关(系统)用户已关联到其他员工，若需要变更请修改原关联的相关用户！")
+                raise UserError(_("Sorry!，关联的相关(系统)用户已关联到其他员工，若需要变更请修改原关联的相关用户！"))
 
     # 从钉钉手动获取用户详情
     @api.multi
@@ -145,19 +156,22 @@ class HrEmployee(models.Model):
                         'job_title': result.get('position'),  # 职位
                         'work_email': result.get('email'),  # email
                         'din_jobnumber': result.get('jobnumber'),  # 工号
-                        'din_avatar': result.get('avatar') if result.get('avatar') else '',  # 钉钉头像url
+                        # 钉钉头像url
+                        'din_avatar': result.get('avatar') if result.get('avatar') else '',
                         'din_isSenior': result.get('isSenior'),  # 高管模式
                         'din_isAdmin': result.get('isAdmin'),  # 是管理员
                         'din_isBoss': result.get('isBoss'),  # 是老板
                         'din_isHide': result.get('isHide'),  # 隐藏手机号
                         'din_active': result.get('active'),  # 是否激活
-                        'din_isLeaderInDepts': result.get('isLeaderInDepts'),  # 是否为部门主管
-                        'din_orderInDepts': result.get('orderInDepts'),  # 所在部门序位
+                        # 是否为部门主管
+                        'din_isLeaderInDepts': result.get('isLeaderInDepts'),
+                        # 所在部门序位
+                        'din_orderInDepts': result.get('orderInDepts'),
                     }
                     # 支持显示国际手机号
                     if result.get('stateCode') != '86':
                         data.update({
-                            'mobile_phone':'+{}-{}'.format(result.get('stateCode'), result.get('mobile')),
+                            'mobile_phone': '+{}-{}'.format(result.get('stateCode'), result.get('mobile')),
                         })
                     if result.get('hiredDate'):
                         date_str = stamp_to_time(result.get('hiredDate'))
@@ -166,12 +180,14 @@ class HrEmployee(models.Model):
                         })
                     if result.get('department'):
                         dep_din_ids = result.get('department')
-                        dep_list = self.env['hr.department'].sudo().search([('din_id', 'in', dep_din_ids)])
+                        dep_list = self.env['hr.department'].sudo().search(
+                            [('din_id', 'in', dep_din_ids)])
                         data.update({'department_ids': [(6, 0, dep_list.ids)]})
                     employee.sudo().write(data)
                 else:
-                    _logger.info("从钉钉同步员工时发生意外，原因为:{}".format(result.get('errmsg')))
-                    employee.message_post(body="从钉钉同步员工失败:{}".format(result.get('errmsg')), message_type='notification')
+                    _logger.info("从钉钉同步员工时发生意外，原因为:%s", result.get('errmsg'))
+                    employee.message_post(body="从钉钉同步员工失败:{}".format(
+                        result.get('errmsg')), message_type='notification')
 
             except Exception as e:
                 raise UserError(e)
@@ -200,19 +216,21 @@ class HrEmployee(models.Model):
                     'job_title': result.get('position'),  # 职位
                     'work_email': result.get('email'),  # email
                     'din_jobnumber': result.get('jobnumber'),  # 工号
-                    'din_avatar': result.get('avatar') if result.get('avatar') else '',  # 钉钉头像url
+                    # 钉钉头像url
+                    'din_avatar': result.get('avatar') if result.get('avatar') else '',
                     'din_isSenior': result.get('isSenior'),  # 高管模式
                     'din_isAdmin': result.get('isAdmin'),  # 是管理员
                     'din_isBoss': result.get('isBoss'),  # 是老板
                     'din_isHide': result.get('isHide'),  # 隐藏手机号
                     'din_active': result.get('active'),  # 是否激活
-                    'din_isLeaderInDepts': result.get('isLeaderInDepts'),  # 是否为部门主管
+                    # 是否为部门主管
+                    'din_isLeaderInDepts': result.get('isLeaderInDepts'),
                     'din_orderInDepts': result.get('orderInDepts'),  # 所在部门序位
                 }
                 # 支持显示国际手机号
                 if result.get('stateCode') != '86':
                     data.update({
-                        'mobile_phone':'+{}-{}'.format(result.get('stateCode'), result.get('mobile')),
+                        'mobile_phone': '+{}-{}'.format(result.get('stateCode'), result.get('mobile')),
                     })
                 if result.get('hiredDate'):
                     date_str = stamp_to_time(result.get('hiredDate'))
@@ -221,17 +239,20 @@ class HrEmployee(models.Model):
                     })
                 if result.get('department'):
                     dep_din_ids = result.get('department')
-                    dep_list = self.env['hr.department'].sudo().search([('din_id', 'in', dep_din_ids)])
+                    dep_list = self.env['hr.department'].sudo().search(
+                        [('din_id', 'in', dep_din_ids)])
                     data.update({'department_id': dep_list[0].id})
                     data.update({'department_ids': [(6, 0, dep_list.ids)]})
-                employee = self.env['hr.employee'].sudo().search([('din_id', '=', userid)])
+                employee = self.env['hr.employee'].sudo().search(
+                    [('din_id', '=', userid)])
                 if employee and event_type == 'user_modify_org':
                     employee.sudo().write(data)
                 if not employee and event_type == 'user_add_org':
                     self.env['hr.employee'].sudo().create(data)
             else:
-                _logger.info("从钉钉同步员工时发生意外，原因为:{}".format(result.get('errmsg')))
-                employee.message_post(body="从钉钉同步员工失败:{}".format(result.get('errmsg')), message_type='notification')
+                _logger.info("从钉钉同步员工时发生意外，原因为:%s", result.get('errmsg'))
+                employee.message_post(body="从钉钉同步员工失败:{}".format(
+                    result.get('errmsg')), message_type='notification')
 
         except Exception as e:
             raise UserError(e)
@@ -246,8 +267,9 @@ class HrEmployee(models.Model):
         for employee in self:
             userid = employee.din_id
             try:
-                result = client.tbdingding.dingtalk_corp_smartdevice_getface(userid)
-                logging.info("获取人脸返回结果:{}".format(result))
+                result = client.tbdingding.dingtalk_corp_smartdevice_getface(
+                    userid)
+                logging.info("获取人脸返回结果:%s", result)
             except Exception as e:
                 raise UserError(e)
 
@@ -263,12 +285,14 @@ class HrEmployee(models.Model):
         client = get_client(self)
         userlist = list()
         for employee in self:
-            emp = self.env['hr.employee'].sudo().search([('din_id', '=', employee.din_id)])
+            emp = self.env['hr.employee'].sudo().search(
+                [('din_id', '=', employee.din_id)])
             userlist.append(emp.din_id)
         if userlist:
             try:
-                result = client.tbdingding.dingtalk_corp_smartdevice_hasface(userlist)
-                logging.info("查询人脸返回结果:{}".format(result))
+                result = client.tbdingding.dingtalk_corp_smartdevice_hasface(
+                    userlist)
+                logging.info("查询人脸返回结果:%s", result)
             except Exception as e:
                 raise UserError(e)
 
@@ -280,7 +304,8 @@ class HrEmployee(models.Model):
         for res in self:
             userid = res.din_id
             super(HrEmployee, self).unlink()
-            din_delete_employee = self.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_delete_employee')
+            din_delete_employee = self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_delete_employee')
             if din_delete_employee:
                 self.delete_din_employee(userid)
             return True
@@ -293,7 +318,7 @@ class HrEmployee(models.Model):
         client = get_client(self)
         try:
             result = client.user.delete(userid)
-            logging.info("user_delete:{}".format(result))
+            logging.info("user_delete:%s", result)
         except Exception as e:
             raise UserError(e)
 
@@ -308,7 +333,8 @@ class HrEmployee(models.Model):
         """
         for emp in self:
             if emp.din_avatar:
-                binary_data = tools.image_resize_image_big(base64.b64encode(requests.get(emp.din_avatar).content))
+                binary_data = tools.image_resize_image_big(
+                    base64.b64encode(requests.get(emp.din_avatar).content))
                 emp.sudo().write({'image': binary_data})
 
     @api.multi
@@ -320,5 +346,3 @@ class HrEmployee(models.Model):
             if emp.din_face:
                 binary_data = tools.image_resize_image_big(emp.din_face)
                 emp.sudo().write({'image': binary_data})
-
-

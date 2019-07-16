@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
+
 from odoo import api, fields, models
-from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -12,13 +13,15 @@ class DinDinDepartmentSign(models.Model):
     _description = "部门签到记录"
     _rec_name = 'department_id'
 
-    company_id = fields.Many2one(comodel_name='res.company', string=u'公司',
+    company_id = fields.Many2one(comodel_name='res.company', string='公司',
                                  default=lambda self: self.env.user.company_id.id)
-    department_id = fields.Many2one(comodel_name='hr.department', string=u'部门', required=True)
-    is_root = fields.Boolean(string=u'根部门', default=False)
-    start_time = fields.Datetime(string=u'开始时间', required=True)
-    end_time = fields.Datetime(string=u'结束时间', required=True)
-    line_ids = fields.One2many(comodel_name='dindin.department.signs.line', inverse_name='signs_id', string=u'列表')
+    department_id = fields.Many2one(
+        comodel_name='hr.department', string='部门', required=True)
+    is_root = fields.Boolean(string='根部门', default=False)
+    start_time = fields.Datetime(string='开始时间', required=True)
+    end_time = fields.Datetime(string='结束时间', required=True)
+    line_ids = fields.One2many(
+        comodel_name='dindin.department.signs.line', inverse_name='signs_id', string='列表')
 
     @api.multi
     def find_department_sign(self):
@@ -44,11 +47,13 @@ class DinDinDepartmentSign(models.Model):
             else:
                 department_id = res.department_id.din_id
             try:
-                result = client.checkin.record(department_id, start_time, end_time, offset=0, size=100, order_asc=True)
-                logging.info(">>>获得签到数据返回结果{}".format(result))
+                result = client.checkin.record(
+                    department_id, start_time, end_time, offset=0, size=100, order_asc=True)
+                logging.info(">>>获得签到数据返回结果%s", result)
                 line_list = list()
                 for data in result:
-                    emp = self.env['hr.employee'].sudo().search([('din_id', '=', data.get('userId'))])
+                    emp = self.env['hr.employee'].sudo().search(
+                        [('din_id', '=', data.get('userId'))])
                     timestamp = stamp_to_time(data.get('timestamp'))
                     line_list.append({
                         'emp_id': emp.id if emp else False,
@@ -64,14 +69,17 @@ class DinDinDepartmentSign(models.Model):
             except Exception as e:
                 raise UserError(e)
 
+
 class DinDinDepartmentSignLine(models.Model):
     _name = 'dindin.department.signs.line'
     _description = "部门签到记录列表"
     _rec_name = 'emp_id'
 
-    signs_id = fields.Many2one(comodel_name='dindin.department.signs', string=u'签到', ondelete='cascade')
-    emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True)
-    timestamp = fields.Datetime(string=u'签到时间')
+    signs_id = fields.Many2one(
+        comodel_name='dindin.department.signs', string='签到', ondelete='cascade')
+    emp_id = fields.Many2one(comodel_name='hr.employee',
+                             string='员工', required=True)
+    timestamp = fields.Datetime(string='签到时间')
     place = fields.Char(string='签到地址')
     detailPlace = fields.Char(string='签到详细地址')
     remark = fields.Char(string='签到备注')

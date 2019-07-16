@@ -8,7 +8,7 @@ odoo.define('dindin_approval.oa_approval_button', function (require) {
     let QWeb = core.qweb;
     let rpc = require('web.rpc');
     var show_button_model = ['oa.leave.application'];
-    var  Widget = require('web.Widget');
+    var Widget = require('web.Widget');
 
     ListController.include({
         renderButtons: function ($node) {
@@ -23,8 +23,8 @@ odoo.define('dindin_approval.oa_approval_button', function (require) {
                 show_button_model = data;
             });
             var tree_model = this.modelName;
-            for(var i=0; i<show_button_model.length; i++) {
-                if (tree_model == show_button_model[i]){
+            for (var i = 0; i < show_button_model.length; i++) {
+                if (tree_model == show_button_model[i]) {
                     var button2 = $("<button type='button' class='btn btn-sm btn-default'>发起审批</button>")
                         .click(this.proxy('popup_import_wizard'));
                     this.$buttons.append(button2);

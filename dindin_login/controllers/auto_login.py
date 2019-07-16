@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 import base64
-import json
 import logging
 import random
-import requests
+
 from odoo import http
-from odoo.http import request
 from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 
@@ -21,7 +20,8 @@ class AutoLoginController(http.Controller):
         :return:
         """
         logging.info(">>>用户正在使用免登...")
-        data = {'corp_id': request.env['ir.config_parameter'].sudo().get_param('ali_dindin.din_corpId')}
+        data = {'corp_id': request.env['ir.config_parameter'].sudo(
+        ).get_param('ali_dindin.din_corpid')}
         return request.render('dindin_login.dingding_auto_login', data)
 
     @http.route('/dingding/auto/login', type='http', auth='none')
@@ -37,22 +37,26 @@ class AutoLoginController(http.Controller):
             if not get_result.get('state'):
                 return self._post_error_message(get_result.get('msg'))
             userid = get_result.get('userid')
-            logging.info(">>>获取的user_id为：{}".format(userid))
+            logging.info(">>>获取的user_id为：%s", userid)
             if userid:
-                employee = request.env['hr.employee'].sudo().search([('din_id', '=', userid)])
+                employee = request.env['hr.employee'].sudo().search(
+                    [('din_id', '=', userid)])
                 if employee:
                     user = employee.user_id
                     if user:
                         # 解密钉钉登录密码
                         logging.info(u'>>>:解密钉钉登录密码')
                         password = base64.b64decode(user.din_password)
-                        password = password.decode(encoding='utf-8', errors='strict')
-                        request.session.authenticate(request.session.db, user.login, password)
+                        password = password.decode(
+                            encoding='utf-8', errors='strict')
+                        request.session.authenticate(
+                            request.session.db, user.login, password)
                         return http.local_redirect('/web')
                     else:
                         # 自动注册
                         password = str(random.randint(100000, 999999))
-                        fail = request.env['res.users'].sudo().create_user_by_employee(employee.id, password)
+                        fail = request.env['res.users'].sudo(
+                        ).create_user_by_employee(employee.id, password)
                         if not fail:
                             return http.local_redirect('/dingding/auto/login/in')
                     return http.local_redirect('/web/login')
@@ -69,7 +73,7 @@ class AutoLoginController(http.Controller):
         try:
             client = get_client(request)
             result = client.user.getuserinfo(auth_code)
-            logging.info(">>>获取用户信息返回结果:{}".format(result))
+            logging.info(">>>获取用户信息返回结果:%s", result)
 
             if result.get('errcode') != 0:
                 return {'state': False, 'msg': "钉钉接口错误:{}".format(result.get('errmsg'))}
@@ -86,4 +90,3 @@ class AutoLoginController(http.Controller):
         """
         data = {'message': message}
         return request.render('dindin_login.dingding_auto_login_message', data)
-
