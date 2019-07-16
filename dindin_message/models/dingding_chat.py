@@ -122,10 +122,10 @@ class DingDingChat(models.Model):
                 if result.get('errcode') == 0:
                     res.write({'chat_id': result.get(
                         'chatid'), 'state': 'normal'})
-                    res.message_post(body="群会话已创建!群会话的ID:{}".format(
+                    res.message_post(body=_("群会话已创建!群会话的ID:{}").format(
                         result.get('chatid')), message_type='notification')
                 else:
-                    raise UserError('创建失败，详情为:{}'.format(result.get('errmsg')))
+                    raise UserError(_('创建失败，详情为:{}').format(result.get('errmsg')))
             except Exception as e:
                 raise UserError(e)
 
@@ -156,7 +156,7 @@ class DingDingChat(models.Model):
             chatid = res.chat_id
             name = res.name
             owner = res.employee_id.din_id
-            show_histocry_type = res.show_history_type
+            show_history_type = res.show_history_type
             searchable = res.searchable
             validation_type = res.validation_type
             mention_all_authority = res.mention_all_authority
@@ -169,9 +169,9 @@ class DingDingChat(models.Model):
                 logging.info(">>>修改会话返回结果%s", result)
                 if result.get('errcode') == 0:
                     res.message_post(
-                        body="群会话已修改!", message_type='notification')
+                        body=_("群会话已修改!"), message_type='notification')
                 else:
-                    raise UserError('修改失败，详情为:{}'.format(result.get('errmsg')))
+                    raise UserError(_('修改失败，详情为:{}').format(result.get('errmsg')))
             except Exception as e:
                 raise UserError(e)
 
@@ -350,7 +350,7 @@ class DingDingChatUserModelDel(models.TransientModel):
             user_list = list()
             for emp in res.user_ids:
                 if not emp.din_id:
-                    raise UserError("员工{}:在钉钉中不存在，请选择其他人员!".format(emp.name))
+                    raise UserError(_("员工{}:在钉钉中不存在，请选择其他人员!").format(emp.name))
                 user_list.append(emp.din_id)
             chatid = ding_chat.chat_id
             del_useridlist = user_list
@@ -362,10 +362,10 @@ class DingDingChatUserModelDel(models.TransientModel):
                     for user in res.user_ids:
                         ding_chat.write({'useridlist': [(3, user.id)]})
                     ding_chat.message_post(
-                        body="群成员已删除!", message_type='notification')
+                        body=_("群成员已删除!"), message_type='notification')
                 else:
                     raise UserError(
-                        '群成员更新失败，详情为:{}'.format(result.get('errmsg')))
+                        _('群成员更新失败，详情为:{}').format(result.get('errmsg')))
             except Exception as e:
                 raise UserError(e)
 
@@ -395,7 +395,7 @@ class DingDingSendChatMessage(models.TransientModel):
         try:
             result = client.chat.send(chatid, msg)
             logging.info(">>>发送群消息返回结果%s", result)
-            ding_chat.message_post(body="消息已成功发送!".format(
+            ding_chat.message_post(body=_("消息已成功发送!").format(
                 self.message), message_type='notification')
         except Exception as e:
             raise UserError(e)
@@ -472,7 +472,7 @@ class DingDingChatList(models.TransientModel):
                 employee = self.env['hr.employee'].sudo().search(
                     [('din_id', '=', result.get('owner'))])
                 if not employee:
-                    raise UserError("返回的群管理员在Odoo系统中不存在!")
+                    raise UserError(_("返回的群管理员在Odoo系统中不存在!"))
                 user_list = list()
                 for userlist in result.get('useridlist'):
                     user = self.env['hr.employee'].sudo().search(

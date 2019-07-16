@@ -27,7 +27,7 @@ class DinDinCalendarEvent(models.Model):
         if auto_calendar_event:
             values['dingtalk_calendar_id'] = self.create_dindin_calendar(
                 values)
-            self.sudo().message_post(body="已同步上传至钉钉日程", message_type='notification')
+            self.sudo().message_post(body=_("已同步上传至钉钉日程"), message_type='notification')
         return super(DinDinCalendarEvent, self).create(values)
 
     @api.model

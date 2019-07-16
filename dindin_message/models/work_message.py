@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
-import requests
-from requests import ReadTimeout
-from odoo import api, fields, models
+
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client
 
@@ -194,7 +192,7 @@ class DinDinWorkMessage(models.Model):
             'task_id': task_id,
             'state': '1'
         })
-        self.message_post(body="消息信息已推送到钉钉，正在加急处理中!",
+        self.message_post(body=_("消息信息已推送到钉钉，正在加急处理中!"),
                           message_type='notification')
 
     @api.model
@@ -255,7 +253,7 @@ class DinDinWorkMessage(models.Model):
             result = client.message.getsendprogress(agent_id, task_id)
             logging.info(">>>查询工作消息状态返回结果%s", result)
             self.write({'state': str(result.get('status'))})
-            self.message_post(body="查询消息进度成功，返回值:{}!".format(
+            self.message_post(body=_("查询消息进度成功，返回值:{}!").format(
                 result), message_type='notification')
         except Exception as e:
             raise UserError(e)
@@ -307,7 +305,7 @@ class DinDinWorkMessage(models.Model):
                     for dept in self.dep_ids:
                         if dept.dept_id.din_id == invalid:
                             dept.write({'msg_type': '00'})
-            self.message_post(body="查询工作通知消息的发送结果成功",
+            self.message_post(body=_("查询工作通知消息的发送结果成功"),
                               message_type='notification')
         except Exception as e:
             raise UserError(e)

@@ -2,7 +2,7 @@
 import base64
 import logging
 
-from odoo import api, fields, models, tools
+from odoo import api, fields, models, tools, _
 from odoo.addons.ali_dindin.dingtalk.main import get_client
 from odoo.exceptions import UserError
 from odoo.modules import get_module_resource

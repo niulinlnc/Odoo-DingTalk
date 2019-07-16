@@ -4,7 +4,7 @@ import logging
 
 import requests
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
 from .ding_robot_api import ActionCard, DingtalkChatbot
@@ -169,7 +169,7 @@ class DingDingRobotSendMessage(models.TransientModel):
                         {'title': val.title, 'url': val.actionURL, 'pic_url': val.pic_url})
                 xiaoding.send_feed_card(link_list)
         except Exception:
-            raise UserError('Webhook地址有误！')
+            raise UserError(_('Webhook地址有误！'))
 
 
 class CardMessageList(models.TransientModel):
