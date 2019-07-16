@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 from odoo.exceptions import UserError
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time, list_cut, day_cut
 
 
@@ -77,8 +77,10 @@ class HrAttendanceTransient(models.TransientModel):
         if self.is_all_emp:
             emps = self.env['hr.employee'].search([('din_id', '!=', '')])
             if len(emps) <= 0:
-                raise UserError("员工钉钉Id不存在！也许是你的员工未同步导致的！")
+                raise UserError(_("员工钉钉Id不存在！也许是你的员工未同步导致的！"))
             self.emp_ids = [(6, 0, emps.ids)]
+        else:
+            self.emp_ids = False
 
     @api.model
     def clear_attendance(self):
@@ -108,10 +110,10 @@ class HrAttendanceTransient(models.TransientModel):
             din_ids.append(user.din_id)
         user_list = list_cut(din_ids, 50)
         for u in user_list:
-            logging.info(">>>开始获取{}员工段数据".format(u))
+            logging.info(">>>开始获取%s员工段数据", u)
             date_list = day_cut(self.start_date, self.stop_date, 7)
             for d in date_list:
-                logging.info(">>>开始获取{}时间段数据".format(d))
+                logging.info(">>>开始获取%s时间段数据", d)
                 offset = 0
                 limit = 50
                 while True:
@@ -155,13 +157,12 @@ class HrAttendanceTransient(models.TransientModel):
                             logging.info(">>>是否还有剩余数据：%s", result.get('hasMore'))
                             if result.get('hasMore'):
                                 offset = offset + limit
-                                logging.info(">>>准备获取剩余数据中的第{}至{}条".format(
-                                    offset+1, offset+limit))
+                                logging.info(">>>准备获取剩余数据中的第%s至%s条", offset + 1, offset + limit)
                             else:
                                 break
                         else:
                             raise UserError(
-                                '请求失败,原因为:{}'.format(result.get('errmsg')))
+                                _('请求失败,原因为:{}').format(result.get('errmsg')))
                     except Exception as e:
                         raise UserError(e)
 
@@ -185,22 +186,21 @@ class HrAttendanceTransient(models.TransientModel):
             din_ids.append(user.din_id)
         user_list = list_cut(din_ids, 50)
         for u in user_list:
-            logging.info(">>>开始获取{}员工段数据".format(u))
+            logging.info(">>>开始获取%s员工段数据", u)
             date_list = day_cut(self.start_date, self.stop_date, 7)
             for d in date_list:
-                logging.info(">>>开始获取{}时间段数据".format(d))
+                logging.info(">>>开始获取%s时间段数据", d)
                 offset = 0
                 limit = 50
                 while True:
                     has_more = self.attendance_list(
                         d[0], d[1], user_ids=u, offset=offset, limit=limit)
-                    logging.info(">>>是否还有剩余数据：%s", hasMore)
+                    logging.info(">>>是否还有剩余数据：%s", has_more)
                     if not has_more:
                         break
                     else:
                         offset = offset + limit
-                        logging.info(">>>准备获取剩余数据中的第{}至{}条".format(
-                            offset+1, offset+limit))
+                        logging.info(">>>准备获取剩余数据中的第%s至%s条", offset + 1, offset + limit)
         logging.info(">>>根据日期获取员工打卡信息结束...")
         action = self.env.ref('dindin_attendance.dingding_attendance_action')
         action_dict = action.read()[0]
@@ -255,6 +255,6 @@ class HrAttendanceTransient(models.TransientModel):
                 else:
                     return False
             else:
-                raise UserError('请求失败,原因为:{}'.format(result.get('errmsg')))
+                raise UserError(_('请求失败,原因为:{}').format(result.get('errmsg')))
         except Exception as e:
             raise UserError(e)

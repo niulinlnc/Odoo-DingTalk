@@ -102,4 +102,4 @@ class AddDingDingEmployee(models.Model):
     @api.multi
     def employees_have_joined(self):
         self.ensure_one()
-        raise UserError("还没有做这个功能")
+        raise UserError(_("还没有做这个功能"))

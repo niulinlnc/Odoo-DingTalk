@@ -23,14 +23,14 @@ class CallBack(Home, http.Controller):
     @http.route('/callback/eventreceive', type='json', auth='none', methods=['POST'], csrf=False)
     def callback_users(self, **kw):
         json_str = request.jsonrequest
-        call_back, din_corpId = self.get_bash_attr()
+        call_back, din_corpid = self.get_bash_attr()
         msg = self.encrypt_result(json_str.get(
-            'encrypt'), call_back.aes_key, din_corpId)
+            'encrypt'), call_back.aes_key, din_corpid)
         logging.info(">>>解密消息结果:%s", msg)
         msg = json.loads(msg)
         event_type = msg.get('EventType')
         success = self.result_success(
-            call_back.aes_key, call_back.token, din_corpId)
+            call_back.aes_key, call_back.token, din_corpid)
         # --------注册时验证------
         if event_type == 'check_url':
             logging.info(">>>钉钉回调事件:回调地址验证")
@@ -54,8 +54,7 @@ class CallBack(Home, http.Controller):
             for user_id in user_ids:
                 request.env['hr.employee'].sudo(
                 ).syn_employee_from_dingding(event_type, user_id)
-                logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(
-                    event_type, user_id))
+                logging.info(">>>回调事件结果：事件类型：%s,相关钉钉ID:%s", event_type, user_id)
                 return success
         elif event_type == 'user_leave_org':
             logging.info(">>>钉钉回调事件:员工离职（删除）")
@@ -74,8 +73,7 @@ class CallBack(Home, http.Controller):
                 # 自动添加到离职花名册中
                 request.env['dingding.get.hrm.dimission.list'].sudo(
                 ).dimission_list(user_id)
-                logging.info(">>>回调事件结果：事件类型：{},相关钉钉ID:{}".format(
-                    event_type, user_id))
+                logging.info(">>>回调事件结果：事件类型：%s,相关钉钉ID:%s", event_type, user_id)
                 return success
         # -----部门-------
         elif event_type == 'org_dept_remove':
@@ -164,12 +162,12 @@ class CallBack(Home, http.Controller):
         """
         call_back = request.env['dindin.users.callback'].sudo().search([])
         if not call_back:
-            raise UserError("钉钉回调管理单据错误，无法获取token和encode_aes_key值!")
-        din_corpId = request.env['ir.config_parameter'].sudo(
-        ).get_param('ali_dindin.din_corpId')
-        if not din_corpId:
-            raise UserError("钉钉CorpId值为空，请前往设置中进行配置!")
-        return call_back[0], din_corpId
+            raise UserError(_("钉钉回调管理单据错误，无法获取token和encode_aes_key值!"))
+        din_corpid = request.env['ir.config_parameter'].sudo(
+        ).get_param('ali_dindin.din_corpid')
+        if not din_corpid:
+            raise UserError(_("钉钉CorpId值为空，请前往设置中进行配置!"))
+        return call_back[0], din_corpid
 
     def bpms_instance_change(self, msg):
         """

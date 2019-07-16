@@ -77,7 +77,7 @@ class DingtalkChatbot(object):
             at_dingtalk_ids = list(map(str, at_dingtalk_ids))
             data["at"]["atDingtalkIds"] = at_dingtalk_ids
 
-        logging.debug('text类型：%s' % data)
+        logging.debug('text类型：%s', data)
         return self.post(data)
 
     def send_image(self, pic_url):
@@ -93,7 +93,7 @@ class DingtalkChatbot(object):
                     "picURL": pic_url
                 }
             }
-            logging.debug('image类型：%s' % data)
+            logging.debug('image类型：%s', data)
             return self.post(data)
         else:
             logging.error("image类型中图片链接不能为空！")
@@ -119,7 +119,7 @@ class DingtalkChatbot(object):
                     "messageUrl": message_url
                 }
             }
-            logging.debug('link类型：%s' % data)
+            logging.debug('link类型：%s', data)
             return self.post(data)
         else:
             logging.error("link类型中消息标题或内容或链接不能为空！")
@@ -155,7 +155,7 @@ class DingtalkChatbot(object):
                 at_dingtalk_ids = list(map(str, at_dingtalk_ids))
                 data["at"]["atDingtalkIds"] = at_dingtalk_ids
 
-            logging.debug("markdown类型：%s" % data)
+            logging.debug("markdown类型：%s", data)
             return self.post(data)
         else:
             logging.error("markdown类型中消息标题或内容不能为空！")
@@ -169,7 +169,7 @@ class DingtalkChatbot(object):
         """
         if isinstance(action_card, ActionCard):
             data = action_card.get_data()
-            logging.debug("ActionCard类型：%s" % data)
+            logging.debug("ActionCard类型：%s", data)
             return self.post(data)
         else:
             logging.error("ActionCard类型：传入的实例类型不正确！")
@@ -189,7 +189,7 @@ class DingtalkChatbot(object):
             # 兼容：1、传入FeedLink或CardItem实例列表；2、传入数据字典列表；
             links = link_data_list
         data = {"msgtype": "feedCard", "feedCard": {"links": links}}
-        logging.debug("FeedCard类型：%s" % data)
+        logging.debug("FeedCard类型：%s", data)
         return self.post(data)
 
     def post(self, data):
@@ -210,8 +210,7 @@ class DingtalkChatbot(object):
             response = requests.post(
                 self.webhook, headers=self.headers, data=post_data)
         except requests.exceptions.HTTPError as exc:
-            logging.error("消息发送失败， HTTP error: %d, reason: %s" %
-                          (exc.response.status_code, exc.response.reason))
+            logging.error("消息发送失败， HTTP error: %d, reason: %s", exc.response.status_code, exc.response.reason)
             raise
         except requests.exceptions.ConnectionError:
             logging.error("消息发送失败，HTTP connection error!")
@@ -226,15 +225,14 @@ class DingtalkChatbot(object):
             try:
                 result = response.json()
             except JSONDecodeError:
-                logging.error("服务器响应异常，状态码：%s，响应内容：%s" %
-                              (response.status_code, response.text))
+                logging.error("服务器响应异常，状态码：%s，响应内容：%s", response.status_code, response.text)
                 return {'errcode': 500, 'errmsg': '服务器响应异常'}
             else:
-                logging.debug('发送结果：%s' % result)
+                logging.debug('发送结果：%s', result)
                 if result['errcode']:
                     error_data = {"msgtype": "text", "text": {
                         "content": "钉钉机器人消息发送失败，原因：%s" % result['errmsg']}, "at": {"isAtAll": True}}
-                    logging.error("消息发送失败，自动通知：%s" % error_data)
+                    logging.error("消息发送失败，自动通知：%s", error_data)
                     requests.post(self.webhook, headers=self.headers,
                                   data=json.dumps(error_data))
                 return result

@@ -15,7 +15,7 @@ def get_client(obj):
        从master升级：pip3 install -U https://github.com/007gzs/dingtalk-sdk/archive/master.zip
     """
     din_corpid = obj.env['ir.config_parameter'].sudo(
-    ).get_param('ali_dindin.din_corpId')
+    ).get_param('ali_dindin.din_corpid')
     din_appkey = obj.env['ir.config_parameter'].sudo(
     ).get_param('ali_dindin.din_appkey')
     din_appsecret = obj.env['ir.config_parameter'].sudo(

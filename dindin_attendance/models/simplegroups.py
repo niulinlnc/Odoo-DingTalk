@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client
 
@@ -68,7 +68,7 @@ class DinDinSimpleGroups(models.Model):
                     else:
                         self.env['dindin.simple.groups'].sudo().create(data)
             else:
-                raise UserError('获取考勤组失败，详情为:{}'.format(result.get('errmsg')))
+                raise UserError(_('获取考勤组失败，详情为:{}').format(result.get('errmsg')))
         except Exception as e:
             raise UserError(e)
         logging.info(">>>获取考勤组结束...")

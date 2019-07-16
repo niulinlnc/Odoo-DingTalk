@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
 
@@ -178,6 +178,6 @@ class DinDinAttendanceList(models.Model):
                 else:
                     return False
             else:
-                raise UserError('请求失败,原因为:{}'.format(result.get('errmsg')))
+                raise UserError(_('请求失败,原因为:{}').format(result.get('errmsg')))
         except Exception as e:
             raise UserError(e)

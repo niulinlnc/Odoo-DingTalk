@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
-import datetime
-# from datetime import datetime
-import json
-import logging
-import requests
-import time
-from requests import ReadTimeout
-from odoo import api, fields, models, tools
-from odoo.modules import get_module_resource
-from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.dingtalk.main import get_client, list_cut
 import base64
+import datetime
+import logging
+
+from odoo import _, api, fields, models, tools
+from odoo.addons.ali_dindin.dingtalk.main import get_client, list_cut
+from odoo.exceptions import UserError
+from odoo.modules import get_module_resource
 
 _logger = logging.getLogger(__name__)
 
@@ -63,6 +59,8 @@ class GetDingDingHealthList(models.TransientModel):
             emps = self.env['hr.employee'].search(
                 [('din_id', '!=', ''), ('health_state', '=', 'open')])
             self.emp_ids = [(6, 0, emps.ids)]
+        else:
+            self.emp_ids = False
 
     @api.multi
     def get_health_list_v1(self):
@@ -112,7 +110,7 @@ class GetDingDingHealthList(models.TransientModel):
         client = get_client(self)
         logging.info(">>>获取钉钉员工运动数据start")
         if len(userids) > 50:
-            raise UserError("钉钉仅支持批量查询小于等于50个员工!")
+            raise UserError(_("钉钉仅支持批量查询小于等于50个员工!"))
         today = datetime.date.today()
         formatted_today = today.strftime('%Y%m%d')
         stat_dates = formatted_today
@@ -122,19 +120,20 @@ class GetDingDingHealthList(models.TransientModel):
             if result['stepinfo_list']:
                 basic_step_info_vo = result['stepinfo_list']['basic_step_info_vo']
                 for stepinfo_list in basic_step_info_vo:
+                    health_date = datetime.datetime.strptime(str(stepinfo_list['stat_date']), "%Y%m%d")
                     data = {
                         'health_count': stepinfo_list['step_count'],
-                        'health_date': datetime.datetime.strptime(str(stepinfo_list['stat_date']), "%Y%m%d"),
+                        'health_date': health_date,
                     }
                     emp = self.env['hr.employee'].sudo().search(
-                        [('din_id', '=', stepinfo_list.get('userid'))])
+                        [('din_id', '=', stepinfo_list.get('userid')), ('health_date', '=', health_date)])
                     if emp:
                         data.update(
                             {'emp_id': emp.id, 'department_id': emp.department_id.id})
-                        partner = self.env['dingding.health'].sudo().search(
+                        sporter = self.env['dingding.health'].sudo().search(
                             [('emp_id', '=', emp.id)])
-                        if partner:
-                            partner.sudo().write(data)
+                        if sporter:
+                            sporter.sudo().write(data)
                         else:
                             self.env['dingding.health'].sudo().create(data)
         except Exception as e:

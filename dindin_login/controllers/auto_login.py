@@ -22,7 +22,7 @@ class AutoLoginController(http.Controller):
         """
         logging.info(">>>用户正在使用免登...")
         data = {'corp_id': request.env['ir.config_parameter'].sudo(
-        ).get_param('ali_dindin.din_corpId')}
+        ).get_param('ali_dindin.din_corpid')}
         return request.render('dindin_login.dingding_auto_login', data)
 
     @http.route('/dingding/auto/login', type='http', auth='none')

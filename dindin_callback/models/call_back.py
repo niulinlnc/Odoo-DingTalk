@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
 import random
 import string
-import requests
+
 from odoo import api, fields, models
+from odoo.addons.ali_dindin.dingtalk.main import get_client
 from odoo.exceptions import UserError
 from odoo.http import request
-from odoo.addons.ali_dindin.dingtalk.main import get_client
 
 _logger = logging.getLogger(__name__)
 
@@ -44,7 +43,7 @@ class DinDinCallback(models.Model):
         comodel_name='dindin.users.callback.list', string='回调类型', ondelete='cascade')
     value_type = fields.Selection(
         string='注册事件类型', selection=ValueType, default='all', copy=False)
-    token = fields.Char(string='Token', default=_get_default_token, size=50)
+    token = fields.Char(default=_get_default_token, size=50)
     aes_key = fields.Char(
         string='数据加密密钥', default=_get_default_aes_key, size=50)
     url = fields.Char(string='回调URL', size=200, default=_get_default_localhost)
@@ -93,7 +92,7 @@ class DinDinCallback(models.Model):
                     self.write({'state': '01'})
                     self.message_post(body="注册事件成功")
                 else:
-                    raise UserError("注册失败！原因:{}".format(result.get('errmsg')))
+                    raise UserError(_("注册失败！原因:{}").format(result.get('errmsg')))
             except Exception as e:
                 raise UserError(e)
         logging.info(">>>注册事件End...")
@@ -119,9 +118,9 @@ class DinDinCallback(models.Model):
                 logging.info(">>>更新回调事件返回结果:%s", result)
                 if result.get('errcode') == 0:
                     self.write({'state': '01'})
-                    self.message_post(body="更新事件成功")
+                    self.message_post(body=_("更新事件成功"))
                 else:
-                    raise UserError("更新失败！原因:{}".format(result.get('errmsg')))
+                    raise UserError(_("更新失败！原因:{}").format(result.get('errmsg')))
             except Exception as e:
                 raise UserError(e)
 
@@ -150,7 +149,6 @@ class DinDinCallback(models.Model):
         except Exception as e:
             logging.info("Token为{}的回调事件删除异常，详情为:{}".format(call_token, e))
             self.state == '00'
-            # raise UserError(e)
         logging.info(">>>删除事件End...")
 
     @api.model

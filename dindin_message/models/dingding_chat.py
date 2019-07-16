@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-import json
+import base64
 import logging
-import requests
-from requests import ReadTimeout
-from odoo import api, fields, models
+
+from odoo import api, fields, models, tools, _
+from odoo.addons.ali_dindin.dingtalk.main import get_client
 from odoo.exceptions import UserError
 from odoo.modules import get_module_resource
-from odoo.addons.ali_dindin.dingtalk.main import get_client
-from odoo import tools
-import base64
+
 _logger = logging.getLogger(__name__)
 
 
@@ -54,7 +52,7 @@ class DingDingChat(models.Model):
     image = fields.Binary("照片", default=_default_image, attachment=True)
     image_medium = fields.Binary("Medium-sized photo", attachment=True)
     image_small = fields.Binary("Small-sized photo", attachment=True)
-    robot_count = fields.Integer(string='群机器人数', compute='get_robot_count')
+    robot_count = fields.Integer(string='群机器人数', compute='_compute_get_robot_count')
     active = fields.Boolean(default=True)
 
     @api.model
@@ -68,7 +66,7 @@ class DingDingChat(models.Model):
         return super(DingDingChat, self).write(values)
 
     @api.multi
-    def get_robot_count(self):
+    def _compute_get_robot_count(self):
         """
         获取当前群的群机器人数量
         :return:
@@ -110,16 +108,16 @@ class DingDingChat(models.Model):
             logging.info(">>>开始钉钉创建群会话")
             name = res.name
             owner = res.employee_id.din_id
-            showHistoryType = res.show_history_type
+            show_history_type = res.show_history_type
             searchable = res.searchable
-            validationType = res.validation_type
-            mentionAllAuthority = res.mention_all_authority
-            chatBannedType = res.chat_banned_type
-            managementType = res.management_ype
+            validation_type = res.validation_type
+            mention_all_authority = res.mention_all_authority
+            chat_banned_type = res.chat_banned_type
+            management_type = res.management_ype
             useridlist = user_list
             try:
-                result = client.chat.create(name, owner, useridlist, show_history_type=showHistoryType, searchable=searchable,
-                                            validation_type=validationType, mention_all_authority=mentionAllAuthority, chat_banned_type=chatBannedType, management_type=managementType)
+                result = client.chat.create(name, owner, useridlist, show_history_type=show_history_type, searchable=searchable,
+                                            validation_type=validation_type, mention_all_authority=mention_all_authority, chat_banned_type=chat_banned_type, management_type=management_type)
                 logging.info(">>>创建会话返回结果%s", result)
                 if result.get('errcode') == 0:
                     res.write({'chat_id': result.get(
@@ -158,16 +156,16 @@ class DingDingChat(models.Model):
             chatid = res.chat_id
             name = res.name
             owner = res.employee_id.din_id
-            showHistoryType = res.show_history_type
+            show_histocry_type = res.show_history_type
             searchable = res.searchable
-            validationType = res.validation_type
-            mentionAllAuthority = res.mention_all_authority
-            chatBannedType = res.chat_banned_type
-            managementType = res.management_ype
+            validation_type = res.validation_type
+            mention_all_authority = res.mention_all_authority
+            chat_banned_type = res.chat_banned_type
+            management_type = res.management_ype
 
             try:
-                result = client.chat.update(chatid, name=name, owner=owner, add_useridlist=(), del_useridlist=(), icon='', chat_banned_type=chatBannedType,
-                                            searchable=searchable, validation_type=validationType, mention_all_authority=mentionAllAuthority, show_history_type=showHistoryType, management_type=managementType)
+                result = client.chat.update(chatid, name=name, owner=owner, add_useridlist=(), del_useridlist=(), icon='', chat_banned_type=chat_banned_type,
+                                            searchable=searchable, validation_type=validation_type, mention_all_authority=mention_all_authority, show_history_type=show_history_type, management_type=management_type)
                 logging.info(">>>修改会话返回结果%s", result)
                 if result.get('errcode') == 0:
                     res.message_post(
@@ -180,11 +178,11 @@ class DingDingChat(models.Model):
     @api.model
     def check_employee_din_id(self, res):
         if not res.employee_id.din_id:
-            raise UserError("员工（群主）在钉钉中不存在，请选择其他人员!")
+            raise UserError(_("员工（群主）在钉钉中不存在，请选择其他人员!"))
         user_list = list()
         for emp in res.useridlist:
             if not emp.din_id:
-                raise UserError("员工{}:在钉钉中不存在，请选择其他人员!".format(emp.name))
+                raise UserError(_("员工{}:在钉钉中不存在，请选择其他人员!").format(emp.name))
             user_list.append(emp.din_id)
         return user_list
 
@@ -240,7 +238,7 @@ class DingDingChat(models.Model):
                     [('din_id', '=', msg.get('Operator'))])
                 chat.sudo().write({'state': 'close'})
                 if emp:
-                    chat.sudo().message_post(body="群会话已被解散，操作人: {}!".format(
+                    chat.sudo().message_post(body=_("群会话已被解散，操作人: {}!").format(
                         emp[0].name), message_type='notification')
         return True
 
@@ -265,11 +263,11 @@ class DingDingChatUserModelAdd(models.TransientModel):
             }
 
     @api.model
-    def default_get(self, fields):
-        res = super(DingDingChatUserModelAdd, self).default_get(fields)
+    def default_get(self, _fields):
+        res = super(DingDingChatUserModelAdd, self).default_get(_fields)
         chat_id = self.env.context.get('active_id', False)
         ding_chat = self.env['dingding.chat'].browse(chat_id)
-        if 'on_user_ids' in fields:
+        if 'on_user_ids' in _fields:
             res.update({'on_user_ids': [(6, 0, ding_chat.useridlist.ids)]})
         return res
 
@@ -286,7 +284,7 @@ class DingDingChatUserModelAdd(models.TransientModel):
             user_list = list()
             for emp in res.user_ids:
                 if not emp.din_id:
-                    raise UserError("员工{}:在钉钉中不存在，请选择其他人员!".format(emp.name))
+                    raise UserError(_("员工{}:在钉钉中不存在，请选择其他人员!").format(emp.name))
                 user_list.append(emp.din_id)
             chatid = ding_chat.chat_id
             add_useridlist = user_list
@@ -302,10 +300,10 @@ class DingDingChatUserModelAdd(models.TransientModel):
                         new_user_list.append(user.id)
                     ding_chat.write({'useridlist': [(6, 0, new_user_list)]})
                     ding_chat.message_post(
-                        body="群成员已增加!", message_type='notification')
+                        body=_("群成员已增加!"), message_type='notification')
                 else:
                     raise UserError(
-                        '群成员更新失败，详情为:{}'.format(result.get('errmsg')))
+                        _('群成员更新失败，详情为:{}').format(result.get('errmsg')))
             except Exception as e:
                 raise UserError(e)
 
@@ -331,11 +329,11 @@ class DingDingChatUserModelDel(models.TransientModel):
             }
 
     @api.model
-    def default_get(self, fields):
-        res = super(DingDingChatUserModelDel, self).default_get(fields)
+    def default_get(self, _fields):
+        res = super(DingDingChatUserModelDel, self).default_get(_fields)
         chat_id = self.env.context.get('active_id', False)
         ding_chat = self.env['dingding.chat'].browse(chat_id)
-        if 'old_user_ids' in fields:
+        if 'old_user_ids' in _fields:
             res.update({'old_user_ids': [(6, 0, ding_chat.useridlist.ids)]})
         return res
 
@@ -486,11 +484,11 @@ class DingDingChatList(models.TransientModel):
                     'chat_icon': result.get('icon'),
                     'name': result.get('name'),
                     'employee_id': employee[0].id,
-                    'show_history_type': result.get('showHistoryType'),
+                    'show_history_type': result.get('show_history_type'),
                     'searchable': result.get('searchable'),
-                    'validation_type': result.get('validationType'),
-                    'mention_all_authority': result.get('mentionAllAuthority'),
-                    'management_ype': result.get('managementType'),
+                    'validation_type': result.get('validation_type'),
+                    'mention_all_authority': result.get('mention_all_authority'),
+                    'management_ype': result.get('management_type'),
                     'useridlist': [(6, 0, user_list)],
                     'state': 'normal'
                 }

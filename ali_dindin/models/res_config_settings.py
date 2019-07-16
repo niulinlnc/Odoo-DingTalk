@@ -10,7 +10,7 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     din_agentid = fields.Char(string='AgentId')
-    din_corpId = fields.Char(string='企业CorpId')
+    din_corpid = fields.Char(string='企业CorpId')
     din_appkey = fields.Char(string='AppKey')
     din_appsecret = fields.Char(string='AppSecret')
     din_token = fields.Boolean(string="自动获取Token")
@@ -101,8 +101,8 @@ class ResConfigSettings(models.TransientModel):
         res.update(
             din_agentid=self.env['ir.config_parameter'].sudo(
             ).get_param('ali_dindin.din_agentid'),
-            din_corpId=self.env['ir.config_parameter'].sudo(
-            ).get_param('ali_dindin.din_corpId'),
+            din_corpid=self.env['ir.config_parameter'].sudo(
+            ).get_param('ali_dindin.din_corpid'),
             din_appkey=self.env['ir.config_parameter'].sudo(
             ).get_param('ali_dindin.din_appkey'),
             din_appsecret=self.env['ir.config_parameter'].sudo(
@@ -141,7 +141,7 @@ class ResConfigSettings(models.TransientModel):
         self.env['ir.config_parameter'].sudo().set_param(
             'ali_dindin.din_agentid', self.din_agentid)
         self.env['ir.config_parameter'].sudo().set_param(
-            'ali_dindin.din_corpId', self.din_corpId)
+            'ali_dindin.din_corpid', self.din_corpid)
         self.env['ir.config_parameter'].sudo().set_param(
             'ali_dindin.din_appkey', self.din_appkey)
         self.env['ir.config_parameter'].sudo().set_param(

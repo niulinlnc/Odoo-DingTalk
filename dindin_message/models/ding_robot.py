@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 import json
-import time
 import logging
+
 import requests
-from requests import ReadTimeout
-from odoo.exceptions import UserError
+
 from odoo import api, fields, models
-from .ding_robot_api import DingtalkChatbot, ActionCard, FeedLink, CardItem
+from odoo.exceptions import UserError
+
+from .ding_robot_api import ActionCard, DingtalkChatbot
+
 _logger = logging.getLogger(__name__)
 
 MESSAGETYPE = [

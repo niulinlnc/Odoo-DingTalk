@@ -65,6 +65,8 @@ class GetDingDingHrmDimissionList(models.TransientModel):
             emps = self.env['hr.employee'].search(
                 [('din_id', '!=', ''), ('work_status', '=', '3')])
             self.emp_ids = [(6, 0, emps.ids)]
+        else:
+            self.emp_ids = False
 
     @api.multi
     def get_hrm_dimission_list(self):

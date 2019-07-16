@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import datetime
-import json
 import logging
 import time
-import requests
-from requests import ReadTimeout
+
 from odoo import api, fields, models
-from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 

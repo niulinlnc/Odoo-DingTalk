@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import base64
 import logging
-from odoo import api, fields, models
+
 import pypinyin
+
+from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 

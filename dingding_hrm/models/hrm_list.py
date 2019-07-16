@@ -49,6 +49,8 @@ class GetDingDingHrmList(models.TransientModel):
         if self.is_all_emp:
             emps = self.env['hr.employee'].search([('din_id', '!=', '')])
             self.emp_ids = [(6, 0, emps.ids)]
+        else:
+            self.emp_ids = False
 
     @api.multi
     def get_hrm_list(self):

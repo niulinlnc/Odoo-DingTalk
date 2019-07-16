@@ -48,5 +48,5 @@ class DinDinBlackboard(models.TransientModel):
                 [('key', '=', 'get_manage_version_info')]).value
             result = requests.get(url=url, timeout=2)
             return result.text
-        except Exception as e:
+        except DingTalkClientException as e:
             return {"获取更新公告信息失败!,详情:%s", e}
