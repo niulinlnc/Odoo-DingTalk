@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
-import requests
-from requests import ReadTimeout
-from odoo import api, fields, models
+
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.addons.ali_dindin.dingtalk.main import get_client
 
@@ -52,7 +50,7 @@ class DinDinApprovalMain(models.Model):
     def unlink(self):
         for res in self:
             if res.oa_state != '00':
-                raise UserError('非草稿单据不能删除!')
+                raise UserError(_('非草稿单据不能删除!'))
         super(DinDinApprovalMain, self).unlink()
 
     @api.model

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
 from odoo import api, fields, models
-
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -91,7 +90,7 @@ class DinDinMessageTemplate(models.Model):
         document = self.env[model].sudo().browse(res_id).copy_data()  # 当前单据
         message_dict = self.create_message_dict(
             model_type, template, document[0])
-        logging.info(">>>msg:%s",message_dict)
+        logging.info(">>>msg:%s", message_dict)
         # 调用消息函数发送
         try:
             if template.msg_type == '03':

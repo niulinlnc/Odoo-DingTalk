@@ -86,7 +86,7 @@ class DingDingSynchronous(models.TransientModel):
             emp_offset = 0
             emp_size = 100
             while True:
-                logging.info(">>>开始获取{}部门的员工".format(department.name))
+                logging.info(">>>开始获取%s部门的员工", department.name)
                 offset = emp_offset
                 size = emp_size
                 result_state = self.get_dingding_employees(

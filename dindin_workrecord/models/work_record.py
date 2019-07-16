@@ -138,7 +138,7 @@ class DinDinWorkRecord(models.Model):
             if result.get('errcode') == 0:
                 return result.get('message_id')
             else:
-                logging.info('发送消息失败，详情为:{}'.format(result.get('errmsg')))
+                logging.info('发送消息失败，详情为:%s', result.get('errmsg'))
         except Exception as e:
             raise UserError(e)
 
@@ -247,18 +247,6 @@ class DinDinWorkRecord(models.Model):
             record = self.env['dindin.work.record'].sudo().search(
                 [('emp_id', '=', emp[0].id), ('record_state', '=', '00'), ('record_type', '=', 'put')])
             return len(record)
-
-    @api.model
-    def get_time_stamp(self, timeNum):
-        """
-        将13位时间戳转换为时间
-        :param timeNum:
-        :return:
-        """
-        timeStamp = float(timeNum / 1000)
-        timeArray = time.localtime(timeStamp)
-        otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-        return otherStyleTime
 
 
 class DinDinWorkRecordList(models.Model):

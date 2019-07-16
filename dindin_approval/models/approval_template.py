@@ -21,12 +21,16 @@ class DinDinApprovalTemplate(models.Model):
                                  string='公司', default=lambda self: self.env.user.company_id.id)
 
     @api.model
+    def client(self):
+        return get_client(self)
+
+    @api.model
     def get_template(self):
         """获取审批模板"""
         logging.info(">>>开始获取审批模板...")
-        client = get_client(self)
+        # client = get_client(self)
         try:
-            result = client.bpms.process_listbyuserid(userid='')
+            result = self.client().bpms.process_listbyuserid(userid='')
             logging.info(">>>获取审批模板返回结果%s", result)
             d_res = result.get('process_list')
             for process in d_res.get('process_top_vo'):
@@ -52,14 +56,14 @@ class DinDinApprovalTemplate(models.Model):
         根据当前用户获取该用户的待审批数量
         :return:
         """
+        # client = get_client(self)
         emp = self.env['hr.employee'].sudo().search(
             [('user_id', '=', self.env.user.id)])
         if len(emp) > 1:
             return {'state': False, 'number': 0, 'msg': '登录用户关联了多个员工'}
         if emp and emp.din_id:
             try:
-                client = get_client(self)
-                result = client.bpms.dingtalk_oapi_process_gettodonum(
+                result = self.client().bpms.dingtalk_oapi_process_gettodonum(
                     emp.din_id)
                 logging.info(">>>获取待审批数量返回结果%s", result)
                 if result.get('errcode') == 0:
@@ -67,7 +71,7 @@ class DinDinApprovalTemplate(models.Model):
                 else:
                     return {'state': False, 'number': 0, 'msg': result.get('errmsg')}
             except Exception as e:
-                raise UserError(e)
+                return {'state': False, 'msg': "获取用户'{}'的待审批数失败，原因：{}".format(self.env.user.name, e)}
         else:
             return {'state': False, 'number': 0, 'msg': 'None'}
 
@@ -80,9 +84,9 @@ class DinDinApprovalTemplate(models.Model):
         :param pcode:
         :return:
         """
-        client = get_client(self)
+        # client = get_client(self)
         try:
-            result = client.bpms.processinstance_get(pid)
+            result = self.client().bpms.processinstance_get(pid)
             logging.info(">>>获取审批实例详情返回结果%s", result)
             if result.get('errcode') == 0:
                 process_instance = result.get('process_instance')
@@ -113,6 +117,6 @@ class DinDinApprovalTemplate(models.Model):
 
             else:
                 logging.info(
-                    '>>>获取单个审批实例-失败，原因为:{}'.format(result.get('errmsg')))
+                    '>>>获取单个审批实例-失败，原因为:%s', result.get('errmsg'))
         except Exception as e:
             raise UserError(e)

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
+
+from odoo import _, api, fields, models
+from odoo.addons.ali_dindin.dingtalk.main import (day_cut, get_client,
+                                                  list_cut, stamp_to_time)
 from odoo.exceptions import UserError
-from odoo import models, fields, api, _
-from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time, list_cut, day_cut
 
 
 class HrEmployee(models.Model):

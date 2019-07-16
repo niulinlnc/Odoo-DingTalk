@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import time
-import redis
-from odoo import fields, _
-from odoo.exceptions import UserError
 from datetime import datetime, timedelta
 from dingtalk.client import AppKeyClient
 from dingtalk.storage.kvstorage import KvStorage
+import redis
+from odoo import _, fields
+from odoo.exceptions import UserError
 
 
 def get_client(obj):
@@ -28,7 +28,7 @@ def get_client(obj):
     ).get_param('ali_dindin.dingtalk_redis_db')
     session_manager = redis.Redis(
         host=dingtalk_redis_ip, port=dingtalk_redis_port, db=dingtalk_redis_db)
-    if not din_appkey and not din_appsecret and not din_corpid:
+    if not din_appkey or not din_appsecret or not din_corpid:
         raise UserError(_('钉钉设置项中的CorpId、AppKey和AppSecret不能为空'))
     return AppKeyClient(din_corpid, din_appkey, din_appsecret, storage=KvStorage(session_manager))
 

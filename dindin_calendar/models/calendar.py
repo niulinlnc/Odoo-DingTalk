@@ -3,7 +3,7 @@ import datetime
 import logging
 import time
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.addons.ali_dindin.dingtalk.main import get_client
 from odoo.exceptions import UserError
 

@@ -74,11 +74,9 @@ class AutoLoginController(http.Controller):
             client = get_client(request)
             result = client.user.getuserinfo(auth_code)
             logging.info(">>>获取用户信息返回结果:%s", result)
-
             if result.get('errcode') != 0:
                 return {'state': False, 'msg': "钉钉接口错误:{}".format(result.get('errmsg'))}
-            else:
-                return {'state': True, 'userid': result.get('userid')}
+            return {'state': True, 'userid': result.get('userid')}
         except Exception as e:
             return {'state': False, 'msg': "登录失败,异常信息:{}".format(str(e))}
 
