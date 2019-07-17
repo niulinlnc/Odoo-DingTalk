@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo.http import request
+import logging
 import time
 from datetime import datetime, timedelta
 
@@ -7,8 +7,9 @@ from dingtalk.client import AppKeyClient
 from dingtalk.storage.kvstorage import KvStorage
 import redis
 
-from odoo import api, fields, http, models, tools, _
-from odoo.exceptions import UserError
+from odoo import api, fields, models, tools
+
+_logger = logging.getLogger(__name__)
 
 # def get_client(obj):
 #     """钉钉客户端初始化
@@ -93,6 +94,13 @@ def time_to_stamp(mytime):
     time_stamp = time_stamp * 1000
     return time_stamp
 
+
+"""
+先在odoo.conf添加配置参数:
+din_corpid = ''
+din_appkey = ''
+din_appsecret = ''
+"""
 
 DIN_CORPID = tools.config.get('din_corpid', '')
 DIN_APPKEY = tools.config.get('din_appkey', '')

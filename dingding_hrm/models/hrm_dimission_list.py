@@ -91,10 +91,8 @@ class GetDingDingHrmDimissionList(models.TransientModel):
         """
         批量获取员工离职信息
         根据传入的staffId列表，批量查询员工的离职信息
-
         :param userid_list: 员工id
         """
-        
         logging.info(">>>获取钉钉获取离职员工信息start")
         if len(user_ids) > 50:
             raise UserError(_("钉钉仅支持批量查询小于等于50个员工!"))
@@ -106,8 +104,9 @@ class GetDingDingHrmDimissionList(models.TransientModel):
             #     raise UserError(_("选择的员工未离职!"))
             if result.get('emp_dimission_info_vo'):
                 for res in result.get('emp_dimission_info_vo'):
-                    main_dept = self.env['hr.department'].search(
-                        [('din_id', '=', res.get('main_dept_id'))])
+                    if res.get('main_dept_id'):
+                        main_dept = self.env['hr.department'].search(
+                            [('din_id', '=', res.get('main_dept_id'))])
                     dept_list = list()
                     if res.get('dept_list'):
                         for depti in res['dept_list']['emp_dept_v_o']:

@@ -57,8 +57,7 @@ class AddDingDingEmployee(models.Model):
         智能人事添加企业待入职员工
 
         :param param: 添加待入职入参
-        """
-        
+        """     
         self.ensure_one()
         logging.info(">>>添加待入职员工start")
         user = self.env['hr.employee'].search(
@@ -89,7 +88,6 @@ class AddDingDingEmployee(models.Model):
         :param offset: 分页起始值，默认0开始
         :param size: 分页大小，最大50
         """
-        
         try:
             result = client.employeerm.querypreentry(offset=0, size=50)
             logging.info(">>>查询待入职员工列表返回结果%s", result)

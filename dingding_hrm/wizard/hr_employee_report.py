@@ -55,7 +55,6 @@ class GetHrEmployeeStauts(models.TransientModel):
         更新待入职员工
         :return:
         """
-        
         offset = 0
         size = 50
         while True:
@@ -83,7 +82,6 @@ class GetHrEmployeeStauts(models.TransientModel):
         更新在职员工,在职员工子状态筛选: 2，试用期；3，正式；5，待离职；-1，无状态
         :return:
         """
-        
         status_arr = ['2', '3', '5', '-1']
         for arr in status_arr:
             offset = 0
@@ -95,7 +93,8 @@ class GetHrEmployeeStauts(models.TransientModel):
                     if result['data_list']:
                         result_list = result['data_list']['string']
                         for data_list in result_list:
-                            sql = """UPDATE hr_employee SET work_status='2',office_status={} WHERE din_id='{}'""".format(arr, data_list)
+                            sql = """UPDATE hr_employee SET work_status='2',office_status={} WHERE din_id='{}'""".format(
+                                arr, data_list)
                             self._cr.execute(sql)
                         if 'next_cursor' in result:
                             offset = result['next_cursor']
@@ -113,7 +112,6 @@ class GetHrEmployeeStauts(models.TransientModel):
         更新离职员工
         :return:
         """
-        
         offset = 0
         size = 50
         while True:
