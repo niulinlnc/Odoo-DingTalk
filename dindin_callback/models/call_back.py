@@ -4,7 +4,7 @@ import random
 import string
 
 from odoo import api, fields, models, _
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 from odoo.exceptions import UserError
 from odoo.http import request
 
@@ -74,7 +74,7 @@ class DinDinCallback(models.Model):
         注册事件
         :return:
         """
-        client = get_client(self)
+        
         logging.info(">>>注册事件...")
         for res in self:
             call_list = list()
@@ -103,7 +103,7 @@ class DinDinCallback(models.Model):
         更新事件
         :return:
         """
-        client = get_client(self)
+        
         for res in self:
             call_list = list()
             for call in res.call_ids:
@@ -137,7 +137,7 @@ class DinDinCallback(models.Model):
 
     @api.model
     def delete_call_back(self, call_token):
-        client = get_client(self)
+        
         logging.info(">>>删除事件...")
         try:
             result = client.callback.delete_call_back()
@@ -157,7 +157,7 @@ class DinDinCallback(models.Model):
         获取所有回调列表
         :return:
         """
-        client = get_client(self)
+        
         try:
             result = client.callback.get_call_back()
             logging.info(">>>获取所有回调事件返回结果:%s", result)

@@ -2,7 +2,7 @@
 import logging
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
+from odoo.addons.ali_dindin.dingtalk.main import client, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 # 已弃用，已经钉钉考勤整合至odoo考勤
@@ -140,7 +140,7 @@ class DinDinAttendanceList(models.Model):
         :param limit: 表示获取考勤数据的条数，最大不能超过50条
         :return:
         """
-        client = get_client(self)
+        
         try:
             result = client.attendance.list(
                 work_date_from, work_date_to, user_ids=user_ids, offset=offset, limit=limit)

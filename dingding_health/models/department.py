@@ -4,7 +4,7 @@ import logging
 
 
 from odoo import api, fields, models
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class HrDepartment(models.Model):
         :return:
         """
         if self.env['ir.config_parameter'].sudo().get_param('dingding_health.auto_dept_health_info'):
-            client = get_client(self)
+            
             for res in self:
                 if res.din_id:
                     today = datetime.date.today()

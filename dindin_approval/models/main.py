@@ -3,7 +3,7 @@ import logging
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 
 _logger = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ class DinDinApprovalMain(models.Model):
         :param form_values:表单参数
         :return: process_instance_id （审批实例id）
         """
-        client = get_client(self)
+        
         try:
             result = client.bpms.processinstance_create(process_code, user_id, dept_id, approvers, form_values,
                                                         agent_id=None, cc_list=cc_list, cc_start=False, cc_finish=False, approvers_v2=())

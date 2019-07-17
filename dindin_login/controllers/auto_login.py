@@ -4,7 +4,7 @@ import logging
 import random
 
 from odoo import http
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)

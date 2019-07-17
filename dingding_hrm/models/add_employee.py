@@ -3,7 +3,7 @@ import base64
 import logging
 
 from odoo import api, fields, models, tools, _
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 from odoo.exceptions import UserError
 from odoo.modules import get_module_resource
 
@@ -58,7 +58,7 @@ class AddDingDingEmployee(models.Model):
 
         :param param: 添加待入职入参
         """
-        client = get_client(self)
+        
         self.ensure_one()
         logging.info(">>>添加待入职员工start")
         user = self.env['hr.employee'].search(
@@ -89,7 +89,7 @@ class AddDingDingEmployee(models.Model):
         :param offset: 分页起始值，默认0开始
         :param size: 分页大小，最大50
         """
-        client = get_client(self)
+        
         try:
             result = client.employeerm.querypreentry(offset=0, size=50)
             logging.info(">>>查询待入职员工列表返回结果%s", result)

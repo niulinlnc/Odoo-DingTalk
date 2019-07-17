@@ -3,7 +3,7 @@ import datetime
 import logging
 
 from odoo import api, fields, models
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 
 _logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class HrEmployee(models.Model):
         :return:
         """
         if self.env['ir.config_parameter'].sudo().get_param('dingding_health.auto_user_health_info'):
-            client = get_client(self)
+            
             for res in self:
                 if res.din_id and res.active:
                     today = datetime.date.today()
@@ -86,7 +86,7 @@ class HrEmployee(models.Model):
         获取员工钉钉运动开启状态
         :param userid: 用户id
         """
-        client = get_client(self)
+        
         try:
             result = client.health.stepinfo_getuserstatus(userid)
             logging.info(">>>获取id:%s钉钉运动开启状态返回结果:%s", userid, result)

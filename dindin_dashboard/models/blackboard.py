@@ -2,9 +2,8 @@
 import logging
 
 import requests
-
 from odoo import api, models
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 
 _logger = logging.getLogger(__name__)
 
@@ -14,21 +13,17 @@ class DinDinBlackboard(models.TransientModel):
     _name = 'dindin.blackboard'
 
     @api.model
-    def client(self):
-        return get_client(self)
-
-    @api.model
     def get_blackboard_by_user(self):
         """
         根据当前用户获取公告信息
         :return:
         """
-        # client = get_client(self)
+
         uid = self.env.user.id
         emp = self.env['hr.employee'].sudo().search([('user_id', '=', uid)])
         if emp:
             try:
-                result = self.client().blackboard.listtopten(emp.din_id)
+                result = client.blackboard.listtopten(emp.din_id)
                 logging.info(">>>获取公告返回结果:%s", result)
                 if result.get('errcode') == 0:
                     line_list = list()

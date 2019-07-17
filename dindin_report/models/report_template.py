@@ -2,7 +2,7 @@
 import logging
 
 from odoo import api, fields, models, _
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ class DingDingReportTemplate(models.Model):
                         且再次调用时offset设置成next_cursor的值
         :param size: 分页大小，最大可设置成100
         """
-        client = get_client(self)
+        
         group = self.env.user.has_group(
             'dindin_report.dd_get_report_templategroup')
         if not group:
@@ -65,7 +65,7 @@ class DingDingReportTemplate(models.Model):
 
         :param userid: 员工id
         """
-        client = get_client(self)
+        
         emp = self.env['hr.employee'].sudo().search(
             [('user_id', '=', self.env.user.id)])
         if len(emp) > 1:

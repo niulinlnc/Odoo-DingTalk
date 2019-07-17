@@ -3,7 +3,7 @@ import base64
 import logging
 
 from odoo import api, fields, models, tools, _
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 from odoo.exceptions import UserError
 from odoo.modules import get_module_resource
 
@@ -102,7 +102,7 @@ class DingDingChat(models.Model):
         :param management_type: 管理类型，0-默认，所有人可管理，1-仅群主可管理
         :return: 群会话的id
         """
-        client = get_client(self)
+        
         for res in self:
             user_list = self.check_employee_din_id(res)
             logging.info(">>>开始钉钉创建群会话")
@@ -148,7 +148,7 @@ class DingDingChat(models.Model):
         :param management_type: 管理类型，0-默认，所有人可管理，1-仅群主可管理
         :return:
         """
-        client = get_client(self)
+        
         for res in self:
             self.check_employee_din_id(res)
             logging.info(">>>开始钉钉修改群会话")
@@ -277,7 +277,7 @@ class DingDingChatUserModelAdd(models.TransientModel):
         添加群成员
         :return:
         """
-        client = get_client(self)
+        
         for res in self:
             chat_id = self.env.context.get('active_id', False)
             ding_chat = self.env['dingding.chat'].browse(chat_id)
@@ -343,7 +343,7 @@ class DingDingChatUserModelDel(models.TransientModel):
         删除群成员
         :return:
         """
-        client = get_client(self)
+        
         for res in self:
             chat_id = self.env.context.get('active_id', False)
             ding_chat = self.env['dingding.chat'].browse(chat_id)
@@ -382,7 +382,7 @@ class DingDingSendChatMessage(models.TransientModel):
         点击群会话发送群消息按钮
         :return:
         """
-        client = get_client(self)
+        
         chat_id = self.env.context.get('active_id', False)
         ding_chat = self.env['dingding.chat'].browse(chat_id)
         chatid = ding_chat.chat_id
@@ -406,7 +406,7 @@ class DingDingSendChatMessage(models.TransientModel):
         发送群会话消息
         :return:
         """
-        client = get_client(self)
+        
         chatid = ding_chat.chat_id
         msg = {
             "msgtype": "markdown",
@@ -430,7 +430,7 @@ class DingDingSendChatMessage(models.TransientModel):
         :param message 消息内容
         :return:
         """
-        client = get_client(self)
+        
         agentid = self.env['ir.config_parameter'].sudo(
         ).get_param('ali_dindin.din_agentid')
         userid_list = userstr
@@ -462,7 +462,7 @@ class DingDingChatList(models.TransientModel):
         获取群会话
         :return:
         """
-        client = get_client(self)
+        
         for res in self:
             logging.info(">>>开始获取群会话...")
             chatid = res.chat_id

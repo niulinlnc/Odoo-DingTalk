@@ -2,7 +2,7 @@
 import logging
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 
 _logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class DinDinSimpleGroups(models.Model):
         获取企业考勤组列表
         :return:
         """
-        client = get_client(self)
+        
         logging.info(">>>获取考勤组...")
         try:
             result = client.attendance.getsimplegroups()
@@ -82,7 +82,7 @@ class DinDinSimpleGroups(models.Model):
         :param userid: 员工在企业内的UserID，企业用来唯一标识用户的字段。
         :return:
         """
-        client = get_client(self)
+        
         emps = self.env['hr.employee'].sudo().search([('din_id', '!=', '')])
         for emp in emps:
             userid = emp.din_id

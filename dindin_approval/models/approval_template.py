@@ -2,7 +2,7 @@
 import logging
 
 from odoo import api, fields, models
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -20,17 +20,14 @@ class DinDinApprovalTemplate(models.Model):
     company_id = fields.Many2one(comodel_name='res.company',
                                  string='公司', default=lambda self: self.env.user.company_id.id)
 
-    @api.model
-    def client(self):
-        return get_client(self)
 
     @api.model
     def get_template(self):
         """获取审批模板"""
         logging.info(">>>开始获取审批模板...")
-        # client = get_client(self)
+
         try:
-            result = self.client().bpms.process_listbyuserid(userid='')
+            result = client.bpms.process_listbyuserid(userid='')
             logging.info(">>>获取审批模板返回结果%s", result)
             d_res = result.get('process_list')
             for process in d_res.get('process_top_vo'):
@@ -56,14 +53,14 @@ class DinDinApprovalTemplate(models.Model):
         根据当前用户获取该用户的待审批数量
         :return:
         """
-        # client = get_client(self)
+
         emp = self.env['hr.employee'].sudo().search(
             [('user_id', '=', self.env.user.id)])
         if len(emp) > 1:
             return {'state': False, 'number': 0, 'msg': '登录用户关联了多个员工'}
         if emp and emp.din_id:
             try:
-                result = self.client().bpms.dingtalk_oapi_process_gettodonum(
+                result = client.bpms.dingtalk_oapi_process_gettodonum(
                     emp.din_id)
                 logging.info(">>>获取待审批数量返回结果%s", result)
                 if result.get('errcode') == 0:
@@ -84,9 +81,9 @@ class DinDinApprovalTemplate(models.Model):
         :param pcode:
         :return:
         """
-        # client = get_client(self)
+
         try:
-            result = self.client().bpms.processinstance_get(pid)
+            result = client.bpms.processinstance_get(pid)
             logging.info(">>>获取审批实例详情返回结果%s", result)
             if result.get('errcode') == 0:
                 process_instance = result.get('process_instance')

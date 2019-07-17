@@ -2,7 +2,7 @@
 import logging
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 
 _logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ class ChangeMobile(models.TransientModel):
             40019 该手机号码对应的用户最多可以加入5个非认证企业；
             40021 该手机号码已经注册过钉钉。
         """
-        client = get_client(self)
+        
         # 先尝试直接更新
         data = {
             'userid': self.din_id,  # userid

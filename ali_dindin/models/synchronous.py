@@ -5,7 +5,7 @@ import logging
 import requests
 
 from odoo import api, fields, models, tools
-from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
+from odoo.addons.ali_dindin.dingtalk.main import client, stamp_to_time
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ class DingDingSynchronous(models.TransientModel):
         同步钉钉部门
         :return:
         """
-        client = get_client(self)
+        
         try:
             result = client.department.list(fetch_child=True)
             for res in result:
@@ -115,7 +115,7 @@ class DingDingSynchronous(models.TransientModel):
         :param s_avatar: 是否获取钉钉头像
         :return:
         """
-        client = get_client(self)
+        
         try:
             result = client.user.list(
                 department[0].din_id, offset, size, order='custom')
@@ -184,7 +184,7 @@ class DingDingSynchronous(models.TransientModel):
         同步钉钉联系人标签
         :return:
         """
-        client = get_client(self)
+        
         logging.info(">>>同步钉钉联系人标签")
         try:
             result = client.ext.listlabelgroups(offset=0, size=100)
@@ -215,7 +215,7 @@ class DingDingSynchronous(models.TransientModel):
         同步钉钉联系人列表
         :return:
         """
-        client = get_client(self)
+        
         logging.info(">>>同步钉钉联系人列表start")
         try:
             result = client.ext.list(offset=0, size=100)

@@ -1,36 +1,38 @@
 # -*- coding: utf-8 -*-
+from odoo.http import request
 import time
 from datetime import datetime, timedelta
+
 from dingtalk.client import AppKeyClient
 from dingtalk.storage.kvstorage import KvStorage
 import redis
-from odoo import _, fields
+
+from odoo import api, fields, http, models, tools, _
 from odoo.exceptions import UserError
 
-
-def get_client(obj):
-    """钉钉客户端初始化
-       安装 pip3 install dingtalk-sdk
-       升级 pip3 install -U dingtalk-sdk
-       从master升级：pip3 install -U https://github.com/007gzs/dingtalk-sdk/archive/master.zip
-    """
-    din_corpid = obj.env['ir.config_parameter'].sudo(
-    ).get_param('ali_dindin.din_corpid')
-    din_appkey = obj.env['ir.config_parameter'].sudo(
-    ).get_param('ali_dindin.din_appkey')
-    din_appsecret = obj.env['ir.config_parameter'].sudo(
-    ).get_param('ali_dindin.din_appsecret')
-    dingtalk_redis_ip = obj.env['ir.config_parameter'].sudo(
-    ).get_param('ali_dindin.dingtalk_redis_ip')
-    dingtalk_redis_port = obj.env['ir.config_parameter'].sudo(
-    ).get_param('ali_dindin.dingtalk_redis_port')
-    dingtalk_redis_db = obj.env['ir.config_parameter'].sudo(
-    ).get_param('ali_dindin.dingtalk_redis_db')
-    session_manager = redis.Redis(
-        host=dingtalk_redis_ip, port=dingtalk_redis_port, db=dingtalk_redis_db)
-    if not din_appkey or not din_appsecret or not din_corpid:
-        raise UserError(_('钉钉设置项中的CorpId、AppKey和AppSecret不能为空'))
-    return AppKeyClient(din_corpid, din_appkey, din_appsecret, storage=KvStorage(session_manager))
+# def get_client(obj):
+#     """钉钉客户端初始化
+#        安装 pip3 install dingtalk-sdk
+#        升级 pip3 install -U dingtalk-sdk
+#        从master升级：pip3 install -U https://github.com/007gzs/dingtalk-sdk/archive/master.zip
+#     """
+#     din_corpid = obj.env['ir.config_parameter'].sudo(
+#     ).get_param('ali_dindin.din_corpid')
+#     din_appkey = obj.env['ir.config_parameter'].sudo(
+#     ).get_param('ali_dindin.din_appkey')
+#     din_appsecret = obj.env['ir.config_parameter'].sudo(
+#     ).get_param('ali_dindin.din_appsecret')
+#     dingtalk_redis_ip = obj.env['ir.config_parameter'].sudo(
+#     ).get_param('ali_dindin.dingtalk_redis_ip')
+#     dingtalk_redis_port = obj.env['ir.config_parameter'].sudo(
+#     ).get_param('ali_dindin.dingtalk_redis_port')
+#     dingtalk_redis_db = obj.env['ir.config_parameter'].sudo(
+#     ).get_param('ali_dindin.dingtalk_redis_db')
+#     session_manager = redis.Redis(
+#         host=dingtalk_redis_ip, port=dingtalk_redis_port, db=dingtalk_redis_db)
+#     if not din_appkey or not din_appsecret or not din_corpid:
+#         raise UserError(_('钉钉设置项中的CorpId、AppKey和AppSecret不能为空'))
+#     return AppKeyClient(din_corpid, din_appkey, din_appsecret, storage=KvStorage(session_manager))
 
 
 def list_cut(mylist, limit):
@@ -90,3 +92,14 @@ def time_to_stamp(mytime):
     time_stamp = time.mktime(time.strptime(time_str, "%Y-%m-%d %H:%M:%S"))
     time_stamp = time_stamp * 1000
     return time_stamp
+
+
+DIN_CORPID = tools.config.get('din_corpid', '')
+DIN_APPKEY = tools.config.get('din_appkey', '')
+DIN_APPSECRET = tools.config.get('din_appsecret', '')
+REDIS_IP = tools.config.get('redis_host', 'localhost')
+REDIS_PORT = int(tools.config.get('redis_port', 6379))
+DINGTALK_REDIS_DB = int(tools.config.get('dingtalk_redis_db', 1))
+SESSION_MANAGER = redis.Redis(host=REDIS_IP, port=REDIS_PORT, db=DINGTALK_REDIS_DB)
+
+client = AppKeyClient(DIN_CORPID, DIN_APPKEY, DIN_APPSECRET, storage=KvStorage(SESSION_MANAGER))

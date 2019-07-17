@@ -2,7 +2,7 @@
 import logging
 
 from odoo import api, fields, models, _
-from odoo.addons.ali_dindin.dingtalk.main import (get_client, list_cut,
+from odoo.addons.ali_dindin.dingtalk.main import (client, list_cut,
                                                   stamp_to_time)
 from odoo.exceptions import UserError
 
@@ -94,7 +94,7 @@ class GetDingDingHrmDimissionList(models.TransientModel):
 
         :param userid_list: 员工id
         """
-        client = get_client(self)
+        
         logging.info(">>>获取钉钉获取离职员工信息start")
         if len(user_ids) > 50:
             raise UserError(_("钉钉仅支持批量查询小于等于50个员工!"))
