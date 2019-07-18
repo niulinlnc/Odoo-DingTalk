@@ -11,6 +11,30 @@ from odoo import fields, tools
 
 _logger = logging.getLogger(__name__)
 
+
+"""
+钉钉开发平台>首页>查看：CorpId
+钉钉开发平台>H5微应用>基础信息>查看：AgentId,AppKey,AppSecret
+在odoo.conf添加配置参数:
+din_agentid = AgentId值
+din_corpid = CorpId值
+din_appkey = AppKey值
+din_appsecret = AppSecret值
+安装 pip3 install dingtalk-sdk
+升级 pip3 install -U dingtalk-sdk
+从master升级：pip3 install -U https://github.com/007gzs/dingtalk-sdk/archive/master.zip
+"""
+
+DIN_CORPID = tools.config.get('din_corpid', '').strip()
+DIN_APPKEY = tools.config.get('din_appkey', '').strip()
+DIN_APPSECRET = tools.config.get('din_appsecret', '').strip()
+REDIS_IP = tools.config.get('redis_host', 'localhost')
+REDIS_PORT = int(tools.config.get('redis_port', 6379))
+DINGTALK_REDIS_DB = int(tools.config.get('dingtalk_redis_db', 1))
+SESSION_MANAGER = redis.Redis(host=REDIS_IP, port=REDIS_PORT, db=DINGTALK_REDIS_DB)
+
+client = AppKeyClient(DIN_CORPID, DIN_APPKEY, DIN_APPSECRET, storage=KvStorage(SESSION_MANAGER))
+
 # def get_client(obj):
 #     """钉钉客户端初始化
 #        安装 pip3 install dingtalk-sdk
@@ -94,23 +118,3 @@ def time_to_stamp(mytime):
     time_stamp = time_stamp * 1000
     return time_stamp
 
-
-"""
-先在odoo.conf添加配置参数:
-din_corpid = ''
-din_appkey = ''
-din_appsecret = ''
-安装 pip3 install dingtalk-sdk
-升级 pip3 install -U dingtalk-sdk
-从master升级：pip3 install -U https://github.com/007gzs/dingtalk-sdk/archive/master.zip
-"""
-
-DIN_CORPID = tools.config.get('din_corpid', '')
-DIN_APPKEY = tools.config.get('din_appkey', '')
-DIN_APPSECRET = tools.config.get('din_appsecret', '')
-REDIS_IP = tools.config.get('redis_host', 'localhost')
-REDIS_PORT = int(tools.config.get('redis_port', 6379))
-DINGTALK_REDIS_DB = int(tools.config.get('dingtalk_redis_db', 1))
-SESSION_MANAGER = redis.Redis(host=REDIS_IP, port=REDIS_PORT, db=DINGTALK_REDIS_DB)
-
-client = AppKeyClient(DIN_CORPID, DIN_APPKEY, DIN_APPSECRET, storage=KvStorage(SESSION_MANAGER))

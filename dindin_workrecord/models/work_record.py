@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime
 import logging
-import time
 
-from odoo import _, api, fields, models
+from odoo import _, api, fields, models, tools
 from odoo.addons.ali_dindin.dingtalk.main import client, stamp_to_time
 from odoo.exceptions import UserError
 
@@ -112,8 +111,9 @@ class DinDinWorkRecord(models.Model):
             msg_list.append({'key': "{}: ".format(
                 line.title), 'value': line.content})
 
-        agentid = self.env['ir.config_parameter'].sudo(
-        ).get_param('ali_dindin.din_agentid')
+        # agentid = self.env['ir.config_parameter'].sudo(
+        # ).get_param('ali_dindin.din_agentid')
+        agentid = tools.config.get('din_agentid', '')
         userid_list = ()
         userid_list = userid_list + (self.emp_id.din_id,)
         msg_body = {

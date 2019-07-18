@@ -431,8 +431,9 @@ class DingDingSendChatMessage(models.TransientModel):
         :return:
         """
         
-        agentid = self.env['ir.config_parameter'].sudo(
-        ).get_param('ali_dindin.din_agentid')
+        # agentid = self.env['ir.config_parameter'].sudo(
+        # ).get_param('ali_dindin.din_agentid')
+        agentid = tools.config.get('din_agentid', '')
         userid_list = userstr
         msg_body = {
             "msgtype": "markdown",
