@@ -2,3 +2,4 @@ pypinyin
 pycryptodome
 Crypto
 dingtalk-sdk
+redis
