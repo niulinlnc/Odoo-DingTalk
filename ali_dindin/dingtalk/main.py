@@ -7,7 +7,7 @@ from dingtalk.client import AppKeyClient
 from dingtalk.storage.kvstorage import KvStorage
 import redis
 
-from odoo import api, fields, models, tools
+from odoo import fields, tools
 
 _logger = logging.getLogger(__name__)
 
@@ -100,6 +100,9 @@ def time_to_stamp(mytime):
 din_corpid = ''
 din_appkey = ''
 din_appsecret = ''
+安装 pip3 install dingtalk-sdk
+升级 pip3 install -U dingtalk-sdk
+从master升级：pip3 install -U https://github.com/007gzs/dingtalk-sdk/archive/master.zip
 """
 
 DIN_CORPID = tools.config.get('din_corpid', '')

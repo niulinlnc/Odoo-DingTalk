@@ -20,7 +20,6 @@ class DinDinApprovalTemplate(models.Model):
     company_id = fields.Many2one(comodel_name='res.company',
                                  string='公司', default=lambda self: self.env.user.company_id.id)
 
-
     @api.model
     def get_template(self):
         """获取审批模板"""

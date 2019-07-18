@@ -3,7 +3,7 @@ import datetime
 import json
 import logging
 import time
-from odoo import http, _
+from odoo import http, tools, _
 from odoo.addons.web.controllers.main import Home
 from odoo.exceptions import UserError
 from odoo.http import request
@@ -163,8 +163,9 @@ class CallBack(Home, http.Controller):
         call_back = request.env['dindin.users.callback'].sudo().search([])
         if not call_back:
             raise UserError(_("钉钉回调管理单据错误，无法获取token和encode_aes_key值!"))
-        din_corpid = request.env['ir.config_parameter'].sudo(
-        ).get_param('ali_dindin.din_corpid')
+        # din_corpid = request.env['ir.config_parameter'].sudo(
+        # ).get_param('ali_dindin.din_corpid')
+        din_corpid = tools.config.get('din_corpid', '')
         if not din_corpid:
             raise UserError(_("钉钉CorpId值为空，请前往设置中进行配置!"))
         return call_back[0], din_corpid

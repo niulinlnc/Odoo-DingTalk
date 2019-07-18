@@ -3,7 +3,7 @@ import base64
 import logging
 import random
 
-from odoo import http
+from odoo import http, tools
 from odoo.addons.ali_dindin.dingtalk.main import client
 from odoo.http import request
 
@@ -20,8 +20,9 @@ class AutoLoginController(http.Controller):
         :return:
         """
         logging.info(">>>用户正在使用免登...")
-        data = {'corp_id': request.env['ir.config_parameter'].sudo(
-        ).get_param('ali_dindin.din_corpid')}
+        # data = {'corp_id': request.env['ir.config_parameter'].sudo(
+        # ).get_param('ali_dindin.din_corpid')}
+        data = {'corp_id': tools.config.get('din_corpid', '')}
         return request.render('dindin_login.dingding_auto_login', data)
 
     @http.route('/dingding/auto/login', type='http', auth='none')
@@ -71,7 +72,6 @@ class AutoLoginController(http.Controller):
         :return:
         """
         try:
-            client = get_client(request)
             result = client.user.getuserinfo(auth_code)
             logging.info(">>>获取用户信息返回结果:%s", result)
             if result.get('errcode') != 0:
