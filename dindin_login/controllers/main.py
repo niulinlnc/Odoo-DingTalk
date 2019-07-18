@@ -225,3 +225,32 @@ class DinDinLogin(Home, http.Controller):
         if not result['state']:
             logging.info(result['msg'])
         return self._do_post_login(result['user'], redirect)
+
+
+    # def getuserinfo(self, code):
+    #     """
+    #     通过CODE换取用户身份
+
+    #     :param code: requestAuthCode接口中获取的CODE
+    #     :return:
+    #     """
+    #     try:
+    #         result = client.user.getuserinfo(code)
+    #         logging.info(">>>通过CODE换取用户身份返回结果:%s", result)
+    #         return result
+    #     except Exception as e:
+    #         raise UserError(e)
+
+    # def get_userid_by_unionid(self, unionid):
+    #     """
+    #     根据unionid获取成员的userid
+
+    #     :param unionid: 用户在当前钉钉开放平台账号范围内的唯一标识
+    #     :return:
+    #     """
+    #     try:
+    #         result = client.user.get_userid_by_unionid(unionid)
+    #         logging.info(">>>根据unionid获取成员的userid返回结果:%s", result)
+    #         return result
+    #     except Exception as e:
+    #         raise UserError(e)
