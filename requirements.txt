@@ -3,3 +3,5 @@ pycryptodome
 Crypto
 dingtalk-sdk
 redis
+qcloudsms_py
+aliyun-python-sdk-core
