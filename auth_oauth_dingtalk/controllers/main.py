@@ -13,7 +13,7 @@ import werkzeug.utils
 from requests import ReadTimeout
 from werkzeug.exceptions import BadRequest
 
-from odoo import http
+from odoo import http, tools
 from odoo.addons.ali_dindin.dingtalk.main import client
 from odoo.addons.auth_oauth.controllers.main import \
     OAuthController as Controller
@@ -79,6 +79,61 @@ class OAuthLogin(Home):
 
 class OAuthController(Controller):
 
+    @http.route('/dingding/auto/login/in', type='http', auth='none')
+    def dingding_auto_login(self, **kw):
+        """
+        免登入口
+        :param kw:
+        :return:
+        """
+        logging.info(">>>用户正在使用免登...")
+        # data = {'corp_id': request.env['ir.config_parameter'].sudo(
+        # ).get_param('ali_dindin.din_corpid')}
+        data = {'corp_id': tools.config.get('din_corpid', '')}
+        return request.render('auth_oauth_dingtalk.dingding_auto_login', data)
+
+    @http.route('/dingding/auto/login', type='http', auth='none')
+    def auth(self, **kw):
+        """
+        通过得到的【免登授权码】获取用户信息
+        :param kw:
+        :return:
+        """
+        authCode = kw.get('authcode')
+        if authCode:
+            get_result = self.get_user_info_by_auth_code(authCode)
+            if not get_result.get('state'):
+                return self._post_error_message(get_result.get('msg'))
+            userid = get_result.get('userid')
+            logging.info(">>>获取的user_id为：%s", userid)
+            if userid:
+                employee = request.env['hr.employee'].sudo().search(
+                    [('din_id', '=', userid)])
+                if employee:
+                    user = employee.user_id
+                    if user:
+                        # 解密钉钉登录密码
+                        logging.info(u'>>>:解密钉钉登录密码')
+                        password = base64.b64decode(user.din_password)
+                        password = password.decode(
+                            encoding='utf-8', errors='strict')
+                        request.session.authenticate(
+                            request.session.db, user.login, password)
+                        return http.local_redirect('/web')
+                    else:
+                        # 自动注册
+                        import random
+                        password = str(random.randint(100000, 999999))
+                        fail = request.env['res.users'].sudo(
+                        ).create_user_by_employee(employee.id, password)
+                        if not fail:
+                            return http.local_redirect('/dingding/auto/login/in')
+                    return http.local_redirect('/web/login')
+                return http.local_redirect('/web/login')
+        else:
+            return self._post_error_message("获取临时授权码失败,请检查钉钉开发者后台设置!")
+
+
     @http.route('/dingtalk/auth_oauth/signin/<int:provider_id>', type='http', auth='none')
     def signin(self, provider_id, **kw):
 
@@ -118,9 +173,9 @@ class OAuthController(Controller):
             _logger.exception("OAuth2: %s", str(e))
             url = "/web/login?oauth_error=2"
 
-    def get_userid_by_unionid(self, code):
+    def get_userid_by_unionid(self, tmp_auth_code):
         """
-        根据返回的临时授权码获取用户信息
+        根据返回的【临时授权码】获取用户信息
         :param code:
         :return:
         """
@@ -141,7 +196,7 @@ class OAuthController(Controller):
                              hashlib.sha256).digest()
         signature = quote(base64.b64encode(signature), 'utf-8')
         data = {
-            'tmp_auth_code': code
+            'tmp_auth_code': tmp_auth_code
         }
         headers = {'Content-Type': 'application/json'}
         new_url = "{}signature={}&timestamp={}&accessKey={}".format(
@@ -158,3 +213,18 @@ class OAuthController(Controller):
 
         except ReadTimeout:
             return {'state': False, 'msg': '网络连接超时'}
+
+    def get_user_info_by_auth_code(self, auth_code):
+        """
+        根据返回的【免登授权码】获取用户信息
+        :param auth_code:
+        :return:
+        """
+        try:
+            result = client.user.getuserinfo(auth_code)
+            logging.info(">>>获取用户信息返回结果:%s", result)
+            if result.get('errcode') != 0:
+                return {'state': False, 'msg': "钉钉接口错误:{}".format(result.get('errmsg'))}
+            return {'state': True, 'userid': result.get('userid')}
+        except Exception as e:
+            return {'state': False, 'msg': "登录失败,异常信息:{}".format(str(e))}

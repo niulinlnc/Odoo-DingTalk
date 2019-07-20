@@ -9,7 +9,9 @@
     "category": "Tools",
     "description": """用钉钉账号登陆或应用内免登，不包括扫码登陆
     """,
-    "data": [],
+    "data": [
+        'views/auto_templates.xml',
+    ],
     "init_xml": [],
     'update_xml': [],
     'demo_xml': [],
