@@ -73,7 +73,7 @@ class DinDinLogin(Home, http.Controller):
             return self._do_err_redirect(result['msg'])
         return self._do_post_login(result['user'], redirect)
 
-    def _do_post_login(self, user, redirect):
+    def _do_post_login(self, userid, redirect):
         """
         所有的验证都结束并正确后，需要界面跳转到主界面
         :param user:  user-Object
@@ -93,23 +93,25 @@ class DinDinLogin(Home, http.Controller):
             values['databases'] = None
         old_uid = request.uid
         # 解密钉钉登录密码
-        logging.info(u'>>>:解密钉钉登录密码')
-        password = base64.b64decode(user.din_password)
+        # logging.info(u'>>>:解密钉钉登录密码')
+        password = base64.b64decode(userid.din_password)
         password = password.decode(encoding='utf-8', errors='strict')
-        if password == '' or not password:
-            return self._do_err_redirect("用户:'{}'无法进行登录,请修改该用户登录密码并关联员工!".format(user.login))
-        if password == '123456':
-            user.sudo().password = '123'
-            user.sudo()._set_password()
-            return self._do_err_redirect("'{}'密码已重置为123,再次扫描进行登录!".format(user.login))
+        # if password == '' or not password:
+        #     return self._do_err_redirect("用户:'{}'无法进行登录,请修改该用户登录密码并关联员工!".format(user.login))
+        # if password == '123456':
+        #     user.sudo().password = '123'
+        #     user.sudo()._set_password()
+        #     return self._do_err_redirect("'{}'密码已重置为123,再次扫描进行登录!".format(user.login))
+        # uid = request.session.authenticate(
+        #     request.session.db, user.login, password)
         uid = request.session.authenticate(
-            request.session.db, user.login, password)
+            request.session.db, userid.login, password)
         logging.info(u'>>>:获取的用户uid: %s', uid)
         if uid is not False:
             request.params['login_success'] = True
             if not redirect:
                 redirect = '/web'
-            logging.info(u'>>>:用户{}登录成功,将跳转到主界面'.format(user.login))
+            logging.info(u'>>>:用户{}登录成功,将跳转到主界面'.format(userid.login))
             return http.redirect_with_hash(redirect)
         request.uid = old_uid
         return self._do_err_redirect("用户不存在或用户信息错误,无法完成登录,请联系管理员")
