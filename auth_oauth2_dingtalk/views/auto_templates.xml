@@ -38,7 +38,7 @@
         </script>
     </template>
 
-    <template id="dindin_login.dingding_auto_login_message">
+    <template id="auth_oauth2_dingtalk.dingding_auto_login_message">
         <style>
             #loading{
             margin: 100px auto 0 auto;

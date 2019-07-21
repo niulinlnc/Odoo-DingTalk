@@ -77,7 +77,7 @@ class OAuthLogin(Home):
 class OAuthController(Controller):
 
     # ----------------------------------------------------------
-    # 用钉钉账号密码登陆
+    # 用钉钉账号密码登陆\扫码登陆
     # ----------------------------------------------------------
     @http.route('/dingtalk/auth_oauth/signin', type='http', auth='none')
     @fragment_to_query_string
@@ -132,15 +132,14 @@ class OAuthController(Controller):
                 url = "/web/login?oauth_error=2"
 
         return set_cookie_and_redirect(url)
-        
+
     def get_userid_by_unionid(self, tmp_auth_code):
         """
         根据返回的【临时授权码】获取用户信息
         :param code:
         :return:
         """
-        url = request.env['ali.dindin.system.conf'].sudo().search(
-            [('key', '=', 'getuserinfo_bycode')]).value
+        url = 'https://oapi.dingtalk.com/sns/getuserinfo_bycode?'
         login_appid = request.env['ir.config_parameter'].sudo(
         ).get_param('ali_dindin.din_login_appid')
         key = request.env['ir.config_parameter'].sudo(
@@ -151,7 +150,7 @@ class OAuthController(Controller):
         # 签名
         # ------------------------
         signature = hmac.new(key.encode('utf-8'), msg.encode('utf-8'),
-                            hashlib.sha256).digest()
+                             hashlib.sha256).digest()
         signature = quote(base64.b64encode(signature), 'utf-8')
         data = {
             'tmp_auth_code': tmp_auth_code
@@ -172,7 +171,6 @@ class OAuthController(Controller):
         except ReadTimeout:
             return {'state': False, 'msg': '网络连接超时'}
 
-    
     # ----------------------------------------------------------
     # 钉钉应用内免登
     # ----------------------------------------------------------
@@ -248,10 +246,3 @@ class OAuthController(Controller):
             return {'state': True, 'userid': result.get('userid')}
         except Exception as e:
             return {'state': False, 'msg': "登录失败,异常信息:{}".format(str(e))}
-
-
-    # ----------------------------------------------------------
-    # 钉钉扫码登陆
-    # ----------------------------------------------------------
-
-    'qrconnect' 
