@@ -14,8 +14,9 @@ import werkzeug.utils
 from requests import ReadTimeout
 from werkzeug.exceptions import BadRequest
 
-from odoo import SUPERUSER_ID, api, http, tools
+from odoo import SUPERUSER_ID, api, http
 from odoo import registry as registry_get
+from odoo import tools
 from odoo.addons.ali_dindin.dingtalk.main import client
 from odoo.addons.auth_oauth.controllers.main import \
     OAuthController as Controller

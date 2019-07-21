@@ -10,7 +10,9 @@
     "description": """用钉钉账号密码登陆odoo
     """,
     "data": [
+        'data/auth_oauth_data.xml',
         'views/auto_templates.xml',
+        'views/auth_oauth_templates.xml',
     ],
     "init_xml": [],
     'update_xml': [],
