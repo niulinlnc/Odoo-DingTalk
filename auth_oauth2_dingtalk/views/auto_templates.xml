@@ -1,5 +1,5 @@
 <odoo>
-    <template id="auth_oauth_dingtalk.dingding_auto_login">
+    <template id="auth_oauth2_dingtalk.dingding_auto_login">
         <style>
             #loading{
             margin: 100px auto 0 auto;

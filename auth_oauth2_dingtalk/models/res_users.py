@@ -11,7 +11,10 @@ class ResUsers(models.Model):
 
     @api.model
     def auth_oauth_dingtalk(self, provide_id, userid):
-        user_ids = self.search([('oauth_provider_id', '=', provide_id), ('oauth_uid', '=', userid)])
+        if provide_id == 'dingtalk':
+            user_ids = self.search([('oauth_uid', '=', userid)])
+        else:
+            user_ids = self.search([('oauth_provider_id', '=', provide_id), ('oauth_uid', '=', userid)])
         _logger.info("user: %s", user_ids)
         if not user_ids or len(user_ids) > 1:
             return AccessDenied

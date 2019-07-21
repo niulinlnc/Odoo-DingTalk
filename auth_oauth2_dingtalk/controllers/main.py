@@ -14,7 +14,7 @@ import werkzeug.utils
 from requests import ReadTimeout
 from werkzeug.exceptions import BadRequest
 
-from odoo import SUPERUSER_ID, api, http
+from odoo import SUPERUSER_ID, api, http, tools
 from odoo import registry as registry_get
 from odoo.addons.ali_dindin.dingtalk.main import client
 from odoo.addons.auth_oauth.controllers.main import \
@@ -76,6 +76,9 @@ class OAuthLogin(Home):
 
 class OAuthController(Controller):
 
+    # ----------------------------------------------------------
+    # 用钉钉账号密码登陆
+    # ----------------------------------------------------------
     @http.route('/dingtalk/auth_oauth/signin', type='http', auth='none')
     @fragment_to_query_string
     def signin(self, **kw):
@@ -87,7 +90,8 @@ class OAuthController(Controller):
         dbname = state['d']
         if not http.db_filter([dbname]):
             return BadRequest()
-        provider = state['p']
+        # provider = state['p']
+        provider = 'dingtalk'
         context = state.get('c', {})
         registry = registry_get(dbname)
         with registry.cursor() as cr:
@@ -128,7 +132,7 @@ class OAuthController(Controller):
                 url = "/web/login?oauth_error=2"
 
         return set_cookie_and_redirect(url)
-
+        
     def get_userid_by_unionid(self, tmp_auth_code):
         """
         根据返回的【临时授权码】获取用户信息
@@ -168,6 +172,68 @@ class OAuthController(Controller):
         except ReadTimeout:
             return {'state': False, 'msg': '网络连接超时'}
 
+    
+    # ----------------------------------------------------------
+    # 钉钉应用内免登
+    # ----------------------------------------------------------
+    @http.route('/dingding/auto/login/in', type='http', auth='none')
+    def dingding_auto_login(self, **kw):
+        """
+        免登入口
+        :param kw:
+        :return:
+        """
+        logging.info(">>>用户正在使用免登...")
+        data = {'corp_id': tools.config.get('din_corpid', '')}
+        return request.render('auth_oauth2_dingtalk.dingding_auto_login', data)
+
+    @http.route('/dingding/auto/login', type='http', auth='none')
+    @fragment_to_query_string
+    def auto_signin(self, **kw):
+        """
+        通过得到的【免登授权码】获取用户信息
+        :param kw:
+        :return:
+        """
+        auth_code = kw.get('authcode')
+        _logger.info("获得的auth_code: %s", auth_code)
+        userid = self.get_user_info_by_auth_code(auth_code).get('userid')
+        dbname = request.session.db
+        if not http.db_filter([dbname]):
+            return BadRequest()
+        provider = 'dingtalk'
+        context = {}
+        registry = registry_get(dbname)
+        with registry.cursor() as cr:
+            try:
+                env = api.Environment(cr, SUPERUSER_ID, context)
+                credentials = env['res.users'].sudo().auth_oauth_dingtalk(provider, userid)
+                cr.commit()
+                url = '/web'
+                resp = login_and_redirect(*credentials, redirect_url=url)
+                # Since /web is hardcoded, verify user has right to land on it
+                if werkzeug.urls.url_parse(resp.location).path == '/web' and not request.env.user.has_group('base.group_user'):
+                    resp.location = '/'
+                return resp
+            except AttributeError:
+                # auth_signup is not installed
+                _logger.error("auth_signup not installed on database %s: oauth sign up cancelled." % (dbname,))
+                url = "/web/login?oauth_error=1"
+            except AccessDenied:
+                # oauth credentials not valid, user could be on a temporary session
+                _logger.info(
+                    'OAuth2: access denied, redirect to main page in case a valid session exists, without setting cookies')
+                url = "/web/login?oauth_error=3"
+                redirect = werkzeug.utils.redirect(url, 303)
+                redirect.autocorrect_location_header = False
+                return redirect
+            except Exception as e:
+                # signup error
+                _logger.exception("OAuth2: %s" % str(e))
+                url = "/web/login?oauth_error=2"
+
+        return set_cookie_and_redirect(url)
+
     def get_user_info_by_auth_code(self, auth_code):
         """
         根据返回的【免登授权码】获取用户信息
@@ -182,3 +248,10 @@ class OAuthController(Controller):
             return {'state': True, 'userid': result.get('userid')}
         except Exception as e:
             return {'state': False, 'msg': "登录失败,异常信息:{}".format(str(e))}
+
+
+    # ----------------------------------------------------------
+    # 钉钉扫码登陆
+    # ----------------------------------------------------------
+
+    'qrconnect' 
