@@ -10,15 +10,15 @@ class ResUsers(models.Model):
     _inherit = 'res.users'
 
     @api.model
-    def auth_oauth_dingtalk(self, provide_id, userid):
+    def auth_oauth_dingtalk(self, provide_id, oauth_uid):
         if provide_id == 'dingtalk':
-            user_ids = self.search([('oauth_uid', '=', userid)])
+            user_ids = self.search([('oauth_uid', '=', oauth_uid)])
         else:
-            user_ids = self.search([('oauth_provider_id', '=', provide_id), ('oauth_uid', '=', userid)])
+            user_ids = self.search([('oauth_provider_id', '=', provide_id), ('oauth_uid', '=', oauth_uid)])
         _logger.info("user: %s", user_ids)
         if not user_ids or len(user_ids) > 1:
             return AccessDenied
-        return (self.env.cr.dbname, user_ids[0].login, userid)
+        return (self.env.cr.dbname, user_ids[0].login, oauth_uid)
 
     @api.model
     def _check_credentials(self, password):

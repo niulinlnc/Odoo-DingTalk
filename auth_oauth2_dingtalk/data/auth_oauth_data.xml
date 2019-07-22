@@ -9,6 +9,7 @@
             <field name="data_endpoint">https://oapi.dingtalk.com/sns/getuserinfo</field>
             <field name="css_class">fa fa-fw fa-stack-exchange</field>
             <field name="body">钉钉扫码登陆</field>
+            <field name="enabled" eval="True"/>
         </record>
         <record id="provider_dingtalk" model="auth.oauth.provider">
             <field name="name">钉钉账号登陆</field>
@@ -18,6 +19,7 @@
             <field name="data_endpoint">https://oapi.dingtalk.com/sns/getuserinfo</field>
             <field name="css_class">fa fa-fw fa-telegram</field>
             <field name="body">钉钉账号登陆</field>
+            <field name="enabled" eval="True"/>
         </record>
 
         <!-- client_id自动填入钉钉移动应用的appid -->
