@@ -22,8 +22,7 @@ import datetime
 import json
 import logging
 import random
-from odoo.addons.auth_oauth.controllers.main import \
-    OAuthController as Controller
+
 import werkzeug.urls
 from aliyunsdkcore.client import AcsClient
 from aliyunsdkcore.request import CommonRequest
@@ -33,6 +32,8 @@ from werkzeug.exceptions import BadRequest
 import odoo
 from odoo import SUPERUSER_ID, _, api, http
 from odoo import registry as registry_get
+from odoo.addons.auth_oauth.controllers.main import \
+    OAuthController as Controller
 from odoo.addons.web.controllers.main import (Home, ensure_db,
                                               login_and_redirect,
                                               set_cookie_and_redirect)
