@@ -207,7 +207,7 @@ class OAuthController(Controller):
     def get_user_info_by_auth_code(self, auth_code):
         """
         根据返回的【免登授权码】获取用户信息
-        :param auth_code:
+        :param auth_code:免登授权码
         :return:
         """
         try:
@@ -219,16 +219,4 @@ class OAuthController(Controller):
         except Exception as e:
             return {'state': False, 'msg': "登录失败,异常信息:{}".format(str(e))}
 
-    # def get_user_info_by_userid(self, userid):
-    #     """
-    #     根据钉钉userid获取用户详情
-    #     :param userid:
-    #     :return:
-    #     """
-    #     try:
-    #         result = client.user.get(userid)
-    #         logging.info(">>>获取用户信息返回结果:%s", result)
-    #         if result.get('errcode') != 0:
-    #             return result
-    #     except Exception as e:
-    #         raise UserError(e)
+

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from odoo import api, fields, models
+from odoo import api, models
 from odoo.exceptions import AccessDenied
 
 _logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ class ResUsers(models.Model):
             user_ids = self.search([('oauth_provider_id', '=', provide_id), ('oauth_uid', '=', oauth_uid)])
         _logger.info("user: %s", user_ids)
         if not user_ids or len(user_ids) > 1:
-            return AccessDenied
+            raise AccessDenied()
         return (self.env.cr.dbname, user_ids[0].login, oauth_uid)
 
     @api.model

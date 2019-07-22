@@ -19,21 +19,30 @@
 ###################################################################################
 import base64
 import datetime
-import odoo
 import json
 import logging
-from odoo import http, _
-from odoo.addons.web.controllers.main import ensure_db, Home
-from odoo.http import request
-from qcloudsms_py import SmsSingleSender
 import random
+from odoo.addons.auth_oauth.controllers.main import \
+    OAuthController as Controller
+import werkzeug.urls
 from aliyunsdkcore.client import AcsClient
 from aliyunsdkcore.request import CommonRequest
+from qcloudsms_py import SmsSingleSender
+from werkzeug.exceptions import BadRequest
+
+import odoo
+from odoo import SUPERUSER_ID, _, api, http
+from odoo import registry as registry_get
+from odoo.addons.web.controllers.main import (Home, ensure_db,
+                                              login_and_redirect,
+                                              set_cookie_and_redirect)
+from odoo.exceptions import AccessDenied
+from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 
 
-class OdooSmsController(Home, http.Controller):
+class OdooSmsController(Home, Controller):
 
     @http.route()
     def web_login(self, *args, **kw):
@@ -76,7 +85,7 @@ class OdooSmsController(Home, http.Controller):
         """
         user_phone = request.params['user_phone']
         # 验证是否存在系统用户
-        users = request.env['res.users'].sudo().search([('login_phone', '=', user_phone)])
+        users = request.env['res.users'].sudo().search([('oauth_uid', '=', user_phone)])
         if not users:
             return json.dumps({'state': False, 'msg': "该手机号码未绑定系统用户，请注册！"})
         # 判断要使用的短信平台，获取配置中已开启的短信平台服务
@@ -179,7 +188,7 @@ class OdooSmsController(Home, http.Controller):
         :param timeout:  超时时长
         :return:
         """
-        users = request.env['res.users'].sudo().search([('login_phone', '=', user_phone)])
+        users = request.env['res.users'].sudo().search([('oauth_uid', '=', user_phone)])
         record = request.env['sms.verification.record'].sudo().create({
             'service_id': service.id,
             'user_id': users[0].id if users else False,
@@ -225,51 +234,95 @@ class OdooSmsController(Home, http.Controller):
 
         return self._web_post_login(phone)
 
+    # def _web_post_login(self, phone):
+    #     """
+    #     登录跳转
+    #     :param phone:
+    #     :param redirect:
+    #     :return:
+    #     """
+    #     ensure_db()
+    #     redirect = None
+    #     request.params['login_success'] = False
+    #     if request.httprequest.method == 'GET' and redirect and request.session.uid:
+    #         return http.redirect_with_hash(redirect)
+    #     if not request.uid:
+    #         request.uid = odoo.SUPERUSER_ID
+    #     values = request.params.copy()
+    #     try:
+    #         values['databases'] = http.db_list()
+    #     except odoo.exceptions.AccessDenied:
+    #         values['databases'] = None
+    #     # 验证是否存在系统用户
+    #     user = request.env['res.users'].sudo().search([('login_phone', '=', phone)], limit=1)
+    #     if not user:
+    #         return json.dumps({'state': False, 'msg': "该手机号码未绑定系统用户，请维护！"})
+    #     login = user.login
+    #     if user.odoo_sms_token:
+    #         password = base64.b64decode(user.odoo_sms_token).decode(encoding='utf-8', errors='strict')
+    #     else:
+    #         # 发送修改密码的短信至手机
+    #         result = self._send_change_password_sms(login, login, phone)
+    #         if not result['state']:
+    #             return json.dumps({
+    #                 'state': False,
+    #                 'msg': "抱歉，由于系统发送修改密码通知短信不成功，操作回退！请联系管理员确认；具体错误Error:{}".format(result['msg'])
+    #             })
+    #         user.sudo().write({'password': login})
+    #         password = login
+    #     try:
+    #         uid = request.session.authenticate(request.session.db, login, password)
+    #         if uid is not False:
+    #             request.params['login_success'] = True
+    #             return json.dumps({'state': True, 'msg': "登录成功"})
+    #         else:
+    #             return json.dumps({'state': False, 'msg': "登录失败，请稍后重试！"})
+    #     except Exception as e:
+    #         return json.dumps({'state': False, 'msg': "登录失败!原因为：{}".format(str(e))})
+
     def _web_post_login(self, phone):
         """
-        登录跳转
+        验证手机并登陆系统
         :param phone:
-        :param redirect:
         :return:
         """
-        ensure_db()
-        redirect = None
-        request.params['login_success'] = False
-        if request.httprequest.method == 'GET' and redirect and request.session.uid:
-            return http.redirect_with_hash(redirect)
-        if not request.uid:
-            request.uid = odoo.SUPERUSER_ID
-        values = request.params.copy()
-        try:
-            values['databases'] = http.db_list()
-        except odoo.exceptions.AccessDenied:
-            values['databases'] = None
-        # 验证是否存在系统用户
-        user = request.env['res.users'].sudo().search([('login_phone', '=', phone)], limit=1)
-        if not user:
-            return json.dumps({'state': False, 'msg': "该手机号码未绑定系统用户，请维护！"})
-        login = user.login
-        if user.odoo_sms_token:
-            password = base64.b64decode(user.odoo_sms_token).decode(encoding='utf-8', errors='strict')
-        else:
-            # 发送修改密码的短信至手机
-            result = self._send_change_password_sms(login, login, phone)
-            if not result['state']:
-                return json.dumps({
-                    'state': False,
-                    'msg': "抱歉，由于系统发送修改密码通知短信不成功，操作回退！请联系管理员确认；具体错误Error:{}".format(result['msg'])
-                })
-            user.sudo().write({'password': login})
-            password = login
-        try:
-            uid = request.session.authenticate(request.session.db, login, password)
-            if uid is not False:
-                request.params['login_success'] = True
-                return json.dumps({'state': True, 'msg': "登录成功"})
-            else:
-                return json.dumps({'state': False, 'msg': "登录失败，请稍后重试！"})
-        except Exception as e:
-            return json.dumps({'state': False, 'msg': "登录失败!原因为：{}".format(str(e))})
+        dbname = request.session.db
+        if not http.db_filter([dbname]):
+            return BadRequest()
+        provider = 'dingtalk'
+        # provider = state['p']
+        context = {}
+        registry = registry_get(dbname)
+        with registry.cursor() as cr:
+            try:
+                env = api.Environment(cr, SUPERUSER_ID, context)
+                credentials = env['res.users'].sudo().auth_oauth_dingtalk(provider, phone)
+                cr.commit()
+                url = '/web'
+                resp = login_and_redirect(*credentials, redirect_url=url)
+                # Since /web is hardcoded, verify user has right to land on it
+                if werkzeug.urls.url_parse(resp.location).path == '/web' and not request.env.user.has_group('base.group_user'):
+                    resp.location = '/'
+                return resp
+            except AttributeError:
+                # auth_signup is not installed
+                _logger.error("auth_signup not installed on database %s: oauth sign up cancelled." % (dbname,))
+                url = "/web/login?oauth_error=1"
+            except AccessDenied:
+                # oauth credentials not valid, user could be on a temporary session
+                _logger.info(
+                    'OAuth2: access denied, redirect to main page in case a valid session exists, without setting cookies')
+                url = "/web/login?oauth_error=3"
+                redirect = werkzeug.utils.redirect(url, 303)
+                redirect.autocorrect_location_header = False
+                return redirect
+            except Exception as e:
+                # signup error
+                _logger.exception("OAuth2: %s" % str(e))
+                url = "/web/login?oauth_error=2"
+
+        return set_cookie_and_redirect(url)
+
 
     def _send_change_password_sms(self, login, password, phone):
         """
