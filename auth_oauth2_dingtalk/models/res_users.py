@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api, _
-from odoo.exceptions import except_orm, Warning, RedirectWarning, AccessDenied
-import odoo.addons.decimal_precision as dp
 import logging
+
+from odoo import api, fields, models
+from odoo.exceptions import AccessDenied
+
 _logger = logging.getLogger(__name__)
 
 
@@ -20,11 +21,11 @@ class ResUsers(models.Model):
             return AccessDenied
         return (self.env.cr.dbname, user_ids[0].login, oauth_uid)
 
-    @api.model
-    def _check_credentials(self, password):
-        try:
-            return super(ResUsers, self)._check_credentials(password)
-        except AccessDenied:
-            res = self.sudo().search([('id', '=', self.env.uid), ('oauth_uid', '=', password)])
-            if not res:
-                raise
+    # @api.model
+    # def _check_credentials(self, password):
+    #     try:
+    #         return super(ResUsers, self)._check_credentials(password)
+    #     except AccessDenied:
+    #         res = self.sudo().search([('id', '=', self.env.uid), ('oauth_uid', '=', password)])
+    #         if not res:
+    #             raise

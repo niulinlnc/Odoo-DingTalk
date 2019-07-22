@@ -101,7 +101,7 @@ class OAuthController(Controller):
         :param kw:
         :return:
         """
-        if kw.get('authcode'): # 免登
+        if kw.get('authcode'):  # 免登
             auth_code = kw.get('authcode')
             _logger.info("获得的auth_code: %s", auth_code)
             userinfo = self.get_user_info_by_auth_code(auth_code)
@@ -111,7 +111,7 @@ class OAuthController(Controller):
                 p='dingtalk',
             )
 
-        elif kw.get('code'):  #扫码或密码登录
+        elif kw.get('code'):  # 扫码或密码登录
             code = kw.get('code', "")
             _logger.info("获得的code: %s", code)
             userinfo = self.get_userid_by_unionid(code)
@@ -166,7 +166,6 @@ class OAuthController(Controller):
 
         return set_cookie_and_redirect(url)
 
-
     def get_userid_by_unionid(self, tmp_auth_code):
         """
         根据返回的【临时授权码】获取用户信息
@@ -219,7 +218,7 @@ class OAuthController(Controller):
             return {'state': True, 'userid': result.get('userid')}
         except Exception as e:
             return {'state': False, 'msg': "登录失败,异常信息:{}".format(str(e))}
-    
+
     # def get_user_info_by_userid(self, userid):
     #     """
     #     根据钉钉userid获取用户详情
