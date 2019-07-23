@@ -2,7 +2,7 @@
 import logging
 
 from odoo import api, fields, models
-from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
+from odoo.addons.ali_dindin.dingtalk.main import client, stamp_to_time
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ class DinDinDepartmentSign(models.Model):
         :param order_asc: 是否正序排列
         :return:
         """
-        client = get_client(self)
+        
         logging.info(">>>获取部门用户签到记录...")
         for res in self:
             res.line_ids = False

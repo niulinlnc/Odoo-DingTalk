@@ -3,7 +3,7 @@ import logging
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
+from odoo.addons.ali_dindin.dingtalk.main import client, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class DinDinUsersSign(models.Model):
         :param size: 分页大小
         :return:
         """
-        client = get_client(self)
+        
         logging.info(">>>获取用户签到记录...")
         for res in self:
             res.line_ids = False

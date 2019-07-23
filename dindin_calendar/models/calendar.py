@@ -3,8 +3,8 @@ import datetime
 import logging
 import time
 
-from odoo import api, fields, models
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo import api, fields, models, _
+from odoo.addons.ali_dindin.dingtalk.main import client
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ class DinDinCalendarEvent(models.Model):
         :param val:
         :return:
         """
-        client = get_client(self)
+        
         start_time = datetime.datetime.strptime("{}.42".format(
             val.get('start')), "%Y-%m-%d %H:%M:%S.%f").timetuple()
         end_time = datetime.datetime.strptime("{}.42".format(
@@ -105,7 +105,7 @@ class DinDinCalendarEvent(models.Model):
         :param userid: 员工id
         :param calendar_id: 日程id
         """
-        client = get_client(self)
+        
         try:
             result = client.calendar.delete(
                 userid=userid, calendar_id=calendar_id)
@@ -127,7 +127,7 @@ class DinDinCalendarEvent(models.Model):
         :param max_results: 结果返回的最多数量，默认250，最多返回2500
         :param time_max: 查询时间上限
         """
-        client = get_client(self)
+        
         user_id = self.env['hr.employee'].search(
             [('user_id', '=', self.env.user.id)]).din_id
         calendar_folder_id = ''

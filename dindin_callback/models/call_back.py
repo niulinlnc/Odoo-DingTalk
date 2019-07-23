@@ -4,7 +4,7 @@ import random
 import string
 
 from odoo import api, fields, models, _
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 from odoo.exceptions import UserError
 from odoo.http import request
 
@@ -74,7 +74,7 @@ class DinDinCallback(models.Model):
         注册事件
         :return:
         """
-        client = get_client(self)
+        
         logging.info(">>>注册事件...")
         for res in self:
             call_list = list()
@@ -103,7 +103,7 @@ class DinDinCallback(models.Model):
         更新事件
         :return:
         """
-        client = get_client(self)
+        
         for res in self:
             call_list = list()
             for call in res.call_ids:
@@ -137,17 +137,17 @@ class DinDinCallback(models.Model):
 
     @api.model
     def delete_call_back(self, call_token):
-        client = get_client(self)
+        
         logging.info(">>>删除事件...")
         try:
             result = client.callback.delete_call_back()
             logging.info(">>>删除回调事件返回结果:%s", result)
             if result.get('errcode') == 0:
-                logging.info("已删除token为{}的回调事件".format(call_token))
+                logging.info("已删除token为%s的回调事件", call_token)
             else:
                 pass
         except Exception as e:
-            logging.info("Token为{}的回调事件删除异常，详情为:{}".format(call_token, e))
+            logging.info("Token为%s的回调事件删除异常，详情为:%s", call_token, e)
             self.state == '00'
         logging.info(">>>删除事件End...")
 
@@ -157,33 +157,32 @@ class DinDinCallback(models.Model):
         获取所有回调列表
         :return:
         """
-        client = get_client(self)
+        
         try:
             result = client.callback.get_call_back()
             logging.info(">>>获取所有回调事件返回结果:%s", result)
             if result.get('errcode') != 0:
                 return {'state': False, 'msg': result.get('errmsg')}
+            tag_list = list()
+            for tag in result.get('call_back_tag'):
+                callback_list = self.env['dindin.users.callback.list'].search(
+                    [('value', '=', tag)])
+                if callback_list:
+                    tag_list.append(callback_list[0].id)
+            callback = self.env['dindin.users.callback'].search(
+                [('company_id', '=', self.env.user.company_id.id)])
+            data = {
+                'call_ids': [(6, 0, tag_list)],
+                'url': result.get('url'),
+                'aes_key': result.get('aes_key'),
+                'token': result.get('token'),
+                'company_id': self.env.user.company_id.id,
+                'state': '01',
+            }
+            if callback:
+                callback.write(data)
             else:
-                tag_list = list()
-                for tag in result.get('call_back_tag'):
-                    callback_list = self.env['dindin.users.callback.list'].search(
-                        [('value', '=', tag)])
-                    if callback_list:
-                        tag_list.append(callback_list[0].id)
-                callback = self.env['dindin.users.callback'].search(
-                    [('company_id', '=', self.env.user.company_id.id)])
-                data = {
-                    'call_ids': [(6, 0, tag_list)],
-                    'url': result.get('url'),
-                    'aes_key': result.get('aes_key'),
-                    'token': result.get('token'),
-                    'company_id': self.env.user.company_id.id,
-                    'state': '01',
-                }
-                if callback:
-                    callback.write(data)
-                else:
-                    self.env['dindin.users.callback'].create(data)
-                return {'state': True}
+                self.env['dindin.users.callback'].create(data)
+            return {'state': True}
         except Exception as e:
             raise UserError(e)

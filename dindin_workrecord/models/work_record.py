@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import datetime
 import logging
-import time
 
-from odoo import _, api, fields, models
-from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
+from odoo import _, api, fields, models, tools
+from odoo.addons.ali_dindin.dingtalk.main import client, stamp_to_time
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -73,7 +72,7 @@ class DinDinWorkRecord(models.Model):
         :param source_name: 待办来源名称
         """
         self.ensure_one()
-        client = get_client(self)
+        
         if len(self.line_ids) < 1:
             raise UserError(_('待办表单列表不能为空!'))
         else:
@@ -106,14 +105,15 @@ class DinDinWorkRecord(models.Model):
         :return:message_id
         """
         self.ensure_one()
-        client = get_client(self)
+        
         msg_list = list()
         for line in self.line_ids:
             msg_list.append({'key': "{}: ".format(
                 line.title), 'value': line.content})
 
-        agentid = self.env['ir.config_parameter'].sudo(
-        ).get_param('ali_dindin.din_agentid')
+        # agentid = self.env['ir.config_parameter'].sudo(
+        # ).get_param('ali_dindin.din_agentid')
+        agentid = tools.config.get('din_agentid', '')
         userid_list = ()
         userid_list = userid_list + (self.emp_id.din_id,)
         msg_body = {
@@ -138,7 +138,7 @@ class DinDinWorkRecord(models.Model):
             if result.get('errcode') == 0:
                 return result.get('message_id')
             else:
-                logging.info('发送消息失败，详情为:{}'.format(result.get('errmsg')))
+                logging.info('发送消息失败，详情为:%s', result.get('errmsg'))
         except Exception as e:
             raise UserError(e)
 
@@ -197,7 +197,7 @@ class DinDinWorkRecord(models.Model):
         :param limit: 分页大小，最多50
         :param status: 待办事项状态，0表示未完成，1表示完成
         """
-        client = get_client(self)
+        
         status = 0
         try:
             result = client.workrecord.getbyuserid(
@@ -215,7 +215,7 @@ class DinDinWorkRecord(models.Model):
         :param userid: 用户id
         :param record_id: 待办事项唯一id
         """
-        client = get_client(self)
+        
         for res in self:
             logging.info("待办更新")
             userid = res.emp_id.din_id
@@ -247,18 +247,6 @@ class DinDinWorkRecord(models.Model):
             record = self.env['dindin.work.record'].sudo().search(
                 [('emp_id', '=', emp[0].id), ('record_state', '=', '00'), ('record_type', '=', 'put')])
             return len(record)
-
-    @api.model
-    def get_time_stamp(self, timeNum):
-        """
-        将13位时间戳转换为时间
-        :param timeNum:
-        :return:
-        """
-        timeStamp = float(timeNum / 1000)
-        timeArray = time.localtime(timeStamp)
-        otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-        return otherStyleTime
 
 
 class DinDinWorkRecordList(models.Model):
@@ -331,7 +319,7 @@ class GetUserDingDingWorkRecord(models.TransientModel):
         :param limit: 分页大小，最多50
         :param status: 待办事项状态，0表示未完成，1表示完成
         """
-        client = get_client(self)
+        
         status = 0
         try:
             result = client.workrecord.getbyuserid(

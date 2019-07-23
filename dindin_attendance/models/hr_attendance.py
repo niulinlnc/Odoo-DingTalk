@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
+
+from odoo import _, api, fields, models
+from odoo.addons.ali_dindin.dingtalk.main import (day_cut, client,
+                                                  list_cut, stamp_to_time)
 from odoo.exceptions import UserError
-from odoo import models, fields, api, _
-from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time, list_cut, day_cut
 
 
 class HrEmployee(models.Model):
@@ -103,7 +105,7 @@ class HrAttendanceTransient(models.TransientModel):
         """
         logging.info(">>>开始清空数据（仅用于测试）...")
         self.clear_attendance()
-        client = get_client(self)
+        
         logging.info(">>>开始获取员工打卡信息...")
         din_ids = list()
         for user in self.emp_ids:
@@ -217,7 +219,7 @@ class HrAttendanceTransient(models.TransientModel):
         :param limit: 表示获取考勤数据的条数，最大不能超过50条
         :return:
         """
-        client = get_client(self)
+        
         try:
             result = client.attendance.list(
                 work_date_from, work_date_to, user_ids=user_ids, offset=offset, limit=limit)

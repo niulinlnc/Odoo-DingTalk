@@ -2,7 +2,7 @@
 import logging
 
 from odoo import api, fields, models
-from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
+from odoo.addons.ali_dindin.dingtalk.main import client, stamp_to_time
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ class DinDinSignList(models.Model):
         :param size: 分页大小
         :return:
         """
-        client = get_client(self)
+        
         start_time = int(signtime) - 1002
         end_time = int(signtime) + 1002
 

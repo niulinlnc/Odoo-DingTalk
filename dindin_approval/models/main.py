@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
-import requests
-from requests import ReadTimeout
-from odoo import api, fields, models
+
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 
 _logger = logging.getLogger(__name__)
 
@@ -52,7 +50,7 @@ class DinDinApprovalMain(models.Model):
     def unlink(self):
         for res in self:
             if res.oa_state != '00':
-                raise UserError('非草稿单据不能删除!')
+                raise UserError(_('非草稿单据不能删除!'))
         super(DinDinApprovalMain, self).unlink()
 
     @api.model
@@ -67,7 +65,7 @@ class DinDinApprovalMain(models.Model):
         :param form_values:表单参数
         :return: process_instance_id （审批实例id）
         """
-        client = get_client(self)
+        
         try:
             result = client.bpms.processinstance_create(process_code, user_id, dept_id, approvers, form_values,
                                                         agent_id=None, cc_list=cc_list, cc_start=False, cc_finish=False, approvers_v2=())

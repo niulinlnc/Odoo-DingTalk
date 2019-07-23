@@ -2,7 +2,7 @@
 import logging
 
 from odoo import api, fields, models, _
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ class HrDepartment(models.Model):
 
     @api.multi
     def create_ding_department(self):
-        client = get_client(self)
+
         for res in self:
             if res.din_id:
                 raise UserError("该部门已在钉钉中存在！")
@@ -51,7 +51,7 @@ class HrDepartment(models.Model):
 
     @api.multi
     def update_ding_department(self):
-        client = get_client(self)
+
         for res in self:
             # 获取部门din_id
             if not res.parent_id:
@@ -89,7 +89,7 @@ class HrDepartment(models.Model):
     @api.model
     def delete_din_department(self, din_id):
         """删除钉钉部门"""
-        client = get_client(self)
+
         try:
             result = client.department.delete(din_id)
             logging.info(">>>删除钉钉部门返回结果:%s", result)

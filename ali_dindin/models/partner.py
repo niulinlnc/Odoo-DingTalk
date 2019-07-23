@@ -2,7 +2,7 @@
 import logging
 
 from odoo import api, fields, models, _
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ class ResPartner(models.Model):
         :param share_user_ids: 共享给的员工userId列表
         :return:
         """
-        client = get_client(self)
+
         for res in self:
             if res.din_userid:
                 raise UserError(_('钉钉中已存在该联系人,请不要重复上传或使用更新联系人功能！'))
@@ -117,7 +117,7 @@ class ResPartner(models.Model):
         :param share_user_ids: 共享给的员工userId列表
         :return:
         """
-        client = get_client(self)
+        
         for res in self:
             # 获取标签
             label_list = list()
@@ -166,7 +166,7 @@ class ResPartner(models.Model):
     @api.model
     def delete_din_extcontact(self, din_userid):
         """删除钉钉联系人"""
-        client = get_client(self)
+        
         try:
             result = client.extcontact.delete(din_userid)
             logging.info("删除钉钉联系人结果:%s", result)
@@ -197,7 +197,7 @@ class ResPartner(models.Model):
         'success': True}
 
         """
-        client = get_client(self)
+        
         for partner in self:
             userid = partner.din_userid
             try:

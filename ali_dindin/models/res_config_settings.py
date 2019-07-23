@@ -54,10 +54,10 @@ class ResConfigSettings(models.TransientModel):
         help='钉钉办公-仪表盘.\n'
         '- This installs the module dindin_dashboard.'
     )
-    module_dindin_login = fields.Boolean(
+    module_auth_oauth2_dingtalk = fields.Boolean(
         '钉钉办公-扫码与免登',
         help='钉钉办公-扫码与免登.\n'
-        '- This installs the module dindin_login.'
+        '- This installs the module auth_oauth2_dingtalk.'
     )
     module_dingding_hrm = fields.Boolean(
         '钉钉办公-智能人事',

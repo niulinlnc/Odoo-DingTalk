@@ -2,7 +2,7 @@
 import logging
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.dingtalk.main import get_client, stamp_to_time
+from odoo.addons.ali_dindin.dingtalk.main import client, stamp_to_time
 
 _logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class DingDingReportUser(models.Model):
         获取日志统计数据（已读人数、评论个数、去重个数、点赞人数）
         :return:
         """
-        client = get_client(self)
+        
         for res in self:
             report_id = res.report_id
             try:
@@ -77,7 +77,7 @@ class DingDingReportUser(models.Model):
         :return:
         """
         # 获取已读人员
-        client = get_client(self)
+        
         report_id = res.report_id
         _type = 0
         try:
@@ -122,7 +122,7 @@ class DingDingReportUser(models.Model):
         :param res:
         :return:
         """
-        client = get_client(self)
+        
         report_id = res.report_id
         try:
             result = client.report.receiver_list(report_id, offset=0, size=100)
@@ -148,7 +148,7 @@ class DingDingReportUser(models.Model):
         :param res:
         :return:
         """
-        client = get_client(self)
+        
         report_id = res.report_id
         try:
             result = client.report.comment_list(report_id, offset=0, size=20)
@@ -211,7 +211,7 @@ class GetUserDingDingReportList(models.TransientModel):
         :param template_name: 要查询的模板名称（可选）
         :param userid: 员工的userid（可选）
         """
-        client = get_client(self)
+        
         for res in self:
             group = self.env.user.has_group(
                 'dindin_report.dd_get_user_report_list')

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, tools, _
 from odoo.exceptions import UserError
-from odoo.addons.ali_dindin.dingtalk.main import get_client
+from odoo.addons.ali_dindin.dingtalk.main import client
 
 _logger = logging.getLogger(__name__)
 
@@ -17,6 +17,8 @@ MESSAGETYPE = [
     ('voice', '语音消息'),
     ('file', '文件消息'),
 ]
+
+agent_id = tools.config.get('din_agentid', '')  # E应用id
 
 
 class DinDinWorkMessage(models.Model):
@@ -206,7 +208,7 @@ class DinDinWorkMessage(models.Model):
         :param msg:   消息体，请参照钉钉提供的消息体格式
         :return task_id: 返回钉钉消息任务id。
         """
-        client = get_client(self)
+        
         logging.info(">>>开始钉钉发送工作消息")
         if not toall and not userstr and not deptstr:
             raise UserError(_("是否发送全部员工、用户列表、部门列表三个参数必须有一个有值！"))
@@ -215,8 +217,7 @@ class DinDinWorkMessage(models.Model):
                 raise UserError(_("需要发送的消息体msg参数格式不正确！"))
         else:
             raise UserError(_("需要发送的消息体不存在！"))
-        agent_id = self.env['ir.config_parameter'].sudo(
-        ).get_param('ali_dindin.din_agentid')  # 应用id
+        # agent_id = tools.config.get('din_agentid', '')  # 应用id
         msg = msg if msg else {}
         to_all_user = 'false'
         userid_list = ()
@@ -245,9 +246,8 @@ class DinDinWorkMessage(models.Model):
         :param task_id: 发送消息时钉钉返回的任务id
         :return:
         """
-        client = get_client(self)
-        agent_id = self.env['ir.config_parameter'].sudo(
-        ).get_param('ali_dindin.din_agentid')  # 应用id
+        
+        # agent_id = tools.config.get('din_agentid', '')  # 应用id
         task_id = self.task_id
         try:
             result = client.message.getsendprogress(agent_id, task_id)
@@ -267,10 +267,9 @@ class DinDinWorkMessage(models.Model):
         :param task_id: 异步任务的id
         :return:
         """
-        client = get_client(self)
+        
         logging.info(">>>开始查询工作通知消息的发送结果")
-        agent_id = self.env['ir.config_parameter'].sudo(
-        ).get_param('ali_dindin.din_agentid')  # 应用id
+        # agent_id = tools.config.get('din_agentid', '')  # 应用id
         task_id = self.task_id
         try:
             result = client.message.getsendresult(
@@ -320,10 +319,9 @@ class DinDinWorkMessage(models.Model):
         :param agent_id: 发送工作通知的微应用agentId
         :param msg_task_id: 发送工作通知返回的taskId
         """
-        client = get_client(self)
+        
         for msg in self:
-            agent_id = self.env['ir.config_parameter'].sudo(
-            ).get_param('ali_dindin.din_agentid')  # 应用id
+            # agent_id = tools.config.get('din_agentid', '')  # 应用id
             task_id = msg.task_id
             try:
                 result = client.message.recall(agent_id, task_id)

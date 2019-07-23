@@ -4,7 +4,7 @@ import datetime
 import logging
 
 from odoo import _, api, fields, models, tools
-from odoo.addons.ali_dindin.dingtalk.main import get_client, list_cut
+from odoo.addons.ali_dindin.dingtalk.main import client, list_cut
 from odoo.exceptions import UserError
 from odoo.modules import get_module_resource
 
@@ -107,7 +107,7 @@ class GetDingDingHealthList(models.TransientModel):
         :param userids: 员工userid列表，最多传50个
         :param stat_date: 时间
         """
-        client = get_client(self)
+        
         logging.info(">>>获取钉钉员工运动数据start")
         if len(userids) > 50:
             raise UserError(_("钉钉仅支持批量查询小于等于50个员工!"))

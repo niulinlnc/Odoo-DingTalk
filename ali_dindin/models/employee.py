@@ -4,7 +4,7 @@ import logging
 import requests
 
 from odoo import api, fields, models, tools, _
-from odoo.addons.ali_dindin.dingtalk.main import (get_client, stamp_to_time,
+from odoo.addons.ali_dindin.dingtalk.main import (client, stamp_to_time,
                                                   time_to_stamp)
 from odoo.exceptions import UserError
 
@@ -47,7 +47,7 @@ class HrEmployee(models.Model):
         """
         上传员工到钉钉
         """
-        client = get_client(self)
+
         for res in self:
             # 获取部门din_id
             department_list = list()
@@ -83,7 +83,7 @@ class HrEmployee(models.Model):
         """
         修改员工时同步至钉钉
         """
-        client = get_client(self)
+
         for res in self:
             # 获取部门din_id
             department_list = list()
@@ -139,7 +139,7 @@ class HrEmployee(models.Model):
         从钉钉获取用户详情
         :return:
         """
-        client = get_client(self)
+
         for employee in self:
             userid = employee.din_id
             try:
@@ -201,7 +201,7 @@ class HrEmployee(models.Model):
         :param userid: 钉钉ID
         :return:
         """
-        client = get_client(self)
+
         try:
             result = client.user.get(userid)
             if result.get('errcode') == 0:
@@ -263,7 +263,7 @@ class HrEmployee(models.Model):
         从钉钉获取用户人脸
         :return:
         """
-        client = get_client(self)
+
         for employee in self:
             userid = employee.din_id
             try:
@@ -282,7 +282,7 @@ class HrEmployee(models.Model):
 
         :param userid_list: 查询用userid列表
         """
-        client = get_client(self)
+
         userlist = list()
         for employee in self:
             emp = self.env['hr.employee'].sudo().search(
@@ -315,7 +315,7 @@ class HrEmployee(models.Model):
         """
         删除钉钉用户
         """
-        client = get_client(self)
+
         try:
             result = client.user.delete(userid)
             logging.info("user_delete:%s", result)
