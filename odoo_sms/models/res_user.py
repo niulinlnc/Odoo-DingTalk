@@ -65,18 +65,25 @@ class ResUsers(models.Model):
             if not res:
                 raise
 
-    # def _set_password(self):
-    #     """
-    #     修改密码后，短信通知到用户
-    #     :return:
-    #     """
-    #     for user in self:
-    #         user.sudo().write({'odoo_sms_token': base64.b64encode(user.password.encode('utf-8'))})
-    #         if user.login_phone:
-    #             result = self.send_change_password_sms(user.login, user.password, user.login_phone)
-    #             if not result['state']:
-    #                 raise ValidationError("抱歉，系统发送修改密码通知短信不成功,请检查原因；Error:{}".format(result['msg']))
-    #     super(ResUsers, self)._set_password()
+
+class ChangePasswordUser(models.TransientModel):
+    """ A model to configure users in the change password wizard. """
+    _inherit = 'change.password.user'
+
+
+    @api.multi
+    def change_password_button(self):
+        """
+        修改密码后，短信通知到用户
+        :return:
+        """
+        for line in self:
+            if line.new_passwd:
+                result = self.send_change_password_sms(line.user_id.login, line.new_passwd, line.user_id.oauth_uid)
+                if not result['state']:
+                    raise ValidationError("抱歉，系统发送修改密码通知短信不成功,请检查原因；Error:{}".format(result['msg']))
+        super(ChangePasswordUser, self).change_password_button()
+
 
     def send_change_password_sms(self, login, password, phone):
         """
