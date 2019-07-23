@@ -25,7 +25,7 @@
     'website': "https://www.sxfblog.com",
     'category': 'sms',
     'version': '1.1',
-    'depends': ['base', 'hr', 'auth_oauth', 'contacts'],
+    'depends': ['base', 'hr', 'contacts', 'auth_oauth'],
     'installable': True,
     'application': True,
     'auto_install': False,

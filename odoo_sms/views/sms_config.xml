@@ -100,7 +100,7 @@
         </field>
     </record>
 
-    <menuitem id="sms_service_config_menu" name="短信服务配置" parent="odoo_sms.sms_configure_menu" sequence="1"
+    <menuitem id="sms_service_config_menu" name="短信模板配置" parent="odoo_sms.sms_configure_menu" sequence="1"
               action="sms_service_config_action"/>
 
 </odoo>

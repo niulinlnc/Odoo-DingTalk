@@ -36,6 +36,7 @@
         <field name="name">短信验证码记录</field>
         <field name="res_model">sms.verification.record</field>
         <field name="view_mode">tree</field>
+        <field name="context">{'search_default_domain_normal': True}</field>
     </record>
 
     <record model="ir.ui.view" id="sms_verification_record_search">
@@ -49,6 +50,10 @@
                 <field name="send_time"/>
                 <field name="end_time"/>
                 <field name="state"/>
+                <separator/>
+                    <filter string="未使用" name="domain_normal" domain="[('state', '=', 'normal')]"/>
+                    <filter string="已使用" name="domain_invalid" domain="[('state', '=', 'invalid')]"/>
+                <separator/>
             </search>
         </field>
     </record>

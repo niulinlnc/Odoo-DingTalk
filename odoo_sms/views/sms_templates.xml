@@ -30,7 +30,7 @@
 
                 <div id="slider" class="form-group field-login">
                     <span id="label">>></span>
-                    <span id="labelTip">拖动滑块验证</span>
+                    <span id="labelTip">请按住滑块,拖动到最右边</span>
                 </div>
 
                 <div class="form-group field-password" id="verification_code_div">

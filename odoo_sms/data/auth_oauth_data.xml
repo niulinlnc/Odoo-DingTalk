@@ -5,7 +5,6 @@
             <field name="name">手机动态验证码登陆</field>
             <field name="auth_endpoint">/sms</field>
             <field name="validation_endpoint">/sms</field>
-            <field name="data_endpoint">/sms</field>
             <field name="css_class">fa fa-fw fa-mobile</field>
             <field name="body">手机动态验证码登陆</field>
             <field name="enabled" eval="True"/>
