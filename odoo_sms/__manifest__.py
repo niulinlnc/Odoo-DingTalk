@@ -24,18 +24,18 @@
     'author': "SuXueFeng",
     'website': "https://www.sxfblog.com",
     'category': 'sms',
-    'version': '1.0',
-    'depends': ['base', 'hr', 'contacts'],
+    'version': '1.1',
+    'depends': ['base', 'hr', 'auth_oauth', 'contacts'],
     'installable': True,
     'application': True,
     'auto_install': False,
     'data': [
+        'data/auth_oauth_data.xml',
         'security/ir.model.access.csv',
         'security/odoo_sms.xml',
         'views/menu.xml',
         'views/sms_config.xml',
         'views/sms_templates.xml',
-        'views/res_user.xml',
         'views/sms_record.xml',
     ]
 }

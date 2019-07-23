@@ -20,23 +20,6 @@
         </xpath>
     </template>
 
-    <template id="odoo_sms.odoo_sms_login" name="OAuth Odoo SMS">
-         <t t-if="sms_config_length &gt; 0">
-            <em t-attf-class="d-block text-center text-muted small}">- 或者 -</em>
-            <div class="o_auth_oauth_providers list-group mt-1 mb-1 text-left">
-                <a t-attf-href="/web/odoo/sms/login" class="list-group-item list-group-item-action py-2" >
-                    <i class="fa fa-mobile"/>&#160;&#160;<t>手机动态验证码登录</t>
-                </a>
-            </div>
-        </t>
-    </template>
-
-    <template id="odoo_sms.login" inherit_id="web.login" name="Phone SMS Login">
-        <xpath expr="//div[hasclass('o_login_auth')]" position="inside">
-            <t t-call="odoo_sms.odoo_sms_login"/>
-        </xpath>
-    </template>
-
     <template id="odoo_sms.login_signup" name="Odoo Sms Login">
         <t t-call="web.login_layout">
             <form class="oe_signup_form" role="form" method="post" t-if="not message">

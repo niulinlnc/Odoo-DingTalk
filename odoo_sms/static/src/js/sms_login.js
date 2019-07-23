@@ -53,7 +53,7 @@ $("#send_verification_code").click(function (event) {
     }
     $.ajax({
         async: false,
-        url: "/web/odoo/send/sms/by/phone",
+        url: "/web/send/sms/by/phone",
         data: {"user_phone": user_phone},
         dataType: "json",
         success: function (data) {
@@ -119,7 +119,7 @@ $("#regain_code").click(function (event) {
     }
     $.ajax({
         async: false,
-        url: "/web/odoo/send/sms/by/phone",
+        url: "/web/send/sms/by/phone",
         data: {"user_phone": user_phone},
         dataType: "json",
         success: function (result) {
