@@ -78,10 +78,10 @@ class ChangePasswordUser(models.TransientModel):
         :return:
         """
         for line in self:
-            if line.new_passwd:
-                result = self.send_change_password_sms(line.user_id.login, line.new_passwd, line.user_id.oauth_uid)
-                if not result['state']:
-                    raise ValidationError("抱歉，系统发送修改密码通知短信不成功,请检查原因；Error:{}".format(result['msg']))
+            if line.new_passwd and line.user_id.oauth_uid:
+                self.send_change_password_sms(line.user_id.login, line.new_passwd, line.user_id.oauth_uid)
+                # if not result['state']:
+                #     raise ValidationError("抱歉，系统发送修改密码通知短信不成功,请检查原因；Error:{}".format(result['msg']))
         super(ChangePasswordUser, self).change_password_button()
 
 
