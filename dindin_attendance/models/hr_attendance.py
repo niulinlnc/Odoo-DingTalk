@@ -93,7 +93,7 @@ class HrAttendanceTransient(models.TransientModel):
             delete from dingding_attendance
         """)
 
-    @api.multi
+    
     def get_attendance_list(self):
         """
         根据日期获取员工打卡信息，当user存在时将获取指定user的打卡，若不存在时，将获取所有员工的打卡信息，
@@ -173,7 +173,7 @@ class HrAttendanceTransient(models.TransientModel):
         action_dict = action.read()[0]
         return action_dict
 
-    @api.multi
+    
     def get_attendance_list_v2(self):
         """
         根据日期获取员工打卡信息，当user存在时将获取指定user的打卡，若不存在时，将获取所有员工的打卡信息，钉钉限制每次传递员工数最大为50个

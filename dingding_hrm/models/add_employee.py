@@ -46,12 +46,12 @@ class AddDingDingEmployee(models.Model):
         tools.image_resize_images(values)
         return super(AddDingDingEmployee, self).create(values)
 
-    @api.multi
+    
     def write(self, values):
         tools.image_resize_images(values)
         return super(AddDingDingEmployee, self).write(values)
 
-    @api.multi
+    
     def add_employee(self):
         """
         智能人事添加企业待入职员工
@@ -97,7 +97,7 @@ class AddDingDingEmployee(models.Model):
         except Exception as e:
             raise UserError(e)
 
-    @api.multi
+    
     def employees_have_joined(self):
         self.ensure_one()
         raise UserError(_("还没有做这个功能"))

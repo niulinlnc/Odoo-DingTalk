@@ -39,7 +39,7 @@ class GetHrEmployeeStauts(models.TransientModel):
     _name = 'get.hrm.employee.state'
     _description = '查询员工入职状态'
 
-    @api.multi
+    
     def get_hrm_employee_state(self):
         self.ensure_one()
         # 更新待入职员工

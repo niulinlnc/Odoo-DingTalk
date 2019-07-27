@@ -85,7 +85,7 @@ class DinDinCalendarEvent(models.Model):
             raise UserError(e)
 
     # 重写删除方法
-    @api.multi
+    
     def unlink(self):
         for res in self:
             calendar_id = res.dingtalk_calendar_id
