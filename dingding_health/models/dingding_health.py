@@ -39,7 +39,7 @@ class DingDingHealth(models.Model):
         tools.image_resize_images(values)
         return super(DingDingHealth, self).create(values)
 
-    @api.multi
+    
     def write(self, values):
         tools.image_resize_images(values)
         return super(DingDingHealth, self).write(values)
@@ -62,7 +62,7 @@ class GetDingDingHealthList(models.TransientModel):
         else:
             self.emp_ids = False
 
-    @api.multi
+    
     def get_health_list_v1(self):
         """
         批量查询多个用户的钉钉运动步数
@@ -79,7 +79,7 @@ class GetDingDingHealthList(models.TransientModel):
         action_dict = action.read()[0]
         return action_dict
 
-    @api.multi
+    
     def get_health_list(self):
         """
         批量查询多个用户的钉钉运动步数

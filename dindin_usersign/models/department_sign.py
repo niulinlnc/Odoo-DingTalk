@@ -23,7 +23,7 @@ class DinDinDepartmentSign(models.Model):
     line_ids = fields.One2many(
         comodel_name='dindin.department.signs.line', inverse_name='signs_id', string='列表')
 
-    @api.multi
+    
     def find_department_sign(self):
         """
         获得签到数据

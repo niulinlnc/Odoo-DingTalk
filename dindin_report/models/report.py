@@ -40,7 +40,7 @@ class DingDingReportUser(models.Model):
     comment_ids = fields.One2many(
         comodel_name='dingding.report.comments.list', inverse_name='rep_id', string='评论列表')
 
-    @api.multi
+    
     def get_report_number_info(self):
         """
         获取日志统计数据（已读人数、评论个数、去重个数、点赞人数）
@@ -199,7 +199,7 @@ class GetUserDingDingReportList(models.TransientModel):
     report_type = fields.Many2one(
         comodel_name='dingding.report.template', string='日志类型')
 
-    @api.multi
+    
     def get_report_by_user(self):
         """
         查询企业员工发出的日志列表

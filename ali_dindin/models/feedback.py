@@ -24,7 +24,7 @@ class DingDingUserFeedback(models.Model):
     state = fields.Selection(string='反馈状态', selection=[(
         '00', '草稿'), ('01', '等待答复'), ('02', '已回复')], default='00')
 
-    @api.multi
+    
     def commit_feedback(self):
         raise UserError("暂未开通！")
 

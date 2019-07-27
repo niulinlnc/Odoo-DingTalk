@@ -33,7 +33,7 @@ class ResPartner(models.Model):
     din_share_employee_ids = fields.Many2many(
         'hr.employee', 'partner_shar_employee_rel', 'partner_id', 'emp_id', string='共享给员工')
 
-    @api.multi
+    
     def create_ding_partner(self):
         """
         添加外部联系人
@@ -98,7 +98,7 @@ class ResPartner(models.Model):
             except Exception as e:
                 raise UserError(e)
 
-    @api.multi
+    
     def update_ding_partner(self):
         """
         更新外部联系人
@@ -154,7 +154,7 @@ class ResPartner(models.Model):
                 raise UserError(e)
 
     # 重写删除方法
-    @api.multi
+    
     def unlink(self):
         for res in self:
             din_userid = res.din_userid
@@ -173,7 +173,7 @@ class ResPartner(models.Model):
         except Exception as e:
             raise UserError(e)
 
-    @api.multi
+    
     def get_dingding_partner(self):
         """
         外部联系人详情
