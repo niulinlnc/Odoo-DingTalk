@@ -3,11 +3,11 @@
 - **基于dingtalk-sdk**
 >本分支基于dingtalk-sdk，安装：pip install dingtalk-sdk
 - **odoo.conf添加参数**
->请在odoo.conf配置文件里添加下面三个参数：
-din_agentid = xxxxxxx
-din_corpid = dingxxxxx
-din_appkey = dingxxxxxxx
-din_appsecret = xxxx
+>请在odoo.conf配置文件里添加下面四个参数：
+>din_agentid = xxxxxxx
+>din_corpid = dingxxxxx
+>din_appkey = dingxxxxxxx
+>din_appsecret = xxxx
 - **redis**
 >token保存在redis里，请在服务器里安装并配置好redis服务器。
 
