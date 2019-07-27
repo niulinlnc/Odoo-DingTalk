@@ -14,7 +14,14 @@
 >din_appsecret = xxxx
 - **redis**
 >token保存在redis里，请在服务器里安装并配置好redis服务器。
-
+>
+>redis默认设置
+>
+>redis_host = localhost
+>
+>redis_port = 6379
+>
+>dingtalk_redis_db = 1
 
 **前言**：
 >
