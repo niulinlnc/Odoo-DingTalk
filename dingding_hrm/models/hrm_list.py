@@ -52,7 +52,7 @@ class GetDingDingHrmList(models.TransientModel):
         else:
             self.emp_ids = False
 
-    
+    @api.multi
     def get_hrm_list(self):
         """
         批量获取员工花名册

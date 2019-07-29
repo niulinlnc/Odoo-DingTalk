@@ -36,7 +36,7 @@ class DinDinWorkRecord(models.Model):
         compute='_compute_attachment_number', string='附件上传功能')
     active = fields.Boolean(default=True)
 
-    
+    @api.multi
     def _compute_attachment_number(self):
         """附件上传"""
         attachment_data = self.env['ir.attachment'].read_group(
@@ -46,7 +46,7 @@ class DinDinWorkRecord(models.Model):
         for expense in self:
             expense.attachment_number = attachment.get(expense.id, 0)
 
-    
+    @api.multi
     def action_get_attachment_view(self):
         """附件上传动作视图"""
         self.ensure_one()
@@ -58,7 +58,7 @@ class DinDinWorkRecord(models.Model):
             'default_res_model': 'dindin.work.record', 'default_res_id': self.id}
         return res
 
-    
+    @api.multi
     def send_record(self):
         """
         新增待办事项
@@ -93,7 +93,7 @@ class DinDinWorkRecord(models.Model):
         self.send_message_to_emp()
         self.message_post(body=_("待办事项已推送到钉钉!"), message_type='notification')
 
-    
+    @api.multi
     def send_message_to_emp(self):
         """
         发送企业通知消息
@@ -207,7 +207,7 @@ class DinDinWorkRecord(models.Model):
         except Exception as e:
             raise UserError(e)
 
-    
+    @api.multi
     def record_update(self):
         """
         更新待办事项状态
@@ -264,7 +264,7 @@ class GetUserDingDingWorkRecord(models.TransientModel):
     _name = 'get.user.dingding.work.record'
     _description = "获取用户待办"
 
-    
+    @api.multi
     def get_user_work_record(self):
         """
         获取当前用户的待办信息

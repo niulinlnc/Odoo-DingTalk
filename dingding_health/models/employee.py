@@ -16,7 +16,7 @@ class HrEmployee(models.Model):
     dd_step_count = fields.Integer(
         string='运动步数', compute='_compute_get_user_today_health')
 
-    
+    @api.multi
     def _compute_get_user_today_health(self):
         """
         获取员工在今日的步数
@@ -48,7 +48,7 @@ class HrEmployee(models.Model):
                 else:
                     res.update({'dd_step_count': 0})
 
-    
+    @api.multi
     def get_user_health_state(self):
         """
         获取选定范围员工钉钉运动开启状态
@@ -63,7 +63,7 @@ class HrEmployee(models.Model):
                 else:
                     res.update({'health_state': 'close'})
 
-    
+    @api.multi
     def get_all_user_health_state(self):
         """
         获取所有员工钉钉运动开启状态
