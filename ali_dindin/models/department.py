@@ -20,7 +20,7 @@ class HrDepartment(models.Model):
     dingding_type = fields.Selection(string='钉钉状态', selection=[('no', '不存在'), ('yes', '存在')],
                                      compute="_compute_dingding_type")
 
-    
+    @api.multi
     def create_ding_department(self):
 
         for res in self:
@@ -49,7 +49,7 @@ class HrDepartment(models.Model):
             except Exception as e:
                 raise UserError(e)
 
-    
+    @api.multi
     def update_ding_department(self):
 
         for res in self:
@@ -74,7 +74,7 @@ class HrDepartment(models.Model):
                 raise UserError(e)
 
     # 重写删除方法
-    
+    @api.multi
     def unlink(self):
 
         for res in self:

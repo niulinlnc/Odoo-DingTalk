@@ -22,7 +22,7 @@ class DinDinUsersSign(models.Model):
     line_ids = fields.One2many(
         comodel_name='dindin.users.signs.line', inverse_name='signs_id', string='列表')
 
-    
+    @api.multi
     def find_users_sign(self):
         """
         获取多个用户的签到记录 (如果是取1个人的数据，时间范围最大到10天，如果是取多个人的数据，时间范围最大1天。)

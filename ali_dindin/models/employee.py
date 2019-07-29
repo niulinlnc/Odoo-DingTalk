@@ -42,7 +42,7 @@ class HrEmployee(models.Model):
     department_ids = fields.Many2many(
         'hr.department', 'employee_department_rel', 'emp_id', 'department_id', string='所属部门')
 
-    
+    @api.multi
     def create_ding_employee(self):
         """
         上传员工到钉钉
@@ -78,7 +78,7 @@ class HrEmployee(models.Model):
             except Exception as e:
                 raise UserError(e)
 
-    
+    @api.multi
     def update_ding_employee(self):
         """
         修改员工时同步至钉钉
@@ -133,7 +133,7 @@ class HrEmployee(models.Model):
                 raise UserError(_("Sorry!，关联的相关(系统)用户已关联到其他员工，若需要变更请修改原关联的相关用户！"))
 
     # 从钉钉手动获取用户详情
-    
+    @api.multi
     def update_employee_from_dingding(self):
         """
         从钉钉获取用户详情
@@ -192,7 +192,7 @@ class HrEmployee(models.Model):
             except Exception as e:
                 raise UserError(e)
 
-    
+    @api.multi
     def syn_employee_from_dingding(self, event_type, userid):
         """
         从钉钉获取用户详情（更新或新建）
@@ -257,7 +257,7 @@ class HrEmployee(models.Model):
         except Exception as e:
             raise UserError(e)
 
-    
+    @api.multi
     def get_face_from_dingding(self):
         """
         从钉钉获取用户人脸
@@ -273,7 +273,7 @@ class HrEmployee(models.Model):
             except Exception as e:
                 raise UserError(e)
 
-    
+    @api.multi
     def has_face_from_dingding(self):
         """
         查询企业员工是否已录入人脸
@@ -296,7 +296,7 @@ class HrEmployee(models.Model):
             except Exception as e:
                 raise UserError(e)
 
-    
+    @api.multi
     def unlink(self):
         """
         重写删除方法
@@ -326,7 +326,7 @@ class HrEmployee(models.Model):
         for res in self:
             res.dingding_type = 'yes' if res.din_id else 'no'
 
-    
+    @api.multi
     def using_dingding_avatar(self):
         """
         单独获取钉钉头像设为员工头像
@@ -337,7 +337,7 @@ class HrEmployee(models.Model):
                     base64.b64encode(requests.get(emp.din_avatar).content))
                 emp.sudo().write({'image': binary_data})
 
-    
+    @api.multi
     def using_dingding_m2(self):
         """
         单独获取M2人脸设为员工头像

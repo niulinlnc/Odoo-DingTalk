@@ -68,7 +68,7 @@ class DinDinCallback(models.Model):
                     call_ids.append(li.id)
             self.call_ids = [(6, 0, call_ids)]
 
-    
+    @api.multi
     def register_call_back(self):
         """
         注册事件
@@ -97,7 +97,7 @@ class DinDinCallback(models.Model):
                 raise UserError(e)
         logging.info(">>>注册事件End...")
 
-    
+    @api.multi
     def update_call_back(self):
         """
         更新事件
@@ -124,7 +124,7 @@ class DinDinCallback(models.Model):
             except Exception as e:
                 raise UserError(e)
 
-    
+    @api.multi
     def unlink(self):
         """
         重写删除方法

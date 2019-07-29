@@ -38,7 +38,7 @@ class DinDinApprovalMain(models.Model):
     oa_url = fields.Char(string='钉钉单据url')
     title = fields.Char(string='标题')
 
-    
+    @api.multi
     def summit_approval(self):
         """
         提交审批按钮，将单据审批信息发送到钉钉
@@ -46,7 +46,7 @@ class DinDinApprovalMain(models.Model):
         """
         pass
 
-    
+    @api.multi
     def unlink(self):
         for res in self:
             if res.oa_state != '00':
@@ -117,7 +117,7 @@ class DinDinApprovalMain(models.Model):
                 cc_str = cc_str + ",{}".format(user.emp_id.din_id)
         return user_str, cc_str
 
-    
+    @api.multi
     def _get_user_and_dept(self):
         """
         返回发起人钉钉id和部门id

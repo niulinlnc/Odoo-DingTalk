@@ -16,7 +16,7 @@ class HrDepartment(models.Model):
     dd_step_count = fields.Integer(
         string='运动步数', compute='get_dept_today_health')
 
-    
+    @api.multi
     def get_dept_today_health(self):
         """
         获取部门在今日的步数

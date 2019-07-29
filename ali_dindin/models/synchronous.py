@@ -21,7 +21,7 @@ class DingDingSynchronous(models.TransientModel):
     employee_avatar = fields.Boolean(string='是否替换为钉钉员工头像', default=False)
     partner = fields.Boolean(string='同步钉钉联系人', default=True)
 
-    
+    @api.multi
     def start_synchronous_data(self):
         """
         基础数据同步
