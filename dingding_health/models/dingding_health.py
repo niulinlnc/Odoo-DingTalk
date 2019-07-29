@@ -126,7 +126,7 @@ class GetDingDingHealthList(models.TransientModel):
                         'health_date': health_date,
                     }
                     emp = self.env['hr.employee'].sudo().search(
-                        [('din_id', '=', stepinfo_list.get('userid')), ('health_date', '=', health_date)])
+                        [('din_id', '=', stepinfo_list.get('userid'))])
                     if emp:
                         data.update(
                             {'emp_id': emp.id, 'department_id': emp.department_id.id})
