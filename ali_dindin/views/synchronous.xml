@@ -44,7 +44,7 @@
         <field name="target">new</field>
     </record>
 
-    <menuitem name="数据同步" id="dingding_bash_data_synchronous_menu" parent="ali_dindin.bash_menu" sequence="1" action="dingding_bash_data_synchronous_action" groups="ali_dindin.dd_synchronous_group"/>
+    <menuitem name="数据同步" id="dingding_bash_data_synchronous_menu" parent="ali_dindin.bash_menu" sequence="8" action="dingding_bash_data_synchronous_action" groups="ali_dindin.dd_synchronous_group"/>
 
     <menuitem name="部门" id="dingding_employee_menu" parent="ali_dindin.bash_menu" sequence="5" groups="hr.group_hr_user" action="hr.open_module_tree_department"/>
 

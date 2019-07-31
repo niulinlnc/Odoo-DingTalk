@@ -413,3 +413,18 @@ class OaMessageList(models.Model):
     value = fields.Char(string='内容', required=True)
     message_id = fields.Many2one(
         comodel_name='dindin.work.message', string='消息', ondelete='cascade')
+
+# 未完成
+class Users(models.Model):
+
+    _inherit = ['res.users']
+
+    notification_type = fields.Selection([
+        ('email', 'Handle by Emails'),
+        ('inbox', 'Handle in Odoo'),
+        ('dingtalk', 'Handle in Dingtalk')],
+        'Notification Management', required=True, default='email',
+        help="Policy on how to handle Chatter notifications:\n"
+             "- Handle by Emails: notifications are sent to your email address\n"
+             "- Handle in Odoo: notifications appear in your Odoo Inbox\n"
+             "- Handle in Dingtalk: notifications appear in Dingtalk")

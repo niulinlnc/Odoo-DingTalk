@@ -14,10 +14,10 @@ class HrEmployee(models.Model):
     health_state = fields.Selection(string='运动状态', selection=[
                                     ('open', '开启'), ('close', '关闭')], default='open')
     dd_step_count = fields.Integer(
-        string='运动步数', compute='_compute_get_user_today_health')
+        string='运动步数', compute='get_user_today_health')
 
     @api.multi
-    def _compute_get_user_today_health(self):
+    def get_user_today_health(self):
         """
         获取员工在今日的步数
         :return:
