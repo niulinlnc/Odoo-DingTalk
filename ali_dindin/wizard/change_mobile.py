@@ -59,8 +59,8 @@ class ChangeMobile(models.TransientModel):
             60104 手机号码在公司中已存在；
             40019 该手机号码对应的用户最多可以加入5个非认证企业；
             40021 该手机号码已经注册过钉钉。
+            40022 企业中的手机号码与登录钉钉的手机号码不一致。
         """
-        
         # 先尝试直接更新
         data = {
             'userid': self.din_id,  # userid
@@ -68,57 +68,53 @@ class ChangeMobile(models.TransientModel):
             'department': [self.dep_din_id],
             'mobile': self.new_mobile,  # 手机
         }
-        try:
-            result = client.user.update(data)
-            if result.get('errcode') == 0:
-                employee = self.env['hr.employee'].search(
-                    [('din_id', '=', self.din_id)])
-                if employee:
-                    employee.sudo().write({'mobile_phone': self.new_mobile})
-                    employee.message_post(body="通过直接更新手机号为:{}".format(
-                        self.new_mobile), message_type='notification')
-            else:
-                # 如果手机号已经激活或者新手机号注册过钉钉，先删除钉钉号再新建
-                data = {
-                    'userid': self.din_id,  # userid
-                }
-                try:
-                    result = client.user.delete(data)
-                    logging.info("user_delete:%s", result)
+
+        result = client.user.update(data)
+        if result.get('errcode') == 0:
+            employee = self.env['hr.employee'].search(
+                [('din_id', '=', self.din_id)])
+            if employee:
+                employee.sudo().write({'mobile_phone': self.new_mobile})
+                employee.message_post(body="通过直接更新手机号为:{}".format(
+                    self.new_mobile), message_type='notification')
+        else:
+            # 如果手机号已经激活或者新手机号注册过钉钉，先删除钉钉号再新建
+            data = {
+                'userid': self.din_id,  # userid
+            }
+            result = client.user.delete(data)
+            logging.info("user_delete:%s", result)
+            employee = self.env['hr.employee'].search(
+                [('din_id', '=', self.din_id)])
+            if employee:
+                if result.get('errcode') == 0:
+                    employee.message_post(
+                        body=_("原号码已经在钉钉上删除，等待新建钉钉号"), message_type='notification')
+                else:
+                    employee.message_post(
+                        body=_("原号码在钉钉已经不存在，等待新建钉钉号"), message_type='notification')
+
+            # 不管是否删除成功，只要保证原号码在钉钉上已经不存在，马上新建钉钉号
+            data = {
+                'userid': self.din_id,  # userid
+                'name': self.name,  # 姓名
+                'department': [self.dep_din_id],
+                'mobile': self.new_mobile,  # 手机
+            }
+            try:
+                result = client.user.create(data)
+                if result.get('errcode') == 0:
                     employee = self.env['hr.employee'].search(
                         [('din_id', '=', self.din_id)])
                     if employee:
-                        if result.get('errcode') == 0:
-                            employee.message_post(
-                                body=_("原号码已经在钉钉上删除，等待新建钉钉号"), message_type='notification')
-                        else:
-                            employee.message_post(
-                                body=_("原号码在钉钉已经不存在，等待新建钉钉号"), message_type='notification')
-                except Exception as e:
-                    raise UserError(e)
-                # 不管是否删除成功，只要保证原号码在钉钉上已经不存在，马上新建钉钉号
-                data = {
-                    'userid': self.din_id,  # userid
-                    'name': self.name,  # 姓名
-                    'department': [self.dep_din_id],
-                    'mobile': self.new_mobile,  # 手机
-                }
-                try:
-                    result = client.user.create(data)
-                    if result.get('errcode') == 0:
-                        employee = self.env['hr.employee'].search(
-                            [('din_id', '=', self.din_id)])
-                        if employee:
-                            employee.sudo().write(
-                                {'mobile_phone': self.new_mobile})
-                            employee.update_ding_employee()  # 换号码后把员工其他信息同步到钉钉
-                            employee.update_employee_from_dingding()  # 换号码后从钉钉获取新手机的激活状态
-                            employee.message_post(body=_("通过删除后重建更换手机号为:{}").format(
-                                self.new_mobile), message_type='notification')
-                    else:
-                        raise UserError(
-                            _('上传钉钉系统时发生错误，详情为:{}').format(result.get('errmsg')))
-                except Exception as e:
-                    raise UserError(e)
-        except Exception as e:
-            raise UserError(e)
+                        employee.sudo().write(
+                            {'mobile_phone': self.new_mobile})
+                        employee.update_ding_employee()  # 换号码后把员工其他信息同步到钉钉
+                        employee.update_employee_from_dingding()  # 换号码后从钉钉获取新手机的激活状态
+                        employee.message_post(body=_("通过删除后重建更换手机号为:{}").format(
+                            self.new_mobile), message_type='notification')
+                else:
+                    raise UserError(
+                        _('上传钉钉系统时发生错误，详情为:{}').format(result.get('errmsg')))
+            except Exception as e:
+                raise UserError(e)
