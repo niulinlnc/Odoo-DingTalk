@@ -62,6 +62,7 @@ class ChangeMobile(models.TransientModel):
             40022 企业中的手机号码与登录钉钉的手机号码不一致。
         """
         # 先尝试直接更新
+        logging.info(">>>开始尝试直接更新手机号")
         data = {
             'userid': self.din_id,  # userid
             'name': self.name,  # 姓名
@@ -77,24 +78,29 @@ class ChangeMobile(models.TransientModel):
                 employee.sudo().write({'mobile_phone': self.new_mobile})
                 employee.message_post(body="通过直接更新手机号为:{}".format(
                     self.new_mobile), message_type='notification')
+            logging.info(">>>直接更新手机号成功！")
         else:
             # 如果手机号已经激活或者新手机号注册过钉钉，先删除钉钉号再新建
+            logging.info(">>>直接更新手机号失败，现在开始删除原钉钉号")
             data = {
                 'userid': self.din_id,  # userid
             }
             result = client.user.delete(data)
-            logging.info("user_delete:%s", result)
+            logging.info(">>>删除原钉钉号返回结果:%s", result)
             employee = self.env['hr.employee'].search(
                 [('din_id', '=', self.din_id)])
             if employee:
                 if result.get('errcode') == 0:
                     employee.message_post(
                         body=_("原号码已经在钉钉上删除，等待新建钉钉号"), message_type='notification')
+                    logging.info(">>>原号码已经在钉钉上删除，等待新建钉钉号")
                 else:
                     employee.message_post(
                         body=_("原号码在钉钉已经不存在，等待新建钉钉号"), message_type='notification')
+                    logging.info(">>>原号码在钉钉已经不存在，等待新建钉钉号")
 
             # 不管是否删除成功，只要保证原号码在钉钉上已经不存在，马上新建钉钉号
+            logging.info(">>>开始通过原钉钉ID重新建立钉钉号")
             data = {
                 'userid': self.din_id,  # userid
                 'name': self.name,  # 姓名
@@ -113,8 +119,10 @@ class ChangeMobile(models.TransientModel):
                         employee.update_employee_from_dingding()  # 换号码后从钉钉获取新手机的激活状态
                         employee.message_post(body=_("通过删除后重建更换手机号为:{}").format(
                             self.new_mobile), message_type='notification')
+                        logging.info(">>>重新建立钉钉号成功，手机号已成功更改！")
                 else:
                     raise UserError(
                         _('上传钉钉系统时发生错误，详情为:{}').format(result.get('errmsg')))
+                    logging.info(">>>重新建立钉钉号失败")
             except Exception as e:
                 raise UserError(e)
