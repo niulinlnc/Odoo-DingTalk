@@ -14,6 +14,7 @@ access_wage_archives_company,wage.archives.company,model_wage_archives_company,b
 access_wage_archives,wage.archives,model_wage_archives,base.group_user,1,1,1,1
 access_wage_archives_line,wage.archives.line,model_wage_archives_line,base.group_user,1,1,1,1
 access_wage_calculate_salary_rules,wage.calculate.salary.rules,model_wage_calculate_salary_rules,base.group_user,1,1,1,1
+access_wage_attendance_rules,wage.attendance.rules,model_wage_attendance_rules,base.group_user,1,1,1,1
 access_wage_special_additional_deduction,wage.special.additional.deduction,model_wage_special_additional_deduction,base.group_user,1,1,1,1
 access_wage_employee_attendance_annal,wage.employee.attendance.annal,model_wage_employee_attendance_annal,base.group_user,1,1,1,1
 access_wage_employee_performance_manage,wage.employee.performance.manage,model_wage_employee_performance_manage,base.group_user,1,1,1,1

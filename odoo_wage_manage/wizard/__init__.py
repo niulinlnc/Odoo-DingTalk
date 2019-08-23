@@ -16,4 +16,5 @@
 from . import wage_insured_monthly_statement
 from . import wage_archives
 from . import wage_payroll_accounting
+from . import wage_attendance_accounting
 from . import wage_employee_tax_details

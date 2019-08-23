@@ -35,6 +35,7 @@
         'views/wage_structure.xml',
         'views/wage_archives.xml',
         'views/wage_calculate_salary_rules.xml',
+        'views/wage_attendance_rules.xml',
         'views/wage_special_additional_deduction.xml',
         'views/wage_statistics_annal.xml',
         'views/wage_payroll_accounting.xml',
@@ -45,6 +46,7 @@
         'wizard/wage_insured_monthly_statement.xml',
         'wizard/wage_archives.xml',
         'wizard/wage_payroll_accounting.xml',
+        'wizard/wage_attendance_accounting.xml',
         'wizard/wage_employee_tax_details.xml',
 
     ],

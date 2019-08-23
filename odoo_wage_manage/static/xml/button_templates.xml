@@ -82,6 +82,25 @@ limitations under the License.
         </t>
     </t>
 
+    <t t-name="OdooWageManageListView.wage_attendance_accounting_btn">
+        <button type="button" class="btn btn-primary wage_attendance_accounting_but_class">
+            考勤计算
+        </button>
+        <!-- <button type="button" class="btn btn-secondary push_down_the_pay_slip_but_class">
+            生成工资条
+        </button> -->
+    </t>
+    <t t-extend="ListView.buttons" t-name="OdooWageManageListView.wage_attendance_accounting_buttons">
+        <t t-jquery="button.o_list_button_add" t-operation="replace">
+            <t t-call="OdooWageManageListView.wage_attendance_accounting_btn"/>
+            <t t-js="ctx">
+                if (window.odoo._modules.indexOf("base_import") >= 0) {
+                    r.push(context.engine.tools.call(context, 'ImportView.import_button', dict));
+                };
+            </t>
+        </t>
+    </t>
+
 </template>
 
 
