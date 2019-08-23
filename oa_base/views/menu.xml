@@ -15,9 +15,9 @@ limitations under the License.
 -->
 <odoo>
     <data>
-       <!--创建导航栏菜单-->
-        <menuitem id="menu_oa_root" name="钉钉审批" web_icon="oa_base,static/description/icon.png" sequence="172"/>
-
+        <!--创建导航栏菜单-->
+        <menuitem id="menu_oa_root" name="审批管理" web_icon="oa_base,static/description/icon.png" sequence="172"/>
+        <menuitem id="menu_oa_approval_template_main" name="审批模板" parent="menu_oa_root" sequence="10"/>
         <menuitem id="menu_oa_root_config" name="设置" parent="menu_oa_root" sequence="100"/>
     </data>
 </odoo>

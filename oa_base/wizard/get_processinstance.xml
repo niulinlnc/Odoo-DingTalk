@@ -43,7 +43,10 @@
         <field name="target">new</field>
     </record>
 
-    <menuitem name="获取审批实例" id="oa_get_process_instance_menu" parent="menu_oa_root" sequence="90"
+    <menuitem name="审批实例" id="oa_process_menu" parent="menu_oa_root" sequence="20"/>
+    <menuitem name="获取钉钉审批实例" id="oa_get_process_instance_menu" parent="oa_process_menu" sequence="10"
           action="oa_get_process_instance_action"/>
+    
+    
 
 </odoo>
