@@ -18,15 +18,15 @@
     <record id="dingding_attendance.attendance_menu" model="ir.ui.menu">
         <field name="name">考勤</field>
         <field name="parent_id" ref="dingding_hrm.hrm_employee_attendance_menu"></field>
-        <field name="sequence">30</field>
+        <field name="sequence">10</field>
         <field name="groups_id" eval="[(6,0, [ref('dingding_hrm.personnel')])]"/>
     </record>
 
     <!--安装智能人事模块后，将钉钉审批下的出勤休假菜单转移到智能人事下面的假勤管理子菜单下-->
     <record id="oa_leave_attendance.oa_leave_application_main_menu" model="ir.ui.menu">
         <field name="name">审批</field>
-        <field name="parent_id" ref="dingding_attendance.attendance_menu"></field>
-        <field name="sequence">30</field>
+        <field name="parent_id" ref="dingding_hrm.hrm_employee_attendance_menu"></field>
+        <field name="sequence">20</field>
         <field name="groups_id" eval="[(6,0, [ref('dingding_hrm.personnel')])]"/>
     </record>
 
@@ -52,10 +52,32 @@
         <field name="sequence">20</field>
     </record>
 
+    <!--安装智能人事模块后，将钉钉审批下的行政人事子菜单重命名为行政审批-->
+    <record id="oa_personnel_admin.oa_administrative_personnel_main_menu" model="ir.ui.menu">
+        <field name="name">行政审批</field>
+        <field name="parent_id" ref="oa_base.menu_oa_root"></field>
+        <field name="sequence">20</field>
+    </record>
+
+    <!--安装智能人事模块后，将钉钉审批下的行政人事>转正申请调整到智能人事>人事异动下面-->
+    <record id="oa_personnel_admin.oa_transfer_application_menu" model="ir.ui.menu">
+        <field name="name">转正申请</field>
+        <field name="parent_id" ref="dingding_hrm.hrm_employee_changes_menu"></field>
+        <field name="sequence">10</field>
+    </record>
+
+    <!--安装智能人事模块后，将钉钉审批下的行政人事>离职申请调整到智能人事>人事异动下面-->
+    <record id="oa_personnel_admin.oa_resignation_application_menu" model="ir.ui.menu">
+        <field name="name">离职申请</field>
+        <field name="parent_id" ref="dingding_hrm.hrm_employee_changes_menu"></field>
+        <field name="sequence">20</field>
+    </record>
+
     <!--安装审批模块后，将钉钉下的设置>审批菜单转移到钉钉审批模板菜单下面-->
     <record id="dingding_base.approval_template_main_menu" model="ir.ui.menu">
         <field name="name">钉钉审批模板</field>
         <field name="parent_id" ref="oa_base.menu_oa_approval_template_main"></field>
         <field name="sequence">10</field>
     </record>
+
 </odoo>
