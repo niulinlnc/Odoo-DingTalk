@@ -16,6 +16,8 @@
 import logging
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from chinese_calendar import is_workday, is_holiday
+
 
 _logger = logging.getLogger(__name__)
 
@@ -60,7 +62,7 @@ class WageAttendanceRules(models.Model):
     leave_minimum_unit = fields.Selection(string=u'最小请假单位', selection=leave_minimum_unit_selection, default='00')
     leave_time_accounting = fields.Selection(string=u'请假时长核算', selection=leave_time_accounting_selection, default='00')
     leave_oa_madel = fields.Many2one(comodel_name='dingding.approval.template', string=u'审批模型')
-    
+
     # -----加班规则-----
     is_allow_overtime = fields.Boolean(string=u'允许加班')
     work_overtime_selection = [
@@ -77,11 +79,14 @@ class WageAttendanceRules(models.Model):
         ('01', '不纳入统计'),
         ('02', '累计次数扣费'),
     ]
-    onduty1_late_attendance_deduction = fields.Selection(string=u'上班1迟到规则', selection=late_attendance_selection, default='00')
+    onduty1_late_attendance_deduction = fields.Selection(
+        string=u'上班1迟到规则', selection=late_attendance_selection, default='00')
     onduty1_late_attendance_time = fields.Float(string=u'允许迟到分钟', digits=(10, 2))
-    onduty2_late_attendance_deduction = fields.Selection(string=u'上班2迟到规则', selection=late_attendance_selection, default='00')
+    onduty2_late_attendance_deduction = fields.Selection(
+        string=u'上班2迟到规则', selection=late_attendance_selection, default='00')
     onduty2_late_attendance_time = fields.Float(string=u'允许迟到分钟', digits=(10, 2))
-    onduty3_late_attendance_deduction = fields.Selection(string=u'上班3迟到规则', selection=late_attendance_selection, default='00')
+    onduty3_late_attendance_deduction = fields.Selection(
+        string=u'上班3迟到规则', selection=late_attendance_selection, default='00')
     onduty3_late_attendance_time = fields.Float(string=u'允许迟到分钟', digits=(10, 2))
     # -----早退规则------
     early_selection = [
@@ -115,131 +120,164 @@ class WageAttendanceRules(models.Model):
     onduty3_notsigned_money = fields.Float(string=u'上班3漏打卡扣费', digits=(10, 2))
     offduty3_notsigned_money = fields.Float(string=u'下班3漏打卡扣费', digits=(10, 2))
 
+    # @api.multi
+    # def compute_leave_deduction(self, base_wage, days, hours):
+    #     """
+    #     计算事假时长
+    #     :param base_wage: 基本工资
+    #     :param days:  出勤天数
+    #     :param hours: 事假缺勤小时
+    #     :return:
+    #     """
+    #     if self.leave_deduction == '00':
+    #         # ('基本工资/应出勤天数/8*请假小时'
+    #         return base_wage / days / 8 * hours
+    #     elif self.leave_deduction == '01':
+    #         # '基本工资/应出勤天数*请假小时'
+    #         return base_wage / days * hours
+    #     else:
+    #         # (按次数) 次数*每次事假扣款
+    #         return (hours / self.hour_leave_number) * self.leave_money
+
+    # @api.multi
+    # def compute_sick_absence(self, base_wage, days, hours):
+    #     """
+    #     计算病假时长
+    #     :param base_wage:
+    #     :param days:
+    #     :param hours:
+    #     :return:
+    #     """
+    #     if self.sick_deduction == '00':
+    #         # 基本工资/2/应出勤天数/8*请假小时
+    #         return base_wage / 2 / days / 8 * hours
+    #     elif self.sick_deduction == '01':
+    #         # 基本工资/应出勤天数*请假小时*病假扣款比例
+    #         return base_wage / days * hours * self.sick_deduction_ratio
+    #     elif self.sick_deduction == '02':
+    #         # 基本工资/应出勤天数*请假小时/8*病假扣款比例
+    #         return base_wage / days * hours / 8 * self.sick_deduction_ratio
+    #     else:
+    #         # (按次数) 次数*每次病假扣款')
+    #         return int(hours / self.hour_sick_number) * self.sick_money
+
+    # @api.multi
+    # def compute_work_overtime(self, employee_id, date_from, date_to):
+    #     """
+    #     计算工作日加班时长
+    #     :param base_wage:
+    #     :param days:
+    #     :param hours:
+    #     :return:
+    #     """
+
+    #     if self.work_overtime_deduction == '00':
+    #         # 基本工资/应出勤天数/8*加班小时*倍数
+    #         return base_wage / days / 8 * hours * self.work_overtime_multiple
+    #     else:
+    #         # 加班小时*固定金额
+    #         return hours * self.work_overtime_money
+
+    # @api.multi
+    # def compute_weekend_overtime(self, base_wage, days, hours):
+    #     """
+    #     计算周末加班时长
+    #     :param base_wage:
+    #     :param days:
+    #     :param hours:
+    #     :return:
+    #     """
+    #     if self.weekend_deduction == '00':
+    #         # 基本工资/应出勤天数/8*加班小时*倍数
+    #         return base_wage / days / 8 * hours * self.weekend_multiple
+    #     else:
+    #         # 加班小时*固定金额
+    #         return hours * self.weekend_multiple
+
+    # @api.multi
+    # def compute_holiday_overtime(self, base_wage, days, hours):
+    #     """
+    #     计算节假日加班时长
+    #     :param base_wage:
+    #     :param days:
+    #     :param hours:
+    #     :return:
+    #     """
+    #     if self.holiday_deduction == '00':
+    #         # 基本工资/应出勤天数/8*加班小时*倍数
+    #         return base_wage / days / 8 * hours * self.holiday_multiple
+    #     else:
+    #         # 加班小时*固定金额
+    #         return hours * self.holiday_money
 
     @api.multi
-    def compute_leave_deduction(self, base_wage, days, hours):
+    def compute_onduty_late_times(self, employee_id, date_from, date_to):
         """
-        计算事假时长
-        :param base_wage: 基本工资
-        :param days:  出勤天数
-        :param hours: 事假缺勤小时
-        :return:
-        """
-        if self.leave_deduction == '00':
-            # ('基本工资/应出勤天数/8*请假小时'
-            return base_wage / days / 8 * hours
-        elif self.leave_deduction == '01':
-            # '基本工资/应出勤天数*请假小时'
-            return base_wage / days * hours
-        else:
-            # (按次数) 次数*每次事假扣款
-            return (hours / self.hour_leave_number) * self.leave_money
-
-    @api.multi
-    def compute_sick_absence(self, base_wage, days, hours):
-        """
-        计算病假时长
-        :param base_wage:
-        :param days:
-        :param hours:
-        :return:
-        """
-        if self.sick_deduction == '00':
-            # 基本工资/2/应出勤天数/8*请假小时
-            return base_wage / 2 / days / 8 * hours
-        elif self.sick_deduction == '01':
-            # 基本工资/应出勤天数*请假小时*病假扣款比例
-            return base_wage / days * hours * self.sick_deduction_ratio
-        elif self.sick_deduction == '02':
-            # 基本工资/应出勤天数*请假小时/8*病假扣款比例
-            return base_wage / days * hours / 8 * self.sick_deduction_ratio
-        else:
-            # (按次数) 次数*每次病假扣款')
-            return int(hours / self.hour_sick_number) * self.sick_money
-
-    @api.multi
-    def compute_work_overtime(self, base_wage, days, hours):
-        """
-        计算工作日加班时长
-        :param base_wage:
-        :param days:
-        :param hours:
-        :return:
-        """
-        if self.work_overtime_deduction == '00':
-            # 基本工资/应出勤天数/8*加班小时*倍数
-            return base_wage / days / 8 * hours * self.work_overtime_multiple
-        else:
-            # 加班小时*固定金额
-            return hours * self.work_overtime_money
-
-    @api.multi
-    def compute_weekend_overtime(self, base_wage, days, hours):
-        """
-        计算周末加班时长
-        :param base_wage:
-        :param days:
-        :param hours:
-        :return:
-        """
-        if self.weekend_deduction == '00':
-            # 基本工资/应出勤天数/8*加班小时*倍数
-            return base_wage / days / 8 * hours * self.weekend_multiple
-        else:
-            # 加班小时*固定金额
-            return hours * self.weekend_multiple
-
-    @api.multi
-    def compute_holiday_overtime(self, base_wage, days, hours):
-        """
-        计算节假日加班时长
-        :param base_wage:
-        :param days:
-        :param hours:
-        :return:
-        """
-        if self.holiday_deduction == '00':
-            # 基本工资/应出勤天数/8*加班小时*倍数
-            return base_wage / days / 8 * hours * self.holiday_multiple
-        else:
-            # 加班小时*固定金额
-            return hours * self.holiday_money
-
-    @api.multi
-    def compute_late_attendance(self, attendance_num):
-        """
-        计算迟到时长
+        计算上班迟到次数
         :param attendance_num:
         :return:
         """
-        if self.late_attendance_deduction == '00':
-            # 迟到次数*扣款金额
-            return attendance_num * self.late_attendance_money
-        else:
-            return 0
+        self._cr.execute("""
+                SELECT COUNT(att.on_timeResult)
+                    FROM hr_attendance att
+                WHERE att.workDate >= %s
+                    AND att.workDate <= %s
+                    AND att.employee_id = %s
+                    AND on_timeResult = 'Late' or 'SeriousLate' or 'Absenteeism'
+                    """, (date_from, date_to, employee_id,))
+        res = self._cr.fetchone()
+        return res[0]
 
     @api.multi
-    def compute_notsigned_attendance(self, attendance_num):
+    def compute_onduty_notsigned_times(self, employee_id, date_from, date_to):
         """
-        计算忘记打卡次数
+        计算上班忘记打卡次数
         :param attendance_num:
         :return:
         """
-        if self.notsigned_deduction == '00':
-            # 忘记打款次数*扣款金额
-            return attendance_num * self.notsigned_money
-        else:
-            return 0
+        self._cr.execute("""
+                SELECT COUNT(att.on_timeResult)
+                    FROM hr_attendance att
+                WHERE att.workDate >= %s
+                    AND att.workDate <= %s
+                    AND att.employee_id = %s
+                    AND on_timeResult = 'NotSigned'
+                    """, (date_from, date_to, employee_id,))
+        res = self._cr.fetchone()
+        return res[0]
 
     @api.multi
-    def compute_early_attendance(self, attendance_num):
+    def compute_offduty_notsigned_times(self, employee_id, date_from, date_to):
         """
-        计算早退时长
+        计算下班忘记打卡次数
         :param attendance_num:
         :return:
         """
-        if self.early_deduction == '00':
-            # 早退次数*扣款金额
-            return attendance_num * self.early_money
-        else:
-            return 0
+        self._cr.execute("""
+                SELECT COUNT(att.on_timeResult)
+                    FROM hr_attendance att
+                WHERE att.workDate >= %s
+                    AND att.workDate <= %s
+                    AND att.employee_id = %s
+                    AND off_timeResult = 'NotSigned'
+                    """, (date_from, date_to, employee_id,))
+        res = self._cr.fetchone()
+        return res[0]
+
+    @api.multi
+    def compute_early_times(self, employee_id, date_from, date_to):
+        """
+        计算早退次数
+        :param attendance_num:
+        :return:
+        """
+        self._cr.execute("""
+                SELECT COUNT(att.off_timeResult)
+                    FROM hr_attendance att
+                WHERE att.workDate >= %s
+                    AND att.workDate <= %s
+                    AND att.employee_id = %s
+                    AND off_timeResult = 'Early'
+                    """, (date_from, date_to, employee_id,))
+        res = self._cr.fetchone()
+        return res[0]

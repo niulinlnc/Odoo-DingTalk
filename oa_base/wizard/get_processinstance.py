@@ -83,6 +83,7 @@ class GetProcessInstance(models.TransientModel):
         for process_id in process_list:
             data = {'process_instance_id': process_id}
             result = self.env['dingding.api.tools'].send_post_request(url, token, data, 20)
+            logging.info(">>>获取审批实例详情返回结果%s", result)
             if result['errcode'] == 0:
                 process_instance = result['process_instance']
                 # get发起人和发起部门
