@@ -75,25 +75,23 @@ limitations under the License.
                         <field name="offduty3_early_deduction" required="1"/>
                         <field name="offduty3_early_time" attrs="{'invisible':[('offduty3_early_deduction', '!=', '00')]}"/>
                     </group>
-                    <group string="漏打卡规则">
-                        <group string="上午">
-                            <field name="onduty1_notsigned_rule" required="1"/>
-                            <field name="onduty1_notsigned_money" attrs="{'invisible':[('onduty1_notsigned_rule', '!=', '00')]}"/>
-                            <field name="offduty1_notsigned_rule" required="1"/>
-                            <field name="offduty1_notsigned_money" attrs="{'invisible':[('offduty1_notsigned_rule', '!=', '00')]}"/>
-                        </group>
-                        <group string="下午">
-                            <field name="onduty2_notsigned_rule" required="1"/>
-                            <field name="onduty2_notsigned_money" attrs="{'invisible':[('onduty2_notsigned_rule', '!=', '00')]}"/>
-                            <field name="offduty2_notsigned_rule" required="1"/>
-                            <field name="offduty2_notsigned_money" attrs="{'invisible':[('offduty2_notsigned_rule', '!=', '00')]}"/>
-                        </group>
-                        <group string="晚上">
-                            <field name="onduty3_notsigned_rule" required="1"/>
-                            <field name="onduty3_notsigned_money" attrs="{'invisible':[('onduty3_notsigned_rule', '!=', '00')]}"/>
-                            <field name="offduty3_notsigned_rule" required="1"/>
-                            <field name="offduty3_notsigned_money" attrs="{'invisible':[('offduty3_notsigned_rule', '!=', '00')]}"/>
-                        </group>
+                    <group string="漏打卡规则-上午">
+                        <field name="onduty1_notsigned_rule" required="1"/>
+                        <field name="onduty1_notsigned_money" attrs="{'invisible':[('onduty1_notsigned_rule', '!=', '00')]}"/>
+                        <field name="offduty1_notsigned_rule" required="1"/>
+                        <field name="offduty1_notsigned_money" attrs="{'invisible':[('offduty1_notsigned_rule', '!=', '00')]}"/>
+                    </group>
+                    <group string="漏打卡规则-下午">
+                        <field name="onduty2_notsigned_rule" required="1"/>
+                        <field name="onduty2_notsigned_money" attrs="{'invisible':[('onduty2_notsigned_rule', '!=', '00')]}"/>
+                        <field name="offduty2_notsigned_rule" required="1"/>
+                        <field name="offduty2_notsigned_money" attrs="{'invisible':[('offduty2_notsigned_rule', '!=', '00')]}"/>
+                    </group>
+                    <group string="漏打卡规则-晚上">
+                        <field name="onduty3_notsigned_rule" required="1"/>
+                        <field name="onduty3_notsigned_money" attrs="{'invisible':[('onduty3_notsigned_rule', '!=', '00')]}"/>
+                        <field name="offduty3_notsigned_rule" required="1"/>
+                        <field name="offduty3_notsigned_money" attrs="{'invisible':[('offduty3_notsigned_rule', '!=', '00')]}"/>
                     </group>
                 </group>
                 <group string="备注">
