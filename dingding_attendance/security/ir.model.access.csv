@@ -11,3 +11,9 @@ access_hr_attendance_result_manage_groups,hr.attendance.result.manage.groups,mod
 access_hr_attendance_record,hr.attendance.record,model_hr_attendance_record,dingding_base.user_groups,1,0,0,0
 access_hr_attendance_record_manage_groups,hr.attendance.record.manage.groups,model_hr_attendance_record,dingding_base.manage_groups,1,1,1,1
 access_dingding_signs_list_group_user,dingding.signs.list.group.user,model_dingding_signs_list,dingding_base.user_groups,1,0,0,0
+access_hr_attendance_total,hr.attendance.total,model_hr_attendance_total,dingding_base.user_groups,1,0,0,0
+access_hr_attendance_total_manage_groups,hr.attendance.total.manage.groups,model_hr_attendance_total,dingding_base.manage_groups,1,1,1,1
+access_hr_legal_holiday,hr.legal.holiday,model_hr_legal_holiday,dingding_base.user_groups,1,0,0,0
+access_hr_legal_holiday_manage_groups,hr.legal.holiday.manage.groups,model_hr_legal_holiday,dingding_base.manage_groups,1,1,1,1
+access_hr_attendance_rules,hr.attendance.rules,model_hr_attendance_rules,dingding_base.user_groups,1,0,0,0
+access_hr_attendance_rules_manage_groups,hr.attendance.rules.manage.groups,model_hr_attendance_rules,dingding_base.manage_groups,1,1,1,1

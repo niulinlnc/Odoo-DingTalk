@@ -41,6 +41,8 @@
         'views/hr_attendance_result.xml',
         'views/hr_attendance_record.xml',
         'views/user_sign_list.xml',
+        'views/hr_attendance_rules.xml',
+        'wizard/hr_attendance_total.xml',
     ],
     'qweb': [
         'static/xml/*.xml'

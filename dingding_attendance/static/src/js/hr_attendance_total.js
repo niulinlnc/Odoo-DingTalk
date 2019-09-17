@@ -15,23 +15,23 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-odoo.define('wage.employee.attendance.annal_js_class.tree.button', function (require) {
+odoo.define('hr.attendance.total_js_class.tree.button', function (require) {
     "use strict";
 
     let ListController = require('web.ListController');
     let ListView = require('web.ListView');
     let viewRegistry = require('web.view_registry');
 
-    let OdooWageAttendanceAnnalViewController = ListController.extend({
-        buttons_template: 'OdooWageManageListView.wage_employee_attendance_annal_buttons',
+    let OdooHrAttendanceAnnalViewController = ListController.extend({
+        buttons_template: 'OdooHrManageListView.hr_attendance_total_buttons',
         renderButtons: function () {
             this._super.apply(this, arguments);
             if (this.$buttons) {
                 let self = this;
-                this.$buttons.on('click', '.compute_attendance_annal_buttons_but_class', function () {
+                this.$buttons.on('click', '.compute_attendance_total_buttons_but_class', function () {
                     self.do_action({
                         type: 'ir.actions.act_window',
-                        res_model: 'wage.employee.attendance.annal.transient',
+                        res_model: 'hr.attendance.total.transient',
                         target: 'new',
                         views: [[false, 'form']],
                         context: [],
@@ -41,11 +41,11 @@ odoo.define('wage.employee.attendance.annal_js_class.tree.button', function (req
         }
     });
 
-    let OdooWageAttendanceAnnalManageListView = ListView.extend({
+    let OdooHrAttendanceAnnalManageListView = ListView.extend({
         config: _.extend({}, ListView.prototype.config, {
-            Controller: OdooWageAttendanceAnnalViewController,
+            Controller: OdooHrAttendanceAnnalViewController,
         }),
     });
 
-    viewRegistry.add('wage_employee_attendance_annal_js_class', OdooWageAttendanceAnnalManageListView);
+    viewRegistry.add('hr_attendance_total_js_class', OdooHrAttendanceAnnalManageListView);
 });
