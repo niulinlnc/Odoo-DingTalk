@@ -23,6 +23,5 @@ from . import hr_dingding_plan
 from . import hr_leaves_list
 from . import hr_attendance_result
 from . import hr_attendance_record
-from . import hr_attendance_rules
 from . import ir_cron
 from . import user_sign_list
