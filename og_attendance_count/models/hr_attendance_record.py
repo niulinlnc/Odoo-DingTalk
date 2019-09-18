@@ -56,7 +56,7 @@ class HrAttendanceRecord(models.Model):
 
     userId = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True, index=True)
     record_id = fields.Char(string='唯一标识')
-    groupId = fields.Many2one(comodel_name='attendance.simple.groups', string=u'考勤组', index=True)
+    groupId = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组', index=True)
     planId = fields.Many2one(comodel_name='hr.attendance.plan', string=u'班次', index=True)
     ding_plan_id = fields.Char(string='钉钉排班ID')
     workDate = fields.Date(string=u'工作日', index=True)
@@ -157,7 +157,7 @@ class HrAttendanceRecordTransient(models.TransientModel):
                     'outsideRemark': rec.get('outsideRemark'),
                 }
                 # 考勤组
-                groups = self.env['attendance.simple.groups'].sudo().search(
+                groups = self.env['hr.attendance.group'].sudo().search(
                     [('group_id', '=', rec.get('groupId'))], limit=1)
                 data.update({'groupId': groups.id if groups else False})
                 # 班次

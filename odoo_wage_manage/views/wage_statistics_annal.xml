@@ -15,8 +15,8 @@ limitations under the License.
 -->
 <odoo>
 
-    <menuitem id="wage_employee_attendance_annal_menu" name="员工考勤统计" parent="wage_statistics_menu" sequence="1"
-              action="dingding_attendance.hr_attendance_total_action"/>
+    <!-- <menuitem id="wage_employee_attendance_annal_menu" name="员工考勤统计" parent="wage_statistics_menu" sequence="1"
+              action="dingding_attendance.hr_attendance_total_action"/> -->
 
     <record id="wage_employee_performance_manage_tree_view" model="ir.ui.view">
         <field name="name">员工绩效统计</field>

@@ -15,7 +15,7 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-odoo.define('attendance.simple.groups.button', function (require) {
+odoo.define('hr.attendance.group.button', function (require) {
     "use strict";
 
     let ListController = require('web.ListController');
@@ -31,7 +31,7 @@ odoo.define('attendance.simple.groups.button', function (require) {
 
     let get_sim_emps_data = function () {
         let def = rpc.query({
-            model: 'attendance.simple.groups',
+            model: 'hr.attendance.group',
             method: 'get_sim_emps',
             args: [],
         }).then(function (result) {
@@ -47,7 +47,7 @@ odoo.define('attendance.simple.groups.button', function (require) {
 
     let getSimpleGroups = function () {
         let def = rpc.query({
-            model: 'attendance.simple.groups',
+            model: 'hr.attendance.group',
             method: 'get_simple_groups',
             args: [],
         }).then(function (result) {
@@ -61,11 +61,11 @@ odoo.define('attendance.simple.groups.button', function (require) {
         renderButtons: function ($node) {
             let $buttons = this._super.apply(this, arguments);
             let tree_model = this.modelName;
-            if (tree_model == 'attendance.simple.groups') {
-                let but = "<button type=\"button\" t-if=\"widget.modelName == 'attendance.simple.groups'\" class=\"btn btn-primary o_pull_attendance.simple.groups\" groups=\"attendance_base.manage_groups\">拉取考勤组</button>";
+            if (tree_model == 'hr.attendance.group') {
+                let but = "<button type=\"button\" t-if=\"widget.modelName == 'hr.attendance.group'\" class=\"btn btn-primary o_pull_hr.attendance.group\" groups=\"attendance_base.manage_groups\">拉取考勤组</button>";
                 let button2 = $(but).click(this.proxy('open_simple_action'));
                 this.$buttons.append(button2);
-                let but3 = "<button type=\"button\" t-if=\"widget.modelName == 'attendance.simple.groups'\" class=\"btn btn-secondary\" groups=\"attendance_base.manage_groups\">获取考勤组成员</button>";
+                let but3 = "<button type=\"button\" t-if=\"widget.modelName == 'hr.attendance.group'\" class=\"btn btn-secondary\" groups=\"attendance_base.manage_groups\">获取考勤组成员</button>";
                 let button3 = $(but3).click(this.proxy('get_simple_emps_action'));
                 this.$buttons.append(button3);
             }

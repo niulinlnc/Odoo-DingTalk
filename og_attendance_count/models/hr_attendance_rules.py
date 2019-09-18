@@ -36,7 +36,7 @@ class HrAttendanceRules(models.Model):
     attendance_information = fields.Selection(string=u'考勤信息', selection=ATTSELECTION, default='ding_att_result')
     # -----考勤组-----
     simple_ids = fields.Many2many(
-        'attendance.simple.groups', 'att_rules_group_rel',
+        'hr.attendance.group', 'att_rules_group_rel',
         'rule_id', 'simple_id',
         string='考勤组')
     # -----班次-----
@@ -118,16 +118,18 @@ class HrAttendanceRules(models.Model):
     onduty3_notsigned_money = fields.Float(string=u'上班3漏打卡扣费', digits=(10, 2))
     offduty3_notsigned_money = fields.Float(string=u'下班3漏打卡扣费', digits=(10, 2))
 
-    # @api.multi
-    # def _compute_leave_deduction(self, base_wage, days, hours):
-    #     """
-    #     计算事假时长
-    #     :param base_wage: 基本工资
-    #     :param days:  出勤天数
-    #     :param hours: 事假缺勤小时
-    #     :return:
-    #     """
+    @api.multi
+    def _compute_attendance_(self, emp_id, check_time):
+        """
+        计算事假时长
+        :param base_wage: 基本工资
+        :param days:  出勤天数
+        :param hours: 事假缺勤小时
+        :return:
+        """
 
+        for record in self:
+            class = self.env['hr.attendance.plan'].sudo().search([('emp_id', '=', emp_id), ])
 
     # @api.multi
     # def _compute_sick_absence(self, base_wage, days, hours):
@@ -138,7 +140,6 @@ class HrAttendanceRules(models.Model):
     #     :param hours:
     #     :return:
     #     """
- 
 
     # @api.multi
     # def _compute_work_overtime(self, base_wage, days, hours):
@@ -149,7 +150,6 @@ class HrAttendanceRules(models.Model):
     #     :param hours:
     #     :return:
     #     """
- 
 
     # @api.multi
     # def _compute_weekend_overtime(self, base_wage, days, hours):
@@ -160,7 +160,6 @@ class HrAttendanceRules(models.Model):
     #     :param hours:
     #     :return:
     #     """
- 
 
     # @api.multi
     # def _compute_holiday_overtime(self, base_wage, days, hours):
@@ -171,7 +170,6 @@ class HrAttendanceRules(models.Model):
     #     :param hours:
     #     :return:
     #     """
- 
 
     # @api.multi
     # def _compute_late_attendance(self, attendance_num):
@@ -180,7 +178,6 @@ class HrAttendanceRules(models.Model):
     #     :param attendance_num:
     #     :return:
     #     """
-  
 
     # @api.multi
     # def _compute_notsigned_attendance(self, attendance_num):
@@ -189,7 +186,7 @@ class HrAttendanceRules(models.Model):
     #     :param attendance_num:
     #     :return:
     #     """
-    
+
     # @api.multi
     # def _compute_early_attendance(self, attendance_num):
     #     """
@@ -197,4 +194,3 @@ class HrAttendanceRules(models.Model):
     #     :param attendance_num:
     #     :return:
     #     """
-  

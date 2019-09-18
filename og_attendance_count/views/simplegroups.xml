@@ -15,7 +15,7 @@
 <odoo>
     <record id="attendance_simple_groups_tree_view" model="ir.ui.view">
         <field name="name">考勤组列表</field>
-        <field name="model">attendance.simple.groups</field>
+        <field name="model">hr.attendance.group</field>
         <field name="arch" type="xml">
             <tree default_order="id desc" create="false" edit="false">
                 <field name="name"/>
@@ -32,7 +32,7 @@
 
     <record id="attendance_simple_groups_form_view" model="ir.ui.view">
         <field name="name">考勤组</field>
-        <field name="model">attendance.simple.groups</field>
+        <field name="model">hr.attendance.group</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
@@ -85,13 +85,13 @@
 
     <record model="ir.actions.act_window" id="attendance_simple_groups_action">
         <field name="name">考勤组</field>
-        <field name="res_model">attendance.simple.groups</field>
+        <field name="res_model">hr.attendance.group</field>
         <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_group_by_s_type': True}</field>
     </record>
 
     <record model="ir.ui.view" id="attendance_simple_groups_search">
-        <field name="model">attendance.simple.groups</field>
+        <field name="model">hr.attendance.group</field>
         <field name="arch" type="xml">
             <search string="考勤组">
                 <field name="name"/>
@@ -110,7 +110,7 @@
 
     <record id="attendance_simple_groups_list_form_view" model="ir.ui.view">
         <field name="name">班次列表</field>
-        <field name="model">attendance.simple.groups.list</field>
+        <field name="model">hr.attendance.group.list</field>
         <field name="arch" type="xml">
             <form string="班次列表">
                 <sheet>

@@ -21,7 +21,7 @@
             <script type="text/javascript" src="/attendance_attendance/static/src/js/hr_attendance_record.js"></script>
             <script type="text/javascript" src="/attendance_attendance/static/src/js/attendance_plan.js"></script>
             <script type="text/javascript" src="/attendance_attendance/static/src/js/hr_leaves_list.js"></script> -->
-            <script type="text/javascript" src="/attendance_attendance/static/src/js/hr_attendance_total.js"></script>
+            <script type="text/javascript" src="/og_attendance_count/static/src/js/hr_attendance_total.js"></script>
         </xpath>
     </template>
 

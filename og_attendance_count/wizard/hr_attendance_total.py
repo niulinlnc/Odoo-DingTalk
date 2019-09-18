@@ -38,7 +38,7 @@ class HrAttendanceTotal(models.Model):
     _name = 'hr.attendance.total'
     _rec_name = 'employee_id'
     _order = 'id'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    # _inherit = ['mail.thread', 'mail.activity.mixin']
 
     @api.model
     def _get_default_company(self):

@@ -30,14 +30,13 @@ class HrAttendancePlan(models.Model):
     _rec_name = 'plan_id'
     _description = "排班列表"
 
-    plan_id = fields.Char(string='排班ID')
+    emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工')
+    group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组')
+    class_id = fields.Char(string='班次')
     check_type = fields.Selection(string=u'打卡类型', selection=[('OnDuty', '上班打卡'), ('OffDuty', '下班打卡')])
     approve_id = fields.Char(string='审批id', help="没有的话表示没有审批单")
-    user_id = fields.Many2one(comodel_name='hr.employee', string=u'员工')
-    class_id = fields.Char(string='考勤班次id')
     class_setting_id = fields.Char(string='班次配置id', help="没有的话表示使用全局班次配置")
     plan_check_time = fields.Datetime(string=u'打卡时间', help="数据库中存储为不含时区的时间UTC=0")
-    group_id = fields.Many2one(comodel_name='attendance.simple.groups', string=u'考勤组')
 
 
 class HrAttendancePlanTran(models.TransientModel):
@@ -95,7 +94,7 @@ class HrAttendancePlanTran(models.TransientModel):
                             utc_plan_check_time = datetime.strptime(
                                 schedules['plan_check_time'], "%Y-%m-%d %H:%M:%S") - timedelta(hours=8)
                             plan_data.update({'plan_check_time': utc_plan_check_time})
-                        simple = self.env['attendance.simple.groups'].search(
+                        simple = self.env['hr.attendance.group'].search(
                             [('group_id', '=', schedules['group_id'])], limit=1)
                         employee = self.env['hr.employee'].search([('ding_id', '=', schedules['userid'])], limit=1)
                         plan_data.update({

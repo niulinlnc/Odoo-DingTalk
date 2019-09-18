@@ -30,8 +30,8 @@
     'application': False,
     'auto_install': True,
     'data': [
-        'security/ir.model.access.csv',
         'security/attendance_security.xml',
+        'security/ir.model.access.csv',
         # 'data/attendance_parameter.xml',
         'views/asset.xml',
         'views/menu.xml',

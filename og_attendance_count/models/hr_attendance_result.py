@@ -65,7 +65,7 @@ class HrAttendanceResult(models.Model):
         ('AUTO_CHECK', '自动打卡')
     ]
     emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True, index=True)
-    ding_group_id = fields.Many2one(comodel_name='attendance.simple.groups', string=u'钉钉考勤组')
+    ding_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'钉钉考勤组')
     plan_id = fields.Many2one(comodel_name='hr.attendance.plan', string=u'排班')
     ding_plan_id = fields.Char(string='钉钉排班ID')
     record_id = fields.Char(string='唯一标识ID', help="钉钉设置的值为id，odoo中为record_id")
@@ -194,7 +194,7 @@ class HrAttendanceResultTransient(models.TransientModel):
                     if rec.get('procInstId'):
                         result = din_client.bpms.processinstance_get(rec.get('procInstId'))
                         data.update({'procInst_title': result.get('title')})
-                    groups = self.env['attendance.simple.groups'].sudo().search(
+                    groups = self.env['hr.attendance.group'].sudo().search(
                         [('group_id', '=', rec.get('groupId'))], limit=1)
                     data.update({'ding_group_id': groups[0].id if groups else False})
                     # 员工

@@ -16,16 +16,15 @@
     <data>
     
         <menuitem name="考勤计算" id="attendance_count_main_menu" web_icon="og_attendance_count,static/description/icon.png"
-                  groups="base.user_groups" sequence="15"/>
+                  groups="og_attendance_count.user_groups" sequence="15"/>
 
         <menuitem name="考勤设置" id="attendance_count_setting_menu" parent="attendance_count_main_menu" sequence="1"/>
 
         <menuitem name="排班表" id="attendance_count_plan_menu" parent="attendance_count_main_menu" sequence="2"/>
         
-        <menuitem name="考勤记录" id="attendance_count_record_menu" parent="attendance_count_main_menu" sequence="2"/>
+        <menuitem name="考勤记录" id="attendance_count_record_menu" parent="attendance_count_main_menu" sequence="3"/>
 
-        <menuitem name="考勤统计" id="attendance_count_total_menu" parent="attendance_count_main_menu" sequence="3"/>
-
+        <menuitem name="考勤统计" id="attendance_count_total_menu" parent="attendance_count_main_menu" sequence="4"/>
 
     </data>
 </odoo>
