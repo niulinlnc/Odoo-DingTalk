@@ -121,15 +121,16 @@ class HrAttendanceRules(models.Model):
     @api.multi
     def _compute_attendance_(self, emp_id, check_time):
         """
-        计算事假时长
-        :param base_wage: 基本工资
-        :param days:  出勤天数
-        :param hours: 事假缺勤小时
+        计算打卡结果
+        :param emp_id: 员工
+        :param check_time:  打卡时间
         :return:
         """
-
+        check_time_min = check_time.replace(hour=1)
+        check_time_max = check_time.replace(hour=23)
         for record in self:
-            class = self.env['hr.attendance.plan'].sudo().search([('emp_id', '=', emp_id), ])
+            domain = [('emp_id', '=', emp_id), ('plan_check_time', '>=', check_time_min), ('plan_check_time', '<=', check_time_max)]
+            class_list = self.env['hr.attendance.plan'].sudo().search(domain)
 
     # @api.multi
     # def _compute_sick_absence(self, base_wage, days, hours):
