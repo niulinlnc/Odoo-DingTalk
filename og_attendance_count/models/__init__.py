@@ -18,8 +18,8 @@
 #
 ###################################################################################
 
-# from . import simplegroups
-# from . import hr_attendance_plan
+from . import hr_attendance_group
+from . import hr_attendance_plan
 # from . import hr_leaves_list
 # from . import hr_attendance_result
 # from . import hr_attendance_record

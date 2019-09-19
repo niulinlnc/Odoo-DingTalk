@@ -26,13 +26,13 @@ _logger = logging.getLogger(__name__)
 
 
 # 拓展员工
-class HrEmployee(models.Model):
+class HrEmployee2(models.Model):
     _inherit = 'hr.employee'
 
-    attendance_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组', index=True)
+    attendance_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组')
 
 
-class HrAttendanceGroups(models.Model):
+class HrAttendanceGroup(models.Model):
     _name = 'hr.attendance.group'
     _rec_name = 'group_name'
     _description = '考勤组'
@@ -45,7 +45,7 @@ class HrAttendanceGroups(models.Model):
 
     group_name = fields.Char(string='考勤组名称', index=True)
     dept_name_list = fields.Many2many('hr.department', string=u'参与考勤部门')
-    emp_ids = fields.One2many(comodel_name='hr.employee', inverse_name='din_group_id', string=u'成员列表')
+    emp_ids = fields.One2many(comodel_name='hr.employee', inverse_name='attendance_group_id', string=u'成员列表')
     member_count = fields.Integer(string=u'成员人数')
     no_attendance_emp_ids = fields.Many2many(
         string=u'无需考勤人员',
@@ -70,23 +70,23 @@ class HrAttendanceGroups(models.Model):
     saturday_class_id = fields.Many2one(string=u'周六班次', comodel_name='hr.attendance.class', ondelete='set null')
     sunday_class_id = fields.Many2one(string=u'周日班次', comodel_name='hr.attendance.class', ondelete='set null')
     is_auto_holiday = fields.Boolean(string=u'节假日自动排休')
-    no_work_days = fields.One2many(comodel_name='hr.employee', inverse_name='din_group_id', string=u'必须打卡日期')
-    need_work_days = fields.One2many(comodel_name='hr.employee', inverse_name='din_group_id', string=u'不用打卡日期')
+    no_work_days = fields.One2many(comodel_name='hr.employee', inverse_name='attendance_group_id', string=u'必须打卡日期')
+    need_work_days = fields.One2many(comodel_name='hr.employee', inverse_name='attendance_group_id', string=u'不用打卡日期')
 
     # 排班制
-    class_ids = fields.One2many(comodel_name='hr.attendance.group.class.list',
-                                inverse_name='group_id', string=u'班次列表' help="考勤组中的班次列表")
-    class_run_days = fields.Char(string='排班周期')
+    # class_ids = fields.One2many(comodel_name='hr.attendance.group.class.list',
+    #                             inverse_name='group_id', string=u'班次列表' help="考勤组中的班次列表")
+    # class_run_days = fields.Char(string='排班周期')
 
     # 自由排班
 
-
-  @api.model
-   def get_dingding_groups(self):
+    @api.model
+    def get_dingding_groups(self):
         """
         获取钉钉考勤组
         :return:
         """
+        raise UserError("暂未实现！！！")
 
     @api.model
     def get_sim_emps(self):
@@ -94,6 +94,7 @@ class HrAttendanceGroups(models.Model):
         获取钉钉考勤组成员
         :return:
         """
+        raise UserError("暂未实现！！！")
 
 
 class HrAttendanceGroupClassList(models.Model):
@@ -101,6 +102,6 @@ class HrAttendanceGroupClassList(models.Model):
     _name = 'hr.attendance.group.class.list'
     _rec_name = 'week_name'
 
-    group_id = fields.Many2one(comodel_name='hr.attendance.groups', string=u'考勤组', index=True)
+    # attendance_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组', index=True)
     week_name = fields.Char(string='星期名称')
     class_id = fields.Char(string='班次Id', index=True)

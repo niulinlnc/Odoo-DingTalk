@@ -54,9 +54,9 @@ class HrAttendanceRecord(models.Model):
         ('AUTO_CHECK', '自动打卡')
     ]
 
-    userId = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True, index=True)
+    emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True, index=True)
     record_id = fields.Char(string='唯一标识')
-    groupId = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组', index=True)
+    group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组', index=True)
     planId = fields.Many2one(comodel_name='hr.attendance.plan', string=u'班次', index=True)
     ding_plan_id = fields.Char(string='钉钉排班ID')
     workDate = fields.Date(string=u'工作日', index=True)

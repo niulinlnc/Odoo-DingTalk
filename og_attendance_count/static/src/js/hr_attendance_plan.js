@@ -15,7 +15,7 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-odoo.define('ding.hr.attendance.plan.button', function (require) {
+odoo.define('hr.attendance.plan.button', function (require) {
     "use strict";
 
     let ListController = require('web.ListController');

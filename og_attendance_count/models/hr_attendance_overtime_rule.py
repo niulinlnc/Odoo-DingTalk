@@ -18,6 +18,8 @@
 #
 ###################################################################################
 import logging
+import time
+from datetime import datetime
 from requests import ReadTimeout
 from odoo import api, fields, models
 from odoo.exceptions import UserError

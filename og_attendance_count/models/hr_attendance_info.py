@@ -38,10 +38,10 @@ class HrEmployee(models.Model):
             return action
 
 
-class HrAttendanceResult(models.Model):
-    _name = "hr.attendance.result"
+class HrAttendanceInfo(models.Model):
+    _name = "hr.attendance.info"
     _rec_name = 'emp_id'
-    _description = "员工打卡结果"
+    _description = "员工考勤日报"
 
     TimeResult = [
         ('Normal', '正常'),
@@ -77,7 +77,7 @@ class HrAttendanceResult(models.Model):
     procInstId = fields.Char(string='审批实例id', help="当该字段非空时，表示打卡记录与请假、加班等审批有关。可以与获取单个审批数据配合使用")
     procInst_title = fields.Char(string='审批标题')
     baseCheckTime = fields.Datetime(string=u'基准时间', help="计算迟到和早退，基准时间")
-    check_in = fields.Datetime(string="实际打卡时间", required=True, help="实际打卡时间,  用户打卡时间的毫秒数")
+    check_time = fields.Datetime(string="实际打卡时间", required=True, help="实际打卡时间,  用户打卡时间的毫秒数")
     timeResult = fields.Selection(string=u'时间结果', selection=TimeResult, index=True)
     sourceType = fields.Selection(string=u'数据来源', selection=SourceType)
 
@@ -90,11 +90,11 @@ class HrAttendanceResult(models.Model):
         """
         if values['work_date']:
             values.update({'work_month': "{}/{}".format(values['work_date'][:4], values['work_date'][5:7])})
-        return super(HrAttendanceResult, self).create(values)
+        return super(HrAttendanceInfo, self).create(values)
 
 
-class HrAttendanceResultTransient(models.TransientModel):
-    _name = 'hr.attendance.result.tran'
+class HrAttendanceInfoTransient(models.TransientModel):
+    _name = 'hr.attendance.info.tran'
     _description = '获取考勤结果'
 
     start_date = fields.Date(string=u'开始日期', required=True)

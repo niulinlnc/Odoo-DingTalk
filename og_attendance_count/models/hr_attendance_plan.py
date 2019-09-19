@@ -27,41 +27,58 @@ _logger = logging.getLogger(__name__)
 
 class HrAttendancePlan(models.Model):
     _name = "hr.attendance.plan"
-    _rec_name = 'plan_id'
+    _rec_name = 'emp_id'
     _description = "排班列表"
 
     emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工')
     group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组')
-    class_id = fields.Char(string='班次')
+    class_id = fields.Many2one(comodel_name='hr.attendance.class', string=u'班次')
     check_type = fields.Selection(string=u'打卡类型', selection=[('OnDuty', '上班打卡'), ('OffDuty', '下班打卡')])
     approve_id = fields.Char(string='审批id', help="没有的话表示没有审批单")
     class_setting_id = fields.Char(string='班次配置id', help="没有的话表示使用全局班次配置")
     plan_check_time = fields.Datetime(string=u'打卡时间', help="数据库中存储为不含时区的时间UTC=0")
+    begin_check_time = fields.Datetime(string=u'开始打卡时间')
+    end_check_time = fields.Datetime(string=u'结束打卡时间')
 
 
 class HrAttendancePlanTran(models.TransientModel):
     _name = "hr.attendance.plan.tran"
-    _description = "排班列表查询"
+    _description = "排班列表查询与计算"
 
     start_date = fields.Date(string=u'开始日期', required=True)
     stop_date = fields.Date(string=u'结束日期', required=True, default=str(fields.datetime.now()))
+    emp_ids = fields.Many2many(comodel_name='hr.employee', relation='hr_attendance_plan_tran_and_hr_employee_rel',
+                               column1='plan_id', column2='emp_id', string=u'员工', required=True)
+    is_all_emp = fields.Boolean(string=u'全部员工')
+
+    @api.onchange('is_all_emp')
+    def onchange_all_emp(self):
+        """
+        获取全部钉钉员工
+        :return:
+        """
+        if self.is_all_emp:
+            emps = self.env['hr.employee'].search([('ding_id', '!=', '')])
+            if len(emps) <= 0:
+                raise UserError("员工钉钉Id不存在！也许是你的员工未同步导致的！")
+            self.emp_ids = [(6, 0, emps.ids)]
 
     @api.multi
-    def get_plan_lists(self):
+    def get_dingding_plan_lists(self):
         """
-        获取企业考勤排班详情
+        获取钉钉企业考勤排班详情
         :return:
         """
         self.ensure_one()
-        self.start_pull_plan_lists(self.start_date, self.stop_date)
+        self.start_pull_dingding_plan_lists(self.start_date, self.stop_date)
         action = self.env.ref('og_attendance_count.hr_attendance_plan_action')
         action_dict = action.read()[0]
         return action_dict
 
     @api.model
-    def start_pull_plan_lists(self, start_date, stop_date):
+    def start_pull_dingding_plan_lists(self, start_date, stop_date):
         """
-        拉取排班信息
+        拉取钉钉排班信息
         :param start_date: string 查询的开始日期
         :param stop_date: string 查询的结束日期
         :return:
@@ -117,6 +134,19 @@ class HrAttendancePlanTran(models.TransientModel):
             work_date = work_date + timedelta(days=1)
         logging.info(">>>------结束获取排班信息-----------")
         return True
+
+    @api.model
+    def compute_attendance_plan(self):
+        """
+        排班计算
+        :return:
+        """
+        # self.ensure_one()
+        # self.start_pull_dingding_plan_lists(self.start_date, self.stop_date)
+        # action = self.env.ref('og_attendance_count.hr_attendance_plan_action')
+        # action_dict = action.read()[0]
+        raise UserError("暂未实现！！！")
+
 
     @api.multi
     def clear_hr_attendance_plan(self):
