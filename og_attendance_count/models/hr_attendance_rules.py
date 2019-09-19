@@ -119,78 +119,7 @@ class HrAttendanceRules(models.Model):
     onduty3_notsigned_money = fields.Float(string=u'上班3漏打卡扣费', digits=(10, 2))
     offduty3_notsigned_money = fields.Float(string=u'下班3漏打卡扣费', digits=(10, 2))
 
-    @api.multi
-    def _compute_attendance_result(self, emp_id, check_time):
-        """
-        计算打卡结果
-        :param emp_id: 员工
-        :param check_time:  打卡时间
-        :return data
-        """
-        work_date, begin_time, end_time = self.get_work_across(check_time)
-        domain = [('emp_id', '=', emp_id), ('plan_check_time', '>=', begin_time), ('plan_check_time', '<=', end_time)]
-        class_list = self.env['hr.attendance.plan'].sudo().search(domain, order='plan_check_time')
-        for c in class_list:
-            if c.begin and c.end and self.compare_time(check_time, c.begin, c.end):
-                check_type = c.check_type
-                work_date = work_date
-                plan_id = c.id
-                baseCheckTime = c.plan_check_time
-                timeResult = self.get_work_result(check_time, c)
-        data = [{
-            'emp_id': emp_id,
-            'check_type': check_type,
-            'work_date': work_date,
-            'plan_id': plan_id,
-            'baseCheckTime': baseCheckTime,
-            'timeResult': timeResult,
-        }]
-        return data
-
-    def compare_time(self, check_time, start_time, end_time):
-        """
-        比较check_time 是否在时间区间[start_time, end_time]中
-        """
-        # get the seconds for specify date
-        start_time = fields.Datetime.from_string(start_time)
-        end_time = fields.Datetime.from_string(end_time)
-        check_time = fields.Datetime.from_string(check_time)
-        if check_time >= start_time and check_time <= end_time:
-            return True
-        return False
-
-    def get_work_across(self, check_time):
-        """
-        根据check_time获取工作日与工作时段区间
-        """
-        # work_date = fields.Datetime.context_timestamp(self, fields.Datetime.from_string(check_time)).date()
-        begin_time = datetime.strptime(str(check_time.date()) + '00:00:00', '%Y-%m-%d %H:%M:%S')
-        end_time = datetime.strptime(str(check_time.date()) + '23:59:59', '%Y-%m-%d %H:%M:%S')
-        return begin_time, end_time
-
-    def get_work_result(self, check_time, c):
-        """
-        根据check_time与对应班次判断考勤结果
-        """
-        if c.class_id.serious_late_minutes and c.class_id.absenteeism_late_minutes:
-            plan_check_time = fields.Datetime.from_string(c.plan_check_time)
-            serious_late_time = plan_check_time + timedelta(minutes=int(c.class_id.serious_late_minutes))
-            absenteeism_late_time = plan_check_time + timedelta(minutes=int(c.class_id.absenteeism_late_minutes))
-        if c.check_type == 'OnDuty':
-            if self.compare_time(check_time, c.begin, c.plan_check_time):
-                result = 'Normal'
-            elif self.compare_time(check_time, c.plan_check_time, serious_late_time):
-                result = 'Late'
-            elif self.compare_time(check_time, serious_late_time, absenteeism_late_time):
-                result = 'SeriousLate'
-            elif self.compare_time(check_time, absenteeism_late_time, c.end):
-                result = 'Absenteeism'
-        elif c.check_type == 'OffDuty':
-            if self.compare_time(check_time, c.begin, c.plan_check_time):
-                result = 'Early'
-            elif self.compare_time(check_time, c.plan_check_time, c.end):
-                result = 'Normal'
-        return result
+    
 
     # @api.multi
     # def _compute_sick_absence(self, base_wage, days, hours):

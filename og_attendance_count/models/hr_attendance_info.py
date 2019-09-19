@@ -112,108 +112,110 @@ class HrAttendanceInfoTransient(models.TransientModel):
             self.emp_ids = [(6, 0, emps.ids)]
 
     @api.multi
-    def get_attendance_list(self):
+    def get_attendance_info_list(self, emp_list, start_date, end_date):
         """
-        根据日期获取员工打卡信息，当user存在时将获取指定user的打卡，若不存在时，将获取所有员工的打卡信息，
-        钉钉限制每次传递员工数最大为50个
+        从钉钉考勤详情获取考勤数据并生成考勤日报表
         :param start_date:
         :param end_date:
         :param user:
         :return:
         """
+        for emp in emp_list:
+            attendance_list = self.env['hr.attendance.record'].sudo().search(
+                [('emp_id', '=', emp.id), ('workDate', '>=', start_date), ('workDate', '<=', end_date)], record='workDate')
+            data_list = list()
+            for rec in attendance_list:
+                data = self.compute_attendance_result(rec.emp_id, rec.userCheckTime)
+                data_list.append(data)
+            # 批量存储记录
+            self.env['hr.attendance.info'].sudo().create(data_list)
 
-        # 删除已存在的考勤信息
-        self.env['hr.attendance.result'].sudo().search([(
-            'emp_id', 'in', self.emp_ids.ids), ('work_date', '>=', self.start_date), ('work_date', '<=', self.stop_date)]).unlink()
+    @api.multi
+    def compute_attendance_result(self, emp_id, check_time):
+        """
+        计算打卡结果
+        :param emp_id: 员工
+        :param check_time:  打卡时间
+        :return data
+        """
+        work_date, begin_time, end_time = self.get_work_across(check_time)
+        domain = [('emp_id', '=', emp_id), ('plan_check_time', '>=', begin_time), ('plan_check_time', '<=', end_time)]
+        class_list = self.env['hr.attendance.plan'].sudo().search(domain, order='plan_check_time')
+        for c in class_list:
+            if c.begin and c.end and self.compare_time(check_time, c.begin, c.end):
+                check_type = c.check_type
+                work_date = work_date
+                plan_id = c.id
+                baseCheckTime = c.plan_check_time
+                timeResult = self.get_work_result(check_time, c)
+        data = {
+            'emp_id': emp_id,
+            'check_type': check_type,
+            'work_date': work_date,
+            'plan_id': plan_id,
+            'baseCheckTime': baseCheckTime,
+            'timeResult': timeResult,
+        }
+        return data
 
-        logging.info(">>>开始获取员工打卡信息...")
-        user_list = list()
-        for emp in self.emp_ids:
-            if not emp.ding_id:
-                raise UserError("员工{}的钉钉ID无效,请输入其他员工或不填！".format(emp.name))
-            user_list.append(emp.ding_id)
-        user_list = self.list_cut(user_list, 50)
-        for u in user_list:
-            logging.info(">>>开始获取{}员工段数据".format(u))
-            date_list = self.day_cut(self.start_date, self.stop_date, 7)
-            for d in date_list:
-                self.start_pull_attendance_list(d[0], d[1], u)
-        logging.info(">>>根据日期获取员工打卡信息结束...")
-        action = self.env.ref('attendance_attendance.hr_attendance_result_action')
-        action_dict = action.read()[0]
-        return action_dict
+    def compare_time(self, check_time, start_time, end_time):
+        """
+        比较check_time 是否在时间区间[start_time, end_time]中
+        """
+        # get the seconds for specify date
+        start_time = fields.Datetime.from_string(start_time)
+        end_time = fields.Datetime.from_string(end_time)
+        check_time = fields.Datetime.from_string(check_time)
+        if check_time >= start_time and check_time <= end_time:
+            return True
+        return False
+
+    def get_work_across(self, check_time):
+        """
+        根据check_time获取工作日与工作时段区间
+        """
+        # work_date = fields.Datetime.context_timestamp(self, fields.Datetime.from_string(check_time)).date()
+        begin_time = datetime.strptime(str(check_time.date()) + '00:00:00', '%Y-%m-%d %H:%M:%S')
+        end_time = datetime.strptime(str(check_time.date()) + '23:59:59', '%Y-%m-%d %H:%M:%S')
+        return begin_time, end_time
+
+    def get_work_result(self, check_time, c):
+        """
+        根据check_time与对应班次判断考勤结果
+        """
+        if c.class_id.serious_late_minutes and c.class_id.absenteeism_late_minutes:
+            plan_check_time = fields.Datetime.from_string(c.plan_check_time)
+            serious_late_time = plan_check_time + timedelta(minutes=int(c.class_id.serious_late_minutes))
+            absenteeism_late_time = plan_check_time + timedelta(minutes=int(c.class_id.absenteeism_late_minutes))
+        if c.check_type == 'OnDuty':
+            if self.compare_time(check_time, c.begin, c.plan_check_time):
+                result = 'Normal'
+            elif self.compare_time(check_time, c.plan_check_time, serious_late_time):
+                result = 'Late'
+            elif self.compare_time(check_time, serious_late_time, absenteeism_late_time):
+                result = 'SeriousLate'
+            elif self.compare_time(check_time, absenteeism_late_time, c.end):
+                result = 'Absenteeism'
+        elif c.check_type == 'OffDuty':
+            if self.compare_time(check_time, c.begin, c.plan_check_time):
+                result = 'Early'
+            elif self.compare_time(check_time, c.plan_check_time, c.end):
+                result = 'Normal'
+        return result
 
     @api.model
-    def start_pull_attendance_list(self, from_date, to_date, user_list):
+    def date_range(self, start_date, end_date):
         """
-        准备数据进行拉取考勤结果
+        生成一个 起始时间 到 结束时间 的一个日期格式列表
+        TODO 起始时间和结束时间相差过大时，考虑使用 yield
+        :param start_date:
+        :param end_date:
         :return:
         """
-        logging.info(">>>开始获取{}-{}时间段数据".format(from_date, to_date))
-        offset = 0
-        limit = 50
-        while True:
-            data = {
-                'workDateFrom': from_date,
-                'workDateTo': to_date,
-                'userIdList': user_list,
-                'offset': offset,
-                'limit': limit,
-            }
-            has_more = self.send_post_dindin(data)
-            logging.info(">>>是否还有剩余数据：{}".format(has_more))
-            if not has_more:
-                break
-            else:
-                offset = offset + limit
-                logging.info(">>>准备获取剩余数据中的第{}至{}条".format(offset + 1, offset + limit))
-        return True
-
-    @api.model
-    def send_post_dindin(self, data):
-        din_client = self.env['attendance.api.tools'].get_client()
-        try:
-            result = din_client.attendance.list(data.get('workDateFrom'), data.get('workDateTo'),
-                                                user_ids=data.get('userIdList'), offset=data.get('offset'), limit=data.get('limit'))
-            if result.get('errcode') == 0:
-                data_list = list()
-                for rec in result.get('recordresult'):
-                    data = {
-                        'record_id': rec.get('id'),
-                        'work_date': self.timestamp_to_local_date(rec.get('workDate')),  # 工作日
-                        'timeResult': rec.get('timeResult'),  # 时间结果
-                        'locationResult': rec.get('locationResult'),  # 考勤结果
-                        'baseCheckTime': self.get_time_stamp(rec.get('baseCheckTime')),  # 基准时间
-                        'sourceType': rec.get('sourceType'),  # 数据来源
-                        'check_type': rec.get('checkType'),
-                        'check_in': self.get_time_stamp(rec.get('userCheckTime')),
-                        'approveId': rec.get('approveId'),
-                        'procInstId': rec.get('procInstId'),
-                        'ding_plan_id': rec.get('planId'),
-                    }
-                    if rec.get('procInstId'):
-                        result = din_client.bpms.processinstance_get(rec.get('procInstId'))
-                        data.update({'procInst_title': result.get('title')})
-                    groups = self.env['hr.attendance.group'].sudo().search(
-                        [('group_id', '=', rec.get('groupId'))], limit=1)
-                    data.update({'ding_group_id': groups[0].id if groups else False})
-                    # 员工
-                    emp_id = self.env['hr.employee'].sudo().search([('ding_id', '=', rec.get('userId'))], limit=1)
-                    data.update({'emp_id': emp_id[0].id if emp_id else False})
-                    # 班次
-                    plan = self.env['hr.attendance.plan'].sudo().search([('plan_id', '=', rec.get('planId'))], limit=1)
-                    data.update({'plan_id': plan[0].id if plan else False})
-                    data_list.append(data)
-                # 批量存储记录
-                self.env['hr.attendance.result'].sudo().create(data_list)
-                if result.get('hasMore'):
-                    return True
-                else:
-                    return False
-            else:
-                raise UserError('请求失败,原因为:{}'.format(result.get('errmsg')))
-        except Exception as e:
-            raise UserError(e)
+        date_tmp = [start_date, ]
+        while date_tmp[-1] < end_date:
+            date_tmp.append(date_tmp[-1] + timedelta(days=1))
+        return date_tmp
 
     @api.model
     def get_time_stamp(self, timeNum):
@@ -280,10 +282,10 @@ class HrAttendanceInfoTransient(models.TransientModel):
         return cut_day
 
     @api.multi
-    def clear_attendance(self):
+    def clear_attendance_info(self):
         """
         清除已下载的所有钉钉出勤记录（仅用于测试，生产环境将删除该函数）
         """
         self._cr.execute("""
-            delete from hr_attendance_result
+            delete from hr_attendance_info
         """)

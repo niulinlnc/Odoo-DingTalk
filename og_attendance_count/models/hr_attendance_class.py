@@ -45,47 +45,50 @@ class HrAttendanceClass(models.Model):
                                         ('1', '1天1次上下班'), ('2', '1天2次上下班'), ('3', '1天3次上下班')])
     is_across_control = fields.Boolean(string=u'打卡范围限制')
 
-    # 上班1
-    onduty1 = fields.Char(string=u'第1次上班打卡')
-    onduty1_begin_min = fields.Char(string=u'第1次上班开始打卡时间')
-    onduty1_end_min = fields.Char(string=u'第1次上班结束打卡时间')
-    offduty1 = fields.Char(string=u'第1次下班打卡')
-    offduty1_begin_min = fields.Char(string=u'第1次下班开始打卡时间')
-    offduty1_end_min = fields.Char(string=u'第1次下班结束打卡时间')
-
     # 休息时间，只有一个时间段的班次有
     rest_begin_time = fields.Char(string='休息开始时间', help="只有一个时间段的班次有")
     rest_end_time = fields.Char(string='休息结束时间', help="只有一个时间段的班次有")
 
-    # 上班2
-    onduty2 = fields.Char(string=u'第2次上班打卡')
-    onduty2_begin_min = fields.Char(string=u'第2次上班开始打卡时间')
-    onduty2_end_min = fields.Char(string=u'第2次上班结束打卡时间')
-    offduty2 = fields.Char(string=u'第2次下班打卡')
-    offduty2_begin_min = fields.Char(string=u'第2次下班开始打卡时间')
-    offduty2_end_min = fields.Char(string=u'第2次下班结束打卡时间')
+    # # 上班1
+    # onduty1 = fields.Char(string=u'第1次上班打卡')
+    # onduty1_begin_min = fields.Char(string=u'第1次上班开始打卡时间')
+    # onduty1_end_min = fields.Char(string=u'第1次上班结束打卡时间')
+    # offduty1 = fields.Char(string=u'第1次下班打卡')
+    # offduty1_begin_min = fields.Char(string=u'第1次下班开始打卡时间')
+    # offduty1_end_min = fields.Char(string=u'第1次下班结束打卡时间')
 
-    # 上班3
-    onduty3 = fields.Char(string=u'第3次上班打卡')
-    onduty3_begin_min = fields.Char(string=u'第3次上班开始打卡时间')
-    onduty3_end_min = fields.Char(string=u'第3次上班结束打卡时间')
-    offduty3 = fields.Char(string=u'第3次下班打卡')
-    offduty3_begin_min = fields.Char(string=u'第3次下班开始打卡时间')
-    offduty3_end_min = fields.Char(string=u'第3次下班结束打卡时间')
+    # # 上班2
+    # onduty2 = fields.Char(string=u'第2次上班打卡')
+    # onduty2_begin_min = fields.Char(string=u'第2次上班开始打卡时间')
+    # onduty2_end_min = fields.Char(string=u'第2次上班结束打卡时间')
+    # offduty2 = fields.Char(string=u'第2次下班打卡')
+    # offduty2_begin_min = fields.Char(string=u'第2次下班开始打卡时间')
+    # offduty2_end_min = fields.Char(string=u'第2次下班结束打卡时间')
 
-    # time_ids = fields.One2many(comodel_name='hr.attendance.class.time',
-    #                            inverse_name='class_id', string=u'打卡时间段' help="一天内上下班的次数")
+    # # 上班3
+    # onduty3 = fields.Char(string=u'第3次上班打卡')
+    # onduty3_begin_min = fields.Char(string=u'第3次上班开始打卡时间')
+    # onduty3_end_min = fields.Char(string=u'第3次上班结束打卡时间')
+    # offduty3 = fields.Char(string=u'第3次下班打卡')
+    # offduty3_begin_min = fields.Char(string=u'第3次下班开始打卡时间')
+    # offduty3_end_min = fields.Char(string=u'第3次下班结束打卡时间')
 
-# class HrattendanceClassTime(models.Model):
-#     _description = "班次内打卡时间段"
-#     _name = 'hr.attendance.class.time'
-#     _rec_name = 'name'
+    time_ids = fields.One2many(comodel_name='hr.attendance.class.time',
+                               inverse_name='class_id', string=u'打卡时间段', help="一天内上下班的次数")
 
-#     name = fields.Char(string=u'时间段')
-#     class_id = fields.Many2one(comodel_name='hr.attendance.class', string=u'班次', index=True)
-#     across = fields.Char(string=u'打卡时间跨度')
-#     check_time = fields.Datetime(string=u'打卡时间')
-#     check_type = fields.Selection(string=u'打卡类型', selection=[('OnDuty', '上班打卡'), ('OffDuty', '下班打卡')])
+
+class HrattendanceClassTime(models.Model):
+    _description = "班次内打卡时间段"
+    _name = 'hr.attendance.class.time'
+    _rec_name = 'name'
+
+    name = fields.Char(string=u'时间段')
+    class_id = fields.Many2one(comodel_name='hr.attendance.class', string=u'班次', index=True)
+    across = fields.Char(string=u'打卡时间跨度')
+    check_time = fields.Datetime(string=u'打卡时间')
+    check_type = fields.Selection(string=u'打卡类型', selection=[('OnDuty', '上班打卡'), ('OffDuty', '下班打卡')])
+    begin_min = fields.Char(string=u'提前打卡分钟数')
+    end_min = fields.Char(string=u'延后打卡分钟数')
 
 
 class HrAttendanceOvertimeRule(models.Model):

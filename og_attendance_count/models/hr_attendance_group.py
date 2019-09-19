@@ -58,17 +58,17 @@ class HrAttendanceGroup(models.Model):
     manager_list = fields.Many2many('hr.employee', string=u'考勤组负责人', index=True)
     week_classes_list = fields.Char(string='班次时间展示')
     is_default = fields.Boolean(string=u'是否默认考勤组')
+    default_class_id = fields.Char(string='默认班次ID')
 
     # 固定班制
-    work_day_list = fields.Char(string='固定班次的工作日班次列表')
-    default_class_id = fields.Char(string='默认班次ID')
-    monday_class_id = fields.Many2one(string=u'周一班次', comodel_name='hr.attendance.class', ondelete='set null')
-    tuesday_class_id = fields.Many2one(string=u'周二班次', comodel_name='hr.attendance.class', ondelete='set null')
-    wednesday_class_id = fields.Many2one(string=u'周三班次', comodel_name='hr.attendance.class', ondelete='set null')
-    thursday_class_id = fields.Many2one(string=u'周四班次', comodel_name='hr.attendance.class', ondelete='set null')
-    friday_class_id = fields.Many2one(string=u'周五班次', comodel_name='hr.attendance.class', ondelete='set null')
-    saturday_class_id = fields.Many2one(string=u'周六班次', comodel_name='hr.attendance.class', ondelete='set null')
-    sunday_class_id = fields.Many2one(string=u'周日班次', comodel_name='hr.attendance.class', ondelete='set null')
+    work_day_list = fields.One2many(comodel_name='hr.attendance.group.class.list', inverse_name='attendance_group_id', string='周班次列表')
+    # monday_class_id = fields.Many2one(string=u'周一班次', comodel_name='hr.attendance.class', ondelete='set null')
+    # tuesday_class_id = fields.Many2one(string=u'周二班次', comodel_name='hr.attendance.class', ondelete='set null')
+    # wednesday_class_id = fields.Many2one(string=u'周三班次', comodel_name='hr.attendance.class', ondelete='set null')
+    # thursday_class_id = fields.Many2one(string=u'周四班次', comodel_name='hr.attendance.class', ondelete='set null')
+    # friday_class_id = fields.Many2one(string=u'周五班次', comodel_name='hr.attendance.class', ondelete='set null')
+    # saturday_class_id = fields.Many2one(string=u'周六班次', comodel_name='hr.attendance.class', ondelete='set null')
+    # sunday_class_id = fields.Many2one(string=u'周日班次', comodel_name='hr.attendance.class', ondelete='set null')
     is_auto_holiday = fields.Boolean(string=u'节假日自动排休')
     no_work_days = fields.One2many(comodel_name='hr.employee', inverse_name='attendance_group_id', string=u'必须打卡日期')
     need_work_days = fields.One2many(comodel_name='hr.employee', inverse_name='attendance_group_id', string=u'不用打卡日期')
@@ -102,6 +102,6 @@ class HrAttendanceGroupClassList(models.Model):
     _name = 'hr.attendance.group.class.list'
     _rec_name = 'week_name'
 
-    # attendance_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组', index=True)
-    week_name = fields.Char(string='星期名称')
+    attendance_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组', index=True)
+    week_name = fields.Char(string='星期')
     class_id = fields.Char(string='班次Id', index=True)

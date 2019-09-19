@@ -63,80 +63,8 @@ class HrAttendancePlanTran(models.TransientModel):
                 raise UserError("员工钉钉Id不存在！也许是你的员工未同步导致的！")
             self.emp_ids = [(6, 0, emps.ids)]
 
-    @api.multi
-    def get_dingding_plan_lists(self):
-        """
-        获取钉钉企业考勤排班详情
-        :return:
-        """
-        self.ensure_one()
-        self.start_pull_dingding_plan_lists(self.start_date, self.stop_date)
-        action = self.env.ref('og_attendance_count.hr_attendance_plan_action')
-        action_dict = action.read()[0]
-        return action_dict
-
     @api.model
-    def start_pull_dingding_plan_lists(self, start_date, stop_date):
-        """
-        拉取钉钉排班信息
-        :param start_date: string 查询的开始日期
-        :param stop_date: string 查询的结束日期
-        :return:
-        """
-
-        # 删除已存在的排班信息
-        self.env['hr.attendance.plan'].sudo().search([
-            ('plan_check_time', '>=', start_date), ('plan_check_time', '<=', stop_date)]).unlink()
-
-        din_client = self.env['attendance.api.tools'].get_client()
-        logging.info(">>>------开始获取排班信息-----------")
-        work_date = start_date
-        while work_date <= stop_date:
-            offset = 0
-            size = 200
-            while True:
-                result = din_client.attendance.listschedule(work_date, offset=offset, size=size)
-                # logging.info(">>>获取排班信息返回结果%s", result)
-                if result.get('ding_open_errcode') == 0:
-                    res_result = result.get('result')
-                    plan_data_list = list()
-                    for schedules in res_result['schedules']['at_schedule_for_top_vo']:
-                        plan_data = {
-                            'class_setting_id': schedules['class_setting_id'] if 'class_setting_id' in schedules else "",
-                            'check_type': schedules['check_type'] if 'check_type' in schedules else "",
-                            'plan_id': schedules['plan_id'] if 'plan_id' in schedules else "",
-                            'class_id': schedules['class_id'] if 'class_id' in schedules else "",
-                        }
-                        if 'plan_check_time' in schedules:
-                            utc_plan_check_time = datetime.strptime(
-                                schedules['plan_check_time'], "%Y-%m-%d %H:%M:%S") - timedelta(hours=8)
-                            plan_data.update({'plan_check_time': utc_plan_check_time})
-                        simple = self.env['hr.attendance.group'].search(
-                            [('group_id', '=', schedules['group_id'])], limit=1)
-                        employee = self.env['hr.employee'].search([('ding_id', '=', schedules['userid'])], limit=1)
-                        plan_data.update({
-                            'group_id': simple.id if simple else False,
-                            'user_id': employee.id if employee else False,
-                        })
-                        plan_data_list.append(plan_data)
-                    self.env['hr.attendance.plan'].create(plan_data_list)
-                    # plan = self.env['hr.attendance.plan'].search([('plan_id', '=', schedules['plan_id'])])
-                    # if not plan:
-                    #     self.env['hr.attendance.plan'].create(plan_data)
-                    # else:
-                    #     plan.write(plan_data)
-                    if not res_result['has_more']:
-                        break
-                    else:
-                        offset += size
-                else:
-                    raise UserError("获取企业考勤排班详情失败: {}".format(result['errmsg']))
-            work_date = work_date + timedelta(days=1)
-        logging.info(">>>------结束获取排班信息-----------")
-        return True
-
-    @api.model
-    def compute_attendance_plan(self):
+    def compute_attendance_plan(self, emp_list, start_date, end_date):
         """
         排班计算
         :return:
@@ -145,7 +73,19 @@ class HrAttendancePlanTran(models.TransientModel):
         # self.start_pull_dingding_plan_lists(self.start_date, self.stop_date)
         # action = self.env.ref('og_attendance_count.hr_attendance_plan_action')
         # action_dict = action.read()[0]
-        raise UserError("暂未实现！！！")
+
+        for emp in emp_list:
+            # 删除已存在的该员工考勤日报
+            self.env['hr.attendance.plan'].sudo().search(
+                [('emp_id', '=', emp.id), ('plan_check_time', '>=', start_date), ('plan_check_time', '<=', end_date)]).unlink()
+
+            att_group = self.env['hr.employee'].search([('id', '=', emp.id)])
+            att_class = self.env['hr.attendance.class'].sudo().search([('id', '=', att_group.monday_class_id.id)])
+            plan_list = list()
+            for work_date in self.date_range(start_date, end_date):
+                if datetime.isoweekday(work_date) == '1':
+                    class_id = att_group.monday_class_id.id
+                    att_class = self.env['hr.attendance.class'].sudo().search([('id', '=', class_id)])
 
 
     @api.multi
