@@ -174,8 +174,8 @@ class HrAttendanceRules(models.Model):
         """
         if c.class_id.serious_late_minutes and c.class_id.absenteeism_late_minutes:
             plan_check_time = fields.Datetime.from_string(c.plan_check_time)
-            serious_late_time = plan_check_time + timedelta(minute=int(c.class_id.serious_late_minutes))
-            absenteeism_late_time = plan_check_time + timedelta(minute=int(c.class_id.absenteeism_late_minutes))
+            serious_late_time = plan_check_time + timedelta(minutes=int(c.class_id.serious_late_minutes))
+            absenteeism_late_time = plan_check_time + timedelta(minutes=int(c.class_id.absenteeism_late_minutes))
         if c.check_type == 'OnDuty':
             if self.compare_time(check_time, c.begin, c.plan_check_time):
                 result = 'Normal'
