@@ -44,7 +44,7 @@
                             <field name="time_ids">
                                 <tree editable="top">
                                     <field name="across"/>
-                                    <field name="check_time" widget="float_time_duration" options="{'round_off': True, 'time_only': True}"/>
+                                    <field name="check_time" widget="float_full_time" options="{'round_off': True}"/>
                                     <field name="check_type"/>
                                     <field name="begin_min" widget="float_full_time" options="{'round_off': True}"/>
                                     <field name="end_min" widget="float_full_time" options="{'round_off': True}"/>
