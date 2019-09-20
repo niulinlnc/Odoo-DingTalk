@@ -85,10 +85,10 @@ class HrattendanceClassTime(models.Model):
     name = fields.Char(string=u'时间段')
     class_id = fields.Many2one(comodel_name='hr.attendance.class', string=u'班次', index=True)
     across = fields.Char(string=u'打卡时间跨度')
-    check_time = fields.Datetime(string=u'打卡时间')
+    check_time = fields.Float(string=u'打卡时间')
     check_type = fields.Selection(string=u'打卡类型', selection=[('OnDuty', '上班打卡'), ('OffDuty', '下班打卡')])
-    begin_min = fields.Char(string=u'提前打卡分钟数')
-    end_min = fields.Char(string=u'延后打卡分钟数')
+    begin_min = fields.Float(string=u'提前打卡时间到')
+    end_min = fields.Float(string=u'延后打卡时间至')
 
 
 class HrAttendanceOvertimeRule(models.Model):
@@ -96,11 +96,18 @@ class HrAttendanceOvertimeRule(models.Model):
     _name = 'hr.attendance.overtime.rule'
     _rec_name = 'rule_name'
 
+
+    OVERTIMERULE = [
+        ('00', '按审批时长计算'),
+        ('01', '在审批时段内，按打卡时长计算'),
+        ('02', '无需审批，按打卡时长计算')
+    ]
+
     rule_name = fields.Char(string='加班规则名称', index=True)
     group_id = fields.Many2one(comodel_name='hr.attendance.groups', string=u'应用考勤组', index=True)
-    rule_for_workday = fields.Selection(string=u'工作日加班规则', selection=OVERTIMERULE, default='NONE')
-    rule_for_weekend = fields.Selection(string=u'休息日加班规则', selection=OVERTIMERULE, default='NONE')
-    rule_for_holiday = fields.Selection(string=u'节假日加班规则', selection=OVERTIMERULE, default='NONE')
+    # rule_for_workday = fields.Selection(string=u'工作日加班规则', selection=OVERTIMERULE, default='NONE')
+    # rule_for_weekend = fields.Selection(string=u'休息日加班规则', selection=OVERTIMERULE, default='NONE')
+    # rule_for_holiday = fields.Selection(string=u'节假日加班规则', selection=OVERTIMERULE, default='NONE')
 
     COMPUTETYPE = [
         ('00', '按审批时长计算'),

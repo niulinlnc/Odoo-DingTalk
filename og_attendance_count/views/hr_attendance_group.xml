@@ -17,7 +17,7 @@
         <field name="name">考勤组列表</field>
         <field name="model">hr.attendance.group</field>
         <field name="arch" type="xml">
-            <tree default_order="id desc" create="false" edit="false">
+            <tree default_order="id desc">
                 <field name="group_name"/>
                 <field name="attendance_type"/>
                 <field name="member_count"/>
@@ -38,40 +38,31 @@
                         <group>
                             <field name="group_name"/>
                             <field name="attendance_type"/>
+                            <field name="manager_list" widget="many2many_tags"/>
                         </group>
                         <group>
                             <field name="member_count"/>
-                            <field name="manager_list" widget="many2many_tags"/>
-                            <field name="dept_name_list" widget="many2many_tags"/>
+                            <field name="no_attendance_emp_ids" widget="many2many_tags"/>
                         </group>
                     </group>
                     <notebook>
-                        <page string="考勤成员">
-                            <!-- <field name="emp_ids" readonly="1">
-                                <tree editable="top" create="false" edit="false">
-                                    <field name="name"/>
-                                    <field name="department_id"/>
-                                    <field name="mobile_phone"/>
-                                    <field name="job_title"/>
-                                </tree>
-                            </field> -->
+                        <page string="考勤部门">
+                            <field name="dept_name_list"/>
                         </page>
-                        <page string="考勤班次">
-                            <!-- <field name="list_ids" readonly="1">
-                                <tree editable="top" create="false" edit="false">
-                                    <field name="class_name"/>
-                                    <field name="class_id"/>
-                                    <field name="check_time"/>
-                                    <field name="end_time"/>
-                                    <field name="rest_begin_time"/>
-                                    <field name="rest_end_time"/>
-                                    <field name="permit_late_minutes"/>
-                                    <field name="work_time_minutes"/>
-                                    <field name="absenteeism_late_minutes"/>
-                                    <field name="serious_late_minutes"/>
-                                    <field name="is_off_duty_free_check"/>
+                        <page string="考勤成员">
+                            <field name="emp_ids">
+                                <tree editable="top">
+                                    <field name="emp_id"/>
                                 </tree>
-                            </field> -->
+                            </field>
+                        </page>
+                        <page string="周考勤班次">
+                            <field name="class_list_ids">
+                                <tree editable="top">
+                                    <field name="week_name"/>
+                                    <field name="class_id"/>
+                                </tree>
+                            </field>
                         </page>
                     </notebook>
                 </sheet>
@@ -83,7 +74,7 @@
         <field name="name">考勤组</field>
         <field name="res_model">hr.attendance.group</field>
         <field name="view_mode">tree,form</field>
-        <field name="context">{'search_default_group_by_attendance_type': True}</field>
+        <!-- <field name="context">{'search_default_group_by_attendance_type': True}</field> -->
     </record>
 
     <record model="ir.ui.view" id="hr_attendance_group_search">
@@ -92,55 +83,15 @@
             <search string="考勤组">
                 <field name="group_name"/>
                 <field name="attendance_type"/>
-                <group expand="0" string="Group By">
+                <!-- <group expand="0" string="Group By">
                     <filter name="group_by_attendance_type" string="考勤类型" domain="[]"
                             context="{'group_by':'attendance_type'}"/>
-                </group>
+                </group> -->
             </search>
         </field>
     </record>
 
     <menuitem id="hr_attendance_group_menu" name="考勤组" parent="attendance_count_setting_menu" sequence="1"
               action="hr_attendance_group_action"/>
-
-    <!-- <record id="hr_attendance_group_list_form_view" model="ir.ui.view">
-        <field name="name">班次列表</field>
-        <field name="model">hr.attendance.group.class.list</field>
-        <field name="arch" type="xml">
-            <form string="班次列表">
-                <sheet>
-                    <group>
-                        <group>
-                            <field name="class_name"/>
-                            <field name="class_id"/>
-                            <field name="class_setting_id"/>
-                            <field name="rest_begin_time"/>
-                            <field name="check_time"/>
-                            <field name="permit_late_minutes"/>
-                        </group>
-                        <group>
-                            <field name="work_time_minutes"/>
-                            <field name="rest_end_time"/>
-                            <field name="end_time"/>
-                            <field name="absenteeism_late_minutes"/>
-                            <field name="serious_late_minutes"/>
-                            <field name="is_off_duty_free_check"/>
-                        </group>
-                    </group>
-                    <notebook>
-                        <page string="打卡时间段">
-                            <field name="time_ids" readonly="1">
-                                <tree editable="top" create="false" edit="false">
-                                    <field name="across"/>
-                                    <field name="check_time"/>
-                                    <field name="check_type"/>
-                                </tree>
-                            </field>
-                        </page>
-                    </notebook>
-                </sheet>
-            </form>
-        </field>
-    </record> -->
 
 </odoo>

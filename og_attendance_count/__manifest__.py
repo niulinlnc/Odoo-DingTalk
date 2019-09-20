@@ -36,6 +36,7 @@
         'views/asset.xml',
         'views/menu.xml',
         'views/hr_attendance_group.xml',
+        'views/hr_attendance_class.xml',
         'views/hr_attendance_plan.xml',
         # 'views/hr_leaves_list.xml',
         # 'views/hr_attendance_result.xml',

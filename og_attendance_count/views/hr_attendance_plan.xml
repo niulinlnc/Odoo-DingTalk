@@ -20,6 +20,7 @@
         <field name="arch" type="xml">
             <tree default_order="id desc">
                 <field name="group_id"/>
+                <field name="work_date"/>
                 <field name="plan_check_time"/>
                 <field name="check_type"/>
                 <field name="approve_id"/>
@@ -58,7 +59,7 @@
         <field name="name">排班列表</field>
         <field name="res_model">hr.attendance.plan</field>
         <field name="view_mode">tree,form</field>
-        <field name="context">{'search_default_group_by_user_id': True, 'search_default_group_by_plan_check_time': True}</field>
+        <!-- <field name="context">{'search_default_group_by_emp_id': True, 'search_default_group_by_plan_check_time': True}</field> -->
     </record>
 
     <record model="ir.ui.view" id="hr_attendance_plan_search">
@@ -73,8 +74,8 @@
                 <field name="plan_check_time"/>
                 <field name="group_id"/>
                 <separator/>
-                <filter name="group_by_user_id" string="员工" context="{'group_by': 'emp_id'}"/>
-                <filter name="group_by_plan_check_time" string="日期" context="{'group_by': 'plan_check_time'}"/>
+                <!-- <filter name="group_by_user_id" string="员工" context="{'group_by': 'emp_id'}"/>
+                <filter name="group_by_plan_check_time" string="日期" context="{'group_by': 'plan_check_time'}"/> -->
                 <separator/>
             </search>
         </field>
