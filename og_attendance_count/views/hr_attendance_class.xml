@@ -35,17 +35,20 @@
                             <field name="class_name"/>
                             <field name="attendance_times"/>
                         </group>
-                        <group>
-                            <field name="attendance_times"/>
+                        <group string = "人性化考勤设置">
+                            <field name="permit_late_minutes"/>
+                            <field name="serious_late_minutes"/>
+                            <field name="absenteeism_late_minutes"/>
+                            <field name="is_off_duty_free_check"/>
+                            <field name="is_late_check_in"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="打卡时间段">
                             <field name="time_ids">
                                 <tree editable="top">
-                                    <field name="across"/>
-                                    <field name="check_time" widget="float_full_time" options="{'round_off': True}"/>
                                     <field name="check_type"/>
+                                    <field name="check_time" widget="float_full_time" options="{'round_off': True}"/>
                                     <field name="begin_min" widget="float_full_time" options="{'round_off': True}"/>
                                     <field name="end_min" widget="float_full_time" options="{'round_off': True}"/>
                                 </tree>
@@ -71,14 +74,12 @@
                 <field name="group_name"/>
                 <field name="attendance_type"/>
                 <group expand="0" string="Group By">
-                    <filter name="group_by_attendance_type" string="考勤类型" domain="[]"
-                            context="{'group_by':'attendance_type'}"/>
+                    <filter name="group_by_attendance_type" string="考勤类型" domain="[]" context="{'group_by':'attendance_type'}"/>
                 </group>
             </search>
         </field>
     </record> -->
 
-    <menuitem id="hr_attendance_class_menu" name="班次" parent="attendance_count_setting_menu" sequence="2"
-              action="hr_attendance_class_action"/>
+    <menuitem id="hr_attendance_class_menu" name="班次" parent="attendance_count_setting_menu" sequence="2" action="hr_attendance_class_action"/>
 
 </odoo>

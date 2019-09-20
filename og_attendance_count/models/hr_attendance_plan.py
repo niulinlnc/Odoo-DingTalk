@@ -109,7 +109,7 @@ class HrAttendancePlanTran(models.TransientModel):
             """
                 SELECT %s as work_date, g.id as group_id , cl.class_id, e.emp_id, cl.week_name, t.check_time as plan_check_time, t.check_type
                 FROM (hr_attendance_group g
-                        INNER JOIN hr_attendance_group_emp e ON g.id = e.attendance_group_id)
+                        INNER JOIN hr_attendance_group_and_employee_rel_01 e ON g.id = e.group_id)
                     INNER JOIN (hr_attendance_class c
                         INNER JOIN hr_attendance_class_time t ON c.id = t.class_id
                         INNER JOIN hr_attendance_group_class_list cl ON c.id = cl.class_id) ON g.id = cl.attendance_group_id

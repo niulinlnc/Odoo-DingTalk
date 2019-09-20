@@ -38,9 +38,11 @@ class HrAttendanceGroup(models.Model):
 
     group_name = fields.Char(string='考勤组名称', index=True)
     dept_name_list = fields.Many2many('hr.department', string=u'参与考勤部门')
-    emp_ids = fields.One2many(comodel_name='hr.attendance.group.emp', inverse_name='attendance_group_id', string=u'成员列表')
+    emp_ids = fields.Many2many('hr.employee', 'hr_attendance_group_and_employee_rel_01',
+                               'group_id', 'emp_id', '成员列表')
     member_count = fields.Integer(string=u'成员人数')
-    no_attendance_emp_ids = fields.One2many(comodel_name='hr.attendance.group.emp.not', inverse_name='attendance_group_id', string=u'不参与考勤成员列表')
+    no_attendance_emp_ids = fields.Many2many('hr.employee', 'hr_attendance_group_and_employee_rel_02',
+                                             'group_id', 'emp_id', '不参与考勤成员列表')
     attendance_type = fields.Selection(string=u'考勤类型', selection=ATTENDANCETYPE, default='NONE')
     manager_list = fields.Many2many('hr.employee', string=u'考勤组负责人', index=True)
     week_classes_list = fields.Char(string='班次时间展示')
@@ -48,15 +50,7 @@ class HrAttendanceGroup(models.Model):
     default_class_id = fields.Char(string='默认班次ID')
 
     # 固定班制
-    # work_day_list = fields.One2many(comodel_name='hr.attendance.group.class.list',
-    #                                 inverse_name='attendance_group_id', string='周班次列表')
-    # monday_class_id = fields.Many2one(string=u'周一班次', comodel_name='hr.attendance.class', ondelete='set null')
-    # tuesday_class_id = fields.Many2one(string=u'周二班次', comodel_name='hr.attendance.class', ondelete='set null')
-    # wednesday_class_id = fields.Many2one(string=u'周三班次', comodel_name='hr.attendance.class', ondelete='set null')
-    # thursday_class_id = fields.Many2one(string=u'周四班次', comodel_name='hr.attendance.class', ondelete='set null')
-    # friday_class_id = fields.Many2one(string=u'周五班次', comodel_name='hr.attendance.class', ondelete='set null')
-    # saturday_class_id = fields.Many2one(string=u'周六班次', comodel_name='hr.attendance.class', ondelete='set null')
-    # sunday_class_id = fields.Many2one(string=u'周日班次', comodel_name='hr.attendance.class', ondelete='set null')
+
     is_auto_holiday = fields.Boolean(string=u'节假日自动排休')
     # no_work_days = fields.One2many(comodel_name='hr.employee', inverse_name='attendance_group_id', string=u'必须打卡日期')
     # need_work_days = fields.One2many(comodel_name='hr.employee', inverse_name='attendance_group_id', string=u'不用打卡日期')
@@ -68,6 +62,18 @@ class HrAttendanceGroup(models.Model):
     # class_run_days = fields.Char(string='排班周期')
 
     # 自由排班
+
+    @api.multi
+    @api.onchange('dept_name_list')
+    def onchange_dept_name_list(self):
+        if self.dept_name_list:
+            emps = self.env['hr.employee'].search([('department_id', 'in', self.dept_name_list.ids)])
+            if len(emps) > 0:
+                self.emp_ids = [(6, 0, emps.ids)]
+                self.member_count = len(emps)
+        else:
+            self.emp_ids = False
+            self.member_count = False
 
 
 class HrAttendanceGroupClassList(models.Model):
@@ -89,19 +95,19 @@ class HrAttendanceGroupClassList(models.Model):
     class_id = fields.Many2one(comodel_name='hr.attendance.class', string=u'班次', index=True)
 
 
-class HrAttendanceGroupEmp(models.Model):
-    _description = "考勤组成员列表"
-    _name = 'hr.attendance.group.emp'
-    _rec_name = 'emp_id'
+# class HrAttendanceGroupEmp(models.Model):
+#     _description = "考勤组成员列表"
+#     _name = 'hr.attendance.group.emp'
+#     _rec_name = 'emp_id'
 
-    attendance_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组', index=True)
-    emp_id = fields.Many2one(comodel_name='hr.employee', string=u'成员')
+#     attendance_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组', index=True)
+#     emp_id = fields.Many2one(comodel_name='hr.employee', string=u'成员')
 
 
-class HrAttendanceGroupEmpNot(models.Model):
-    _description = "考勤组排除成员列表"
-    _name = 'hr.attendance.group.emp.not'
-    _rec_name = 'emp_id'
+# class HrAttendanceGroupEmpNot(models.Model):
+#     _description = "考勤组排除成员列表"
+#     _name = 'hr.attendance.group.emp.not'
+#     _rec_name = 'emp_id'
 
-    attendance_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组', index=True)
-    emp_id = fields.Many2one(comodel_name='hr.employee', string=u'不参与考勤成员')
+#     attendance_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组', index=True)
+#     emp_id = fields.Many2one(comodel_name='hr.employee', string=u'不参与考勤成员')

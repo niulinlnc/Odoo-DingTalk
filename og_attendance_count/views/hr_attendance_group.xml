@@ -42,7 +42,6 @@
                         </group>
                         <group>
                             <field name="member_count"/>
-                            <field name="no_attendance_emp_ids" widget="many2many_tags"/>
                         </group>
                     </group>
                     <notebook>
@@ -50,15 +49,14 @@
                             <field name="dept_name_list"/>
                         </page>
                         <page string="考勤成员">
-                            <field name="emp_ids">
-                                <tree editable="top">
-                                    <field name="emp_id"/>
-                                </tree>
-                            </field>
+                            <field name="emp_ids" widget="many2many_tags"/>
+                        </page>
+                        <page string="不参与考勤成员">
+                            <field name="no_attendance_emp_ids" widget="many2many_tags"/>
                         </page>
                         <page string="周考勤班次">
                             <field name="class_list_ids">
-                                <tree editable="top">
+                                <tree editable="bottom">
                                     <field name="week_name"/>
                                     <field name="class_id"/>
                                 </tree>
