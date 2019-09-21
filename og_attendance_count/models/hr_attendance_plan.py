@@ -18,6 +18,7 @@
 #
 ###################################################################################
 import logging
+import time
 from datetime import datetime, timedelta
 from odoo import api, fields, models
 from odoo.exceptions import UserError
@@ -33,6 +34,7 @@ WEEKDAY = [
     ('6', '周六'),
     ('7', '周日')
 ]
+
 
 class HrAttendancePlan(models.Model):
     _name = "hr.attendance.plan"
@@ -94,29 +96,26 @@ class HrAttendancePlanTran(models.TransientModel):
                 [('emp_id', '=', emp.id), ('plan_check_time', '>=', start_date), ('plan_check_time', '<=', stop_date)]).unlink()
             for work_date in self.date_range(start_date, stop_date):
                 plan = self.get_emp_attendance_plan(emp.id, work_date)
-                if len(plan) > 0:
+                if plan:
                     self.env['hr.attendance.plan'].sudo().create(plan)
 
     @api.multi
     def get_emp_attendance_plan(self, emp_id, work_date):
         """
-        SELECT #9/1/2019# AS 工作日, 考勤组.考勤组名, 员工.员工姓名, 周班次列表.星期, 班次.班次名, 班次时段.时间, 班次时段.类型
-           FROM (考勤组 INNER JOIN 员工 ON 考勤组.ID = 员工.考勤组ID) 
-                  INNER JOIN ((班次 INNER JOIN 班次时段 ON 班次.ID = 班次时段.班次ID) 
-                              INNER JOIN 周班次列表 ON 班次.ID = 周班次列表.班次ID) ON 考勤组.ID = 周班次列表.考勤组ID;
+        生成排班表
         """
         self._cr.execute(
             """
-                SELECT %s as work_date, g.id as group_id , cl.class_id, e.emp_id, cl.week_name, t.check_time as plan_check_time, t.check_type
+                SELECT %s as work_date, e.group_id as group_id , cl.class_id, e.emp_id, cl.week_name,
+                TO_TIMESTAMP(%s + t.check_time - 28800) as plan_check_time, t.check_type
                 FROM (hr_attendance_group g
-                        INNER JOIN hr_attendance_group_and_employee_rel_01 e ON g.id = e.group_id)
-                    INNER JOIN (hr_attendance_class c
-                        INNER JOIN hr_attendance_class_time t ON c.id = t.class_id
-                        INNER JOIN hr_attendance_group_class_list cl ON c.id = cl.class_id) ON g.id = cl.attendance_group_id
-                WHERE e.emp_id = %s
-                """, (work_date, emp_id))
+                INNER JOIN hr_attendance_group_and_employee_rel_01 e ON g.id = e.group_id)
+                INNER JOIN ((hr_attendance_class c INNER JOIN hr_attendance_class_time t ON c.id = t.class_id)
+                INNER JOIN hr_attendance_group_class_list cl ON c.id = cl.class_id) ON g.id = cl.attendance_group_id
+                WHERE e.emp_id = %s AND cl.week_name = %s
+                """, (work_date, time.mktime(time.strptime(str(work_date), "%Y-%m-%d")), emp_id, str(datetime.isoweekday(work_date))))
         res = self._cr.dictfetchall()
-        if res:
+        if len(res) > 0:
             return res
 
     @api.model

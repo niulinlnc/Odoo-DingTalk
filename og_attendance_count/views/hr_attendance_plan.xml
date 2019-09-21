@@ -21,6 +21,7 @@
             <tree default_order="id desc">
                 <field name="group_id"/>
                 <field name="work_date"/>
+                <field name="week_name"/>
                 <field name="plan_check_time"/>
                 <field name="check_type"/>
                 <field name="approve_id"/>
