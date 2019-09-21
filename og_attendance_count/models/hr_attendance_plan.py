@@ -79,7 +79,7 @@ class HrAttendancePlanTran(models.TransientModel):
     @api.multi
     def compute_attendance_plan(self):
         """
-        排班计算
+        开始排班计算
         :return:
         """
         # self.ensure_one()
@@ -99,21 +99,25 @@ class HrAttendancePlanTran(models.TransientModel):
                 if plan:
                     self.env['hr.attendance.plan'].sudo().create(plan)
 
+        action = self.env.ref('og_attendance_count.hr_attendance_plan_action')
+        action_dict = action.read()[0]
+        return action_dict
+
     @api.multi
     def get_emp_attendance_plan(self, emp_id, work_date):
         """
         生成排班表
+        (%s + interval '1' second  * t.check_time)
         """
         self._cr.execute(
-            """
-                SELECT %s as work_date, e.group_id as group_id , cl.class_id, e.emp_id, cl.week_name,
-                TO_TIMESTAMP(%s + t.check_time - 28800) as plan_check_time, t.check_type
+            """SELECT %s AS work_date, e.group_id AS group_id, cl.class_id, e.emp_id, cl.week_name,
+                TO_TIMESTAMP(%s + t.check_time) AT TIME ZONE 'utc' AS plan_check_time, t.check_type
                 FROM (hr_attendance_group g
                 INNER JOIN hr_attendance_group_and_employee_rel_01 e ON g.id = e.group_id)
                 INNER JOIN ((hr_attendance_class c INNER JOIN hr_attendance_class_time t ON c.id = t.class_id)
                 INNER JOIN hr_attendance_group_class_list cl ON c.id = cl.class_id) ON g.id = cl.attendance_group_id
-                WHERE e.emp_id = %s AND cl.week_name = %s
-                """, (work_date, time.mktime(time.strptime(str(work_date), "%Y-%m-%d")), emp_id, str(datetime.isoweekday(work_date))))
+                WHERE e.emp_id = %s AND cl.week_name = CAST(EXTRACT(ISODOW FROM TIMESTAMP %s) AS VARCHAR)
+                """, (work_date, time.mktime(work_date.timetuple()), emp_id, work_date))
         res = self._cr.dictfetchall()
         if len(res) > 0:
             return res
