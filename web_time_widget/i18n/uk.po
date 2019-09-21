@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* crnd_web_float_full_time_widget
+#	* web_time_widget
 #
 msgid ""
 msgstr ""
@@ -15,17 +15,17 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
-#. module: crnd_web_float_full_time_widget
+#. module: web_time_widget
 #. openerp-web
-#: code:addons/crnd_web_float_full_time_widget/static/src/js/float_full_time_widget.js:213
+#: code:addons/web_time_widget/static/src/js/float_full_time_widget.js:213
 #, python-format
 msgid ", can not be more than 23:59:59,999 sec and less than 0 sec! Please check it!"
-msgstr ", должно находиться в пределах от 00:00:00,000 до 23:59:59,999! Проверьте, пожалуйста!"
+msgstr ", має лежати в межах від 00:00:00,000 до 23:59:59,999! Перевірте, будь-ласка!"
 
-#. module: crnd_web_float_full_time_widget
+#. module: web_time_widget
 #. openerp-web
-#: code:addons/crnd_web_float_full_time_widget/static/src/js/float_full_time_widget.js:211
+#: code:addons/web_time_widget/static/src/js/float_full_time_widget.js:211
 #, python-format
 msgid "The value of the field: "
-msgstr "Значение поля: "
+msgstr "Значення поля: "
 

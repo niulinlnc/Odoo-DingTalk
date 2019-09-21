@@ -8,5 +8,5 @@ class TestJS(odoo.tests.HttpCase):
 
     def test_01_js(self):
         self.phantom_js(
-            '/web/tests?module=crnd_web_float_full_time_widget',
+            '/web/tests?module=web_time_widget',
             "", "", login='admin', timeout=1800)

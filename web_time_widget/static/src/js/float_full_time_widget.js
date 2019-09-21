@@ -1,4 +1,4 @@
-odoo.define('crnd_web_float_full_time_widget.FullFloatTime', function (require) {
+odoo.define('web_time_widget.FullFloatTime', function (require) {
     "use strict";
 
     var registry = require('web.field_registry');

@@ -1,10 +1,10 @@
-odoo.define('crnd_web_float_full_time_widget.tests', function (require) {
+odoo.define('web_time_widget.tests', function (require) {
     "use strict";
 
     var FieldUtils = require('web.field_utils');
     var QUnit = window.QUnit;
 
-    QUnit.module('crnd_web_float_full_time_widget', {}, function () {
+    QUnit.module('web_time_widget', {}, function () {
 
         QUnit.test('parse float full time', function (assert) {
             assert.expect(7);

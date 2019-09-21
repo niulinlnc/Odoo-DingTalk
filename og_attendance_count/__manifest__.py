@@ -25,7 +25,7 @@
     'website': "https://www.ongood.cn",
     'category': 'attendance',
     'version': '2.0',
-    'depends': ['base', 'hr'],
+    'depends': ['base', 'hr', 'web_time_widget'],
     'installable': True,
     'application': False,
     'auto_install': True,

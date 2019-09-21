@@ -46,8 +46,8 @@ class HrAttendanceClass(models.Model):
     is_across_control = fields.Boolean(string=u'打卡范围限制')
 
     # 休息时间，只有一个时间段的班次有
-    rest_begin_time = fields.Char(string='休息开始时间', help="只有一个时间段的班次有")
-    rest_end_time = fields.Char(string='休息结束时间', help="只有一个时间段的班次有")
+    rest_begin_time = fields.Float(string='休息开始时间', help="只有一个时间段的班次有")
+    rest_end_time = fields.Float(string='休息结束时间', help="只有一个时间段的班次有")
 
     # # 上班1
     # onduty1 = fields.Char(string=u'第1次上班打卡')

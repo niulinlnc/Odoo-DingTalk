@@ -34,6 +34,8 @@
                         <group>
                             <field name="class_name"/>
                             <field name="attendance_times"/>
+                            <field name="rest_begin_time" widget="float_full_time" options="{'round_off': True}" attrs="{'invisible': [('attendance_times', '!=', '1')]}"/>
+                            <field name="rest_end_time" widget="float_full_time" options="{'round_off': True}" attrs="{'invisible': [('attendance_times', '!=', '1')]}"/>
                         </group>
                         <group string = "人性化考勤设置">
                             <field name="permit_late_minutes"/>
