@@ -22,7 +22,7 @@ from . import hr_attendance_group
 from . import hr_attendance_class
 from . import hr_attendance_plan
 # from . import hr_leaves_list
-# from . import hr_attendance_result
+from . import hr_attendance_info
 # from . import hr_attendance_record
 from . import hr_attendance_rules
 # from . import ir_cron

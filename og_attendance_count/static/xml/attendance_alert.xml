@@ -16,7 +16,7 @@
 
     <t t-name="OdooHrManageListView.hr_attendance_total_but">
         <button type="button" class="btn btn-secondary compute_attendance_total_buttons_but_class" groups="og_attendance_count.manage_groups">
-            计算考勤结果
+            汇总考勤结果
         </button>
     </t>
     <t t-extend="ListView.buttons" t-name="OdooHrManageListView.hr_attendance_total_buttons">

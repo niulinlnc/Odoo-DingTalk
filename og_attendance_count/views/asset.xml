@@ -14,10 +14,10 @@
 -->
 <odoo>
 
-    <template id="attendance_attendance_asset" name="Dindin Attendance Asset" inherit_id="web.assets_backend">
+    <template id="og_attendance_count_asset" name="Og Attendance Count Asset" inherit_id="web.assets_backend">
         <xpath expr="." position="inside">
             <!-- <script type="text/javascript" src="/og_attendance_count/static/src/js/hr_attendance_group.js"></script> -->
-            <!-- <script type="text/javascript" src="/og_attendance_count/static/src/js/attendance_list_result.js"></script> -->
+            <script type="text/javascript" src="/og_attendance_count/static/src/js/hr_attendance_info.js"></script>
             <!-- <script type="text/javascript" src="/og_attendance_count/static/src/js/hr_attendance_record.js"></script> -->
             <script type="text/javascript" src="/og_attendance_count/static/src/js/hr_attendance_plan.js"></script>
             <!-- <script type="text/javascript" src="/og_attendance_count/static/src/js/hr_leaves_list.js"></script> -->

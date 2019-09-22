@@ -15,7 +15,7 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-odoo.define('ding.hr.attendance.result.button', function (require) {
+odoo.define('hr.attendance.info.button', function (require) {
     "use strict";
 
     let ListController = require('web.ListController');
@@ -24,17 +24,17 @@ odoo.define('ding.hr.attendance.result.button', function (require) {
         renderButtons: function ($node) {
             let $buttons = this._super.apply(this, arguments);
             let tree_model = this.modelName;
-            if (tree_model == 'hr.attendance.result') {
-                let but = "<button type=\"button\" t-if=\"widget.modelName == 'hr.attendance.result'\" class=\"btn btn-secondary\" groups=\"attendance_base.manage_groups\">获取打卡结果</button>";
-                let button2 = $(but).click(this.proxy('open_attendance_list_action'));
+            if (tree_model == 'hr.attendance.info') {
+                let but = "<button type=\"button\" t-if=\"widget.modelName == 'hr.attendance.info'\" class=\"btn btn-secondary\" groups=\"og_attendance_count.manage_groups\">计算考勤结果</button>";
+                let button2 = $(but).click(this.proxy('open_attendance_info_list_action'));
                 this.$buttons.append(button2);
             }
             return $buttons;
         },
-        open_attendance_list_action: function () {
+        open_attendance_info_list_action: function () {
             this.do_action({
                 type: 'ir.actions.act_window',
-                res_model: 'hr.attendance.tran',
+                res_model: 'hr.attendance.info.tran',
                 target: 'new',
                 views: [[false, 'form']],
                 context: [],

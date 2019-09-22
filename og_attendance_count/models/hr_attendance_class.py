@@ -87,8 +87,8 @@ class HrattendanceClassTime(models.Model):
     across = fields.Char(string=u'打卡时间跨度')
     check_time = fields.Float(string=u'打卡时间')
     check_type = fields.Selection(string=u'打卡类型', selection=[('OnDuty', '上班打卡'), ('OffDuty', '下班打卡')])
-    begin_min = fields.Float(string=u'提前打卡时间到')
-    end_min = fields.Float(string=u'延后打卡时间至')
+    begin_time = fields.Float(string=u'提前打卡时间到')
+    end_time = fields.Float(string=u'延后打卡时间至')
 
 
 class HrAttendanceOvertimeRule(models.Model):

@@ -31,9 +31,9 @@ class HrEmployee(models.Model):
     _inherit = "hr.employee"
     _description = "Employee"
 
-    def attendance_attendance_action_employee(self):
+    def og_attendance_count_action_employee(self):
         for res in self:
-            action = self.env.ref('attendance_attendance.hr_attendance_result_action').read()[0]
+            action = self.env.ref('og_attendance_count.hr_attendance_info_action').read()[0]
             action['domain'] = [('emp_id', '=', res.id)]
             return action
 
@@ -65,8 +65,8 @@ class HrAttendanceInfo(models.Model):
         ('AUTO_CHECK', '自动打卡')
     ]
     emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True, index=True)
-    ding_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'钉钉考勤组')
-    plan_id = fields.Many2one(comodel_name='hr.attendance.plan', string=u'排班')
+    attendance_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组')
+    attendance_plan_id = fields.Many2one(comodel_name='hr.attendance.plan', string=u'排班ID')
     ding_plan_id = fields.Char(string='钉钉排班ID')
     record_id = fields.Char(string='唯一标识ID', help="钉钉设置的值为id，odoo中为record_id")
     work_date = fields.Date(string=u'工作日')
@@ -80,17 +80,18 @@ class HrAttendanceInfo(models.Model):
     check_time = fields.Datetime(string="实际打卡时间", required=True, help="实际打卡时间,  用户打卡时间的毫秒数")
     timeResult = fields.Selection(string=u'时间结果', selection=TimeResult, index=True)
     sourceType = fields.Selection(string=u'数据来源', selection=SourceType)
+    attendance_date_status = 
 
-    @api.model
-    def create(self, values):
-        """
-        创建时触发
-        :param values:
-        :return:
-        """
-        if values['work_date']:
-            values.update({'work_month': "{}/{}".format(values['work_date'][:4], values['work_date'][5:7])})
-        return super(HrAttendanceInfo, self).create(values)
+    # @api.model
+    # def create(self, values):
+    #     """
+    #     创建时触发
+    #     :param values:
+    #     :return:
+    #     """
+    #     if values['work_date']:
+    #         values.update({'work_month': "{}/{}".format(values['work_date'][:4], values['work_date'][5:7])})
+    #     return super(HrAttendanceInfo, self).create(values)
 
 
 class HrAttendanceInfoTransient(models.TransientModel):
@@ -112,7 +113,7 @@ class HrAttendanceInfoTransient(models.TransientModel):
             self.emp_ids = [(6, 0, emps.ids)]
 
     @api.multi
-    def get_attendance_info_list(self, emp_list, start_date, end_date):
+    def get_attendance_info_list(self):
         """
         从钉钉考勤详情获取考勤数据并生成考勤日报表
         :param start_date:
@@ -120,18 +121,33 @@ class HrAttendanceInfoTransient(models.TransientModel):
         :param user:
         :return:
         """
+        emp_list = self.emp_ids
+        start_date = self.start_date
+        stop_date = self.stop_date
         for emp in emp_list:
+            # 删除数据
+            self.env['hr.attendance.info'].sudo().search(
+                [('emp_id', '=', emp.id), ('work_date', '>=', start_date), ('work_date', '<=', stop_date)]).unlink()
             attendance_list = self.env['hr.attendance.record'].sudo().search(
-                [('emp_id', '=', emp.id), ('workDate', '>=', start_date), ('workDate', '<=', end_date)], record='workDate')
+                [('userId', '=', emp.id), ('workDate', '>=', start_date), ('workDate', '<=', stop_date)], order='workDate')
             data_list = list()
             for rec in attendance_list:
-                data = self.compute_attendance_result(rec.emp_id, rec.userCheckTime)
-                data_list.append(data)
+                data = self.compute_attendance_result(rec.userId, rec.userCheckTime)
+                if data:
+                    data.update({
+                        'locationResult': rec.locationResult,
+                        'sourceType': rec.sourceType,
+                    })
+                    data_list.append(data)
             # 批量存储记录
             self.env['hr.attendance.info'].sudo().create(data_list)
 
+        action = self.env.ref('og_attendance_count.hr_attendance_info_action')
+        action_dict = action.read()[0]
+        return action_dict
+
     @api.multi
-    def compute_attendance_result(self, emp_id, check_time):
+    def compute_attendance_result(self, emp, check_time):
         """
         计算打卡结果
         :param emp_id: 员工
@@ -139,24 +155,23 @@ class HrAttendanceInfoTransient(models.TransientModel):
         :return data
         """
         work_date, begin_time, end_time = self.get_work_across(check_time)
-        domain = [('emp_id', '=', emp_id), ('plan_check_time', '>=', begin_time), ('plan_check_time', '<=', end_time)]
+        domain = [('emp_id', '=', emp.id), ('plan_check_time', '>=', begin_time), ('plan_check_time', '<=', end_time)]
         class_list = self.env['hr.attendance.plan'].sudo().search(domain, order='plan_check_time')
         for c in class_list:
-            if c.begin and c.end and self.compare_time(check_time, c.begin, c.end):
-                check_type = c.check_type
-                work_date = work_date
-                plan_id = c.id
-                baseCheckTime = c.plan_check_time
-                timeResult = self.get_work_result(check_time, c)
-        data = {
-            'emp_id': emp_id,
-            'check_type': check_type,
-            'work_date': work_date,
-            'plan_id': plan_id,
-            'baseCheckTime': baseCheckTime,
-            'timeResult': timeResult,
-        }
-        return data
+            if c.begin_check_time and c.end_check_time and self.compare_time(check_time, c.begin_check_time, c.end_check_time):
+                data = {
+                    'emp_id': emp.id,
+                    'check_type': c.check_type,
+                    'work_date': work_date,
+                    'check_time': check_time,
+                    'attendance_group_id': c.group_id.id,
+                    'attendance_plan_id': c.id,
+                    'baseCheckTime': c.plan_check_time,
+                    'timeResult': self.get_work_result(check_time, c),
+                }
+                return data
+            else:
+                pass
 
     def compare_time(self, check_time, start_time, end_time):
         """
@@ -174,10 +189,13 @@ class HrAttendanceInfoTransient(models.TransientModel):
         """
         根据check_time获取工作日与工作时段区间
         """
-        # work_date = fields.Datetime.context_timestamp(self, fields.Datetime.from_string(check_time)).date()
-        begin_time = datetime.strptime(str(check_time.date()) + '00:00:00', '%Y-%m-%d %H:%M:%S')
-        end_time = datetime.strptime(str(check_time.date()) + '23:59:59', '%Y-%m-%d %H:%M:%S')
-        return begin_time, end_time
+        work_date = fields.Datetime.context_timestamp(self, fields.Datetime.from_string(check_time)).date()
+        # begin_time = datetime.strptime(str(check_time.date()) + '00:00:00', '%Y-%m-%d %H:%M:%S')
+        # end_time = datetime.strptime(str(check_time.date()) + '23:59:59', '%Y-%m-%d %H:%M:%S')
+        begin_time = work_date
+        end_time = work_date + timedelta(days=1)
+
+        return work_date, begin_time, end_time
 
     def get_work_result(self, check_time, c):
         """
@@ -188,18 +206,18 @@ class HrAttendanceInfoTransient(models.TransientModel):
             serious_late_time = plan_check_time + timedelta(minutes=int(c.class_id.serious_late_minutes))
             absenteeism_late_time = plan_check_time + timedelta(minutes=int(c.class_id.absenteeism_late_minutes))
         if c.check_type == 'OnDuty':
-            if self.compare_time(check_time, c.begin, c.plan_check_time):
+            if self.compare_time(check_time, c.begin_check_time, c.plan_check_time):
                 result = 'Normal'
             elif self.compare_time(check_time, c.plan_check_time, serious_late_time):
                 result = 'Late'
             elif self.compare_time(check_time, serious_late_time, absenteeism_late_time):
                 result = 'SeriousLate'
-            elif self.compare_time(check_time, absenteeism_late_time, c.end):
+            elif self.compare_time(check_time, absenteeism_late_time, c.end_check_time):
                 result = 'Absenteeism'
         elif c.check_type == 'OffDuty':
-            if self.compare_time(check_time, c.begin, c.plan_check_time):
+            if self.compare_time(check_time, c.begin_check_time, c.plan_check_time):
                 result = 'Early'
-            elif self.compare_time(check_time, c.plan_check_time, c.end):
+            elif self.compare_time(check_time, c.plan_check_time, c.end_check_time):
                 result = 'Normal'
         return result
 

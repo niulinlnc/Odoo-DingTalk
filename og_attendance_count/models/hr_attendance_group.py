@@ -91,7 +91,7 @@ class HrAttendanceGroupClassList(models.Model):
         ('7', '周日')
     ]
     attendance_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组', index=True)
-    week_name = fields.Selection(string=u'星期', selection=WEEKDAY, default='1')
+    week_name = fields.Selection(string=u'星期', selection=WEEKDAY)
     class_id = fields.Many2one(comodel_name='hr.attendance.class', string=u'班次', index=True)
 
 

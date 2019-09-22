@@ -4,10 +4,6 @@ access_hr_attendance_group,hr.attendance.group,model_hr_attendance_group,og_atte
 access_hr_attendance_group_manage_groups,hr.attendance.group.manage.groups,model_hr_attendance_group,og_attendance_count.manage_groups,1,1,1,1
 access_hr_attendance_group_class_list,hr.attendance.group.class.list,model_hr_attendance_group_class_list,og_attendance_count.user_groups,1,0,0,0
 access_hr_attendance_group_class_list_manage_groups,hr.attendance.group.class.list.manage.groups,model_hr_attendance_group_class_list,og_attendance_count.manage_groups,1,1,1,1
-access_hr_attendance_group_emp,hr.attendance.group.emp,model_hr_attendance_group_emp,og_attendance_count.user_groups,1,0,0,0
-access_hr_attendance_group_emp_manage_groups,hr.attendance.group.emp.manage.groups,model_hr_attendance_group_emp,og_attendance_count.manage_groups,1,1,1,1
-access_hr_attendance_group_emp_not,hr.attendance.group.emp.not,model_hr_attendance_group_emp_not,og_attendance_count.user_groups,1,0,0,0
-access_hr_attendance_group_emp_not_manage_groups,hr.attendance.group.emp.not.manage.groups,model_hr_attendance_group_emp_not,og_attendance_count.manage_groups,1,1,1,1
 
 access_hr_attendance_class,hr.attendance.class,model_hr_attendance_class,og_attendance_count.user_groups,1,0,0,0
 access_hr_attendance_class_manage_groups,hr.attendance.class.manage.groups,model_hr_attendance_class,og_attendance_count.manage_groups,1,1,1,1
@@ -23,3 +19,6 @@ access_hr_attendance_holiday,hr.attendance.holiday,model_hr_attendance_holiday,o
 access_hr_attendance_holiday_manage_groups,hr.attendance.holiday.manage.groups,model_hr_attendance_holiday,og_attendance_count.manage_groups,1,1,1,1
 access_hr_attendance_rules,hr.attendance.rules,model_hr_attendance_rules,og_attendance_count.user_groups,1,0,0,0
 access_hr_attendance_rules_manage_groups,hr.attendance.rules.manage.groups,model_hr_attendance_rules,og_attendance_count.manage_groups,1,1,1,1
+
+access_hr_attendance_info,hr.attendance.info,model_hr_attendance_info,og_attendance_count.user_groups,1,0,0,0
+access_hr_attendance_info_manage_groups,hr.attendance.info.manage.groups,model_hr_attendance_info,og_attendance_count.manage_groups,1,1,1,1

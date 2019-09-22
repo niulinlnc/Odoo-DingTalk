@@ -48,11 +48,11 @@
                     <notebook>
                         <page string="打卡时间段">
                             <field name="time_ids">
-                                <tree editable="top">
+                                <tree editable="bottom">
                                     <field name="check_type"/>
                                     <field name="check_time" widget="float_full_time" options="{'round_off': True}"/>
-                                    <field name="begin_min" widget="float_full_time" options="{'round_off': True}"/>
-                                    <field name="end_min" widget="float_full_time" options="{'round_off': True}"/>
+                                    <field name="begin_time" widget="float_full_time" options="{'round_off': True}"/>
+                                    <field name="end_time" widget="float_full_time" options="{'round_off': True}"/>
                                 </tree>
                             </field>
                         </page>

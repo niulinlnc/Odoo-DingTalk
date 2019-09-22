@@ -12,21 +12,39 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
+<!-- 
+    emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True, index=True)
+    attendance_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组')
+    attendance_plan_id = fields.Many2one(comodel_name='hr.attendance.plan', string=u'排班ID')
+    ding_plan_id = fields.Char(string='钉钉排班ID')
+    record_id = fields.Char(string='唯一标识ID', help="钉钉设置的值为id，odoo中为record_id")
+    work_date = fields.Date(string=u'工作日')
+    work_month = fields.Char(string='年月字符串', help="为方便其他模块按照月份获取数据时使用", index=True)
+    check_type = fields.Selection(string=u'考勤类型', selection=[('OnDuty', '上班'), ('OffDuty', '下班')], index=True)
+    locationResult = fields.Selection(string=u'位置结果', selection=LocationResult)
+    approveId = fields.Char(string='关联的审批id', help="当该字段非空时，表示打卡记录与请假、加班等审批有关")
+    procInstId = fields.Char(string='审批实例id', help="当该字段非空时，表示打卡记录与请假、加班等审批有关。可以与获取单个审批数据配合使用")
+    procInst_title = fields.Char(string='审批标题')
+    baseCheckTime = fields.Datetime(string=u'基准时间', help="计算迟到和早退，基准时间")
+    check_time = fields.Datetime(string="实际打卡时间", required=True, help="实际打卡时间,  用户打卡时间的毫秒数")
+    timeResult = fields.Selection(string=u'时间结果', selection=TimeResult, index=True)
+    sourceType = fields.Selection(string=u'数据来源', selection=SourceType) -->
+
 <odoo>
 
-    <record id="hr_attendance_result_tree_view" model="ir.ui.view">
-        <field name="name">员工打卡结果</field>
-        <field name="model">hr.attendance.result</field>
+    <record id="hr_attendance_info_tree_view" model="ir.ui.view">
+        <field name="name">员工考勤日报</field>
+        <field name="model">hr.attendance.info</field>
         <field name="arch" type="xml">
-            <tree default_order="check_in desc">
+            <tree default_order="check_time desc">
                 <field name="emp_id"/>
-                <field name="ding_group_id"/>
-                <field name="ding_plan_id"/>
+                <field name="attendance_group_id"/>
+                <field name="attendance_plan_id"/>
                 <field name="work_date"/>
                 <field name="check_type"/>
                 <field name="locationResult"/>
                 <field name="baseCheckTime"/>
-                <field name="check_in"/>
+                <field name="check_time"/>
                 <field name="timeResult"/>
                 <field name="sourceType"/>
                 <field name="procInstId"/>
@@ -35,31 +53,31 @@
         </field>
     </record>
 
-    <record id="hr_attendance_result_form_view" model="ir.ui.view">
-        <field name="name">员工打卡结果</field>
-        <field name="model">hr.attendance.result</field>
+    <record id="hr_attendance_info_form_view" model="ir.ui.view">
+        <field name="name">员工考勤日报</field>
+        <field name="model">hr.attendance.info</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
                         <field name="emp_id"/>
-                        <field name="ding_group_id"/>
+                        <field name="attendance_group_id"/>
                         <field name="work_date"/>
                     </group>
                     <notebook>
                         <page string="打卡结果">
                             <group>
                                 <group>
-                                    <field name="record_id"/>
+                                    <!-- <field name="record_id"/> -->
                                     <field name="check_type"/>
                                     <field name="locationResult"/>
                                     <field name="approveId"/>
                                     <field name="procInstId"/>
                                 </group>
                                 <group>
-                                    <field name="plan_id"/>
+                                    <field name="attendance_plan_id"/>
                                     <field name="baseCheckTime"/>
-                                    <field name="check_in"/>
+                                    <field name="check_time"/>
                                     <field name="timeResult"/>
                                     <field name="sourceType"/>
                                 </group>
@@ -71,14 +89,14 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="hr_attendance_result_kanban">
+    <record model="ir.ui.view" id="hr_attendance_info_kanban">
         <field name="name">员工打卡结果看板</field>
-        <field name="model">hr.attendance.result</field>
+        <field name="model">hr.attendance.info</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile" create="true">
                 <field name="emp_id"/>
-                <field name="check_in"/>
-                <field name="ding_group_id"/>
+                <field name="check_time"/>
+                <field name="attendance_group_id"/>
                 <field name="check_type"/>
                 <templates>
                     <t t-name="kanban-box">
@@ -102,7 +120,7 @@
                                 <i class="fa fa-calendar" aria-label="Period" role="img" title="Period"/>
                                 <field name="check_type"/>
                                 -
-                                <field name="check_in"/>
+                                <field name="check_time"/>
                             </div>
                         </div>
                     </t>
@@ -111,21 +129,21 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="hr_attendance_result_pivot">
+    <record model="ir.ui.view" id="hr_attendance_info_pivot">
         <field name="name">员工打卡结果列表视图</field>
-        <field name="model">hr.attendance.result</field>
+        <field name="model">hr.attendance.info</field>
         <field name="arch" type="xml">
             <pivot string="考勤透视图">
                 <field name="emp_id" type="col"/>
                 <field name="check_type" type="row"/>
-                <field name="check_in" type="measure"/>
+                <field name="check_time" type="measure"/>
             </pivot>
         </field>
     </record>
 
-    <record id="hr_attendance_result_graph" model="ir.ui.view">
+    <record id="hr_attendance_info_graph" model="ir.ui.view">
         <field name="name">attendance.attendance.graph</field>
-        <field name="model">hr.attendance.result</field>
+        <field name="model">hr.attendance.info</field>
         <field name="arch" type="xml">
             <graph string="员工打卡结果列表报表" stacked="True">
                 <field name="emp_id" type="row"/>
@@ -134,9 +152,9 @@
         </field>
     </record>
 
-    <record id="hr_attendance_result_calendar" model="ir.ui.view">
+    <record id="hr_attendance_info_calendar" model="ir.ui.view">
         <field name="name">attendance.attendance.calendar</field>
-        <field name="model">hr.attendance.result</field>
+        <field name="model">hr.attendance.info</field>
         <field name="arch" type="xml">
             <calendar string="考勤" date_start="work_date" color="check_type">
                 <field name="emp_id"/>
@@ -145,24 +163,24 @@
         </field>
     </record>
 
-    <record model="ir.actions.act_window" id="hr_attendance_result_action">
+    <record model="ir.actions.act_window" id="hr_attendance_info_action">
         <field name="name">员工打卡结果</field>
-        <field name="res_model">hr.attendance.result</field>
+        <field name="res_model">hr.attendance.info</field>
         <field name="view_mode">tree,kanban,form,calendar,pivot,graph,activity</field>
         <field name="context">{'search_default_groupby_timeResult': True}</field>
     </record>
 
-    <record model="ir.ui.view" id="hr_attendance_result_search">
-        <field name="model">hr.attendance.result</field>
+    <record model="ir.ui.view" id="hr_attendance_info_search">
+        <field name="model">hr.attendance.info</field>
         <field name="arch" type="xml">
             <search string="员工打卡结果">
                 <field name="emp_id"/>
-                <field name="ding_group_id"/>
+                <field name="attendance_group_id"/>
                 <field name="work_date"/>
                 <field name="check_type"/>
                 <field name="locationResult"/>
                 <field name="baseCheckTime"/>
-                <field name="check_in"/>
+                <field name="check_time"/>
                 <field name="timeResult"/>
                 <field name="sourceType"/>
                 <separator/>
@@ -174,24 +192,24 @@
                 <filter name="groupby_check_type" string="考勤类型" context="{'group_by': 'check_type'}"/>
                 <filter string="我的考勤" name="myattendances" domain="[('emp_id.user_id.id', '=', uid)]"/>
                 <separator/>
-                <filter name="check_in_filter" string="签到日期" date="check_in"/>
+                <filter name="check_in_filter" string="签到日期" date="check_time"/>
                 <separator/>
             </search>
         </field>
     </record>
 
-    <menuitem id="hr_attendance_result_menu" name="员工打卡结果" parent="attendance_attendance.attendance_two_menu" sequence="2"
-              action="hr_attendance_result_action"/>
+    <menuitem id="hr_attendance_info_menu" name="员工考勤日报" parent="attendance_count_record_menu" sequence="2"
+              action="hr_attendance_info_action"/>
 
 
-    <record id="attendance_attendance.view_employee_form_inherit_hr_attendance" model="ir.ui.view">
+    <record id="og_attendance_count.view_employee_form_inherit_hr_attendance" model="ir.ui.view">
         <field name="name">hr.employee</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="priority">11</field>
         <field name="arch" type="xml">
             <xpath expr="//button[@name='toggle_active']" position="before">
-                <button type="object" name="attendance_attendance_action_employee" class="oe_stat_button" string="钉钉出勤"
+                <button type="object" name="og_attendance_count_action_employee" class="oe_stat_button" string="其他出勤"
                         icon="fa-calendar-check-o">
                 </button>
             </xpath>
@@ -199,8 +217,8 @@
     </record>
 
     <record id="hr_attendance_tran_form_view" model="ir.ui.view">
-        <field name="name">hr.attendance.tran.form</field>
-        <field name="model">hr.attendance.tran</field>
+        <field name="name">hr.attendance.info.tran.form</field>
+        <field name="model">hr.attendance.info.tran</field>
         <field name="arch" type="xml">
             <form>
                 <group>
@@ -216,17 +234,17 @@
                     <field name="emp_ids" widget="many2many_tags" placeholder="员工..."/>
                 </group>
                 <footer>
-                    <button string="开始获取" name="get_attendance_list" type="object" class="oe_highlight"/>
+                    <button string="计算考勤结果" name="get_attendance_info_list" type="object" class="oe_highlight"/>
                     <button string="取消" class="btn btn-default" special="cancel"/>
-                    <!-- <button string="清空记录" name="clear_attendance" type="object" class="btn-danger oe_highlight"/> -->
+                    <button string="清空记录" name="clear_attendance_info" type="object" class="btn-danger oe_highlight"/>
                 </footer>
             </form>
         </field>
     </record>
 
-    <record id="hr_attendance_tran_action" model="ir.actions.act_window">
-        <field name="name">hr.attendance.tran.action</field>
-        <field name="res_model">hr.attendance.tran</field>
+    <record id="hr_attendance_info_tran_action" model="ir.actions.act_window">
+        <field name="name">hr.attendance.info.tran.action</field>
+        <field name="res_model">hr.attendance.info.tran</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>

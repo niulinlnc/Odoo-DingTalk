@@ -39,7 +39,7 @@
         'views/hr_attendance_class.xml',
         'views/hr_attendance_plan.xml',
         # 'views/hr_leaves_list.xml',
-        # 'views/hr_attendance_result.xml',
+        'views/hr_attendance_info.xml',
         # 'views/hr_attendance_record.xml',
         # 'views/user_sign_list.xml',
         'views/hr_attendance_rules.xml',
