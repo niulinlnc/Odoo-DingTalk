@@ -51,6 +51,7 @@ class HrAttendanceInfo(models.Model):
         ('Absenteeism', '旷工迟到'),
         ('NotSigned', '未打卡'),
         ('Leave', '事假缺卡'),
+        ('Holiday', '节日休息'),
     ]
     LocationResult = [
         ('Normal', '范围内'), ('Outside', '范围外'), ('NotSigned', '未打卡'),
@@ -72,6 +73,16 @@ class HrAttendanceInfo(models.Model):
         ('06', '其他')
     ]
 
+    NOTSIGNEDORIGIN = [
+        ('Forget', '漏打'),
+        ('Leave', '请假'),
+        ('Public', '公出'),
+        ('Trip', '出差'),
+        ('Change', '调休'),
+        ('Annual', '年休假'),
+        ('Holiday', '节假日'),
+    ]
+
     emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True, index=True)
     attendance_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组')
     attendance_plan_id = fields.Many2one(comodel_name='hr.attendance.plan', string=u'排班ID')
@@ -89,6 +100,7 @@ class HrAttendanceInfo(models.Model):
     timeResult = fields.Selection(string=u'时间结果', selection=TimeResult, index=True)
     sourceType = fields.Selection(string=u'数据来源', selection=SourceType)
     attendance_date_status = fields.Selection(string=u'日期性质', selection=DATESTATUS)
+    not_signed_origin = fields.Selection(string=u'缺卡原因', selection=NOTSIGNEDORIGIN)
 
     # @api.model
     # def create(self, values):
@@ -146,8 +158,8 @@ class HrAttendanceInfoTransient(models.TransientModel):
                     data.update({
                         'locationResult': rec.locationResult,
                         'sourceType': rec.sourceType,
-                        'procInstId': rec.procInstId if rec.procInstId else False,
-                        'procInst_title': self.get_procInst_title(rec.procInstId) if rec.procInstId else False,
+                        # 'procInstId': rec.procInstId if rec.procInstId else False,
+                        # 'procInst_title': self.get_procInst_title(rec.procInstId) if rec.procInstId else False,
                         'attendance_date_status': date_status,
                     })
                     data_list.append(data)
@@ -187,6 +199,31 @@ class HrAttendanceInfoTransient(models.TransientModel):
             else:
                 pass
 
+    def get_work_result(self, check_time, attendance_class):
+        """
+        根据check_time与对应班次判断考勤结果
+        """
+        c = attendance_class
+        plan_check_time = fields.Datetime.from_string(c.plan_check_time)
+        permit_late_time = plan_check_time + timedelta(minutes=int(c.class_id.permit_late_minutes) + 1)
+        serious_late_time = plan_check_time + timedelta(minutes=int(c.class_id.serious_late_minutes))
+        absenteeism_late_time = plan_check_time + timedelta(minutes=int(c.class_id.absenteeism_late_minutes))
+        if c.check_type == 'OnDuty':
+            if self.compare_time(check_time, c.begin_check_time, permit_late_time):
+                result = 'Normal'
+            elif self.compare_time(check_time, permit_late_time, serious_late_time):
+                result = 'Late'
+            elif self.compare_time(check_time, serious_late_time, absenteeism_late_time):
+                result = 'SeriousLate'
+            elif self.compare_time(check_time, absenteeism_late_time, c.end_check_time):
+                result = 'Absenteeism'
+        elif c.check_type == 'OffDuty':
+            if self.compare_time(check_time, c.begin_check_time, c.plan_check_time):
+                result = 'Early'
+            elif self.compare_time(check_time, c.plan_check_time, c.end_check_time):
+                result = 'Normal'
+        return result
+
     def compare_time(self, check_time, start_time, end_time):
         """
         比较check_time 是否在时间区间[start_time, end_time]中
@@ -208,30 +245,6 @@ class HrAttendanceInfoTransient(models.TransientModel):
         end_time = begin_time + timedelta(days=1)
 
         return work_date, begin_time, end_time
-
-    def get_work_result(self, check_time, c):
-        """
-        根据check_time与对应班次判断考勤结果
-        """
-        if c.class_id.serious_late_minutes and c.class_id.absenteeism_late_minutes:
-            plan_check_time = fields.Datetime.from_string(c.plan_check_time)
-            serious_late_time = plan_check_time + timedelta(minutes=int(c.class_id.serious_late_minutes))
-            absenteeism_late_time = plan_check_time + timedelta(minutes=int(c.class_id.absenteeism_late_minutes))
-        if c.check_type == 'OnDuty':
-            if self.compare_time(check_time, c.begin_check_time, c.plan_check_time):
-                result = 'Normal'
-            elif self.compare_time(check_time, c.plan_check_time, serious_late_time):
-                result = 'Late'
-            elif self.compare_time(check_time, serious_late_time, absenteeism_late_time):
-                result = 'SeriousLate'
-            elif self.compare_time(check_time, absenteeism_late_time, c.end_check_time):
-                result = 'Absenteeism'
-        elif c.check_type == 'OffDuty':
-            if self.compare_time(check_time, c.begin_check_time, c.plan_check_time):
-                result = 'Early'
-            elif self.compare_time(check_time, c.plan_check_time, c.end_check_time):
-                result = 'Normal'
-        return result
 
     @api.multi
     def compute_date_status(self, check_time):
@@ -283,18 +296,17 @@ class HrAttendanceInfoTransient(models.TransientModel):
                     'timeResult': 'NotSigned',
                 }
                 not_singned_list.append(data)
-        # 标记事假缺卡
-        not_singned_list = self.not_signed_because_leave(not_singned_list)
+        # 标记缺卡原因
+        not_singned_list = self.get_not_signed_origin(not_singned_list)
         self.env['hr.attendance.info'].sudo().create(not_singned_list)
 
     @api.model
-    def not_signed_because_leave(self, not_singned_list):
+    def get_not_signed_origin(self, not_singned_list):
         """
-        筛选出因请假而缺卡的并标记为事假缺卡
+        标记缺卡原因
         :param timeNum:
         :return:
         """
-        # 判断是否在请假期间
         data_list = list()
         for data in not_singned_list:
             domain = [('user_id', '=', data['emp_id']), ('start_time', '<=', data['check_time']),
@@ -302,8 +314,12 @@ class HrAttendanceInfoTransient(models.TransientModel):
             leave_info = self.env['hr.leaves.list'].sudo().search(domain, limit=1)
             # 缺卡且基准时间在请假时间段内
             if len(leave_info) > 0:
-                data.update({'timeResult': 'Leave'})
-                data_list.append(data)
+                data.update({'not_signed_origin': 'Leave'})
+            # 节假日
+            elif self.env['hr.attendance.holiday'].sudo().search([('holiday_date', '=', data['work_date'])]):
+                data.update({'not_signed_origin': 'Holiday'})
+            else:
+                data.update({'not_signed_origin': 'Forget'})
             data_list.append(data)
         return data_list
 

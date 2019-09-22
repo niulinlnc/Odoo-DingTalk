@@ -34,9 +34,9 @@ class HrAttendanceClass(models.Model):
     work_time = fields.Char(string='工作时长', help="单位分钟，-1表示关闭该功能")
 
     # 人性化班次设置
-    permit_late_minutes = fields.Char(string='允许迟到时长(分钟)', help="允许迟到时长，单位分钟")
-    serious_late_minutes = fields.Char(string='严重迟到分钟', help="严重迟到时长，单位分钟")
-    absenteeism_late_minutes = fields.Char(string='旷工迟到分钟', help="旷工迟到时长，单位分钟")
+    permit_late_minutes = fields.Char(string='允许迟到分钟', default='0', help="允许迟到时长，单位分钟")
+    serious_late_minutes = fields.Char(string='严重迟到分钟', default='60', help="严重迟到时长，单位分钟")
+    absenteeism_late_minutes = fields.Char(string='旷工迟到分钟', default='120', help="旷工迟到时长，单位分钟")
     is_off_duty_free_check = fields.Selection(string=u'强制打卡', selection=[('Y', '下班不强制打卡'), ('N', '下班强制打卡')])
     is_late_check_in = fields.Boolean(string=u'允许晚走晚到')
 
@@ -95,7 +95,6 @@ class HrAttendanceOvertimeRule(models.Model):
     _description = "加班规则"
     _name = 'hr.attendance.overtime.rule'
     _rec_name = 'rule_name'
-
 
     OVERTIMERULE = [
         ('00', '按审批时长计算'),

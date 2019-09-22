@@ -46,6 +46,7 @@
                 <field name="baseCheckTime"/>
                 <field name="check_time"/>
                 <field name="timeResult"/>
+                <field name="not_signed_origin"/>
                 <field name="sourceType"/>
                 <field name="procInstId"/>
                 <field name="procInst_title"/>
