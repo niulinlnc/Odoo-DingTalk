@@ -13,26 +13,6 @@ limitations under the License.
 -->
 <odoo>
 
-    <record id="hr_attendance_holiday_tree_view" model="ir.ui.view">
-        <field name="name">法定节假日表</field>
-        <field name="model">hr.attendance.holiday</field>
-        <field name="arch" type="xml">
-            <tree default_order="id desc" editable="top">
-                <field name="holiday_name" required="1"/>
-                <field name="holiday_date" required="1"/>
-                <field name="status" required="1"/>
-            </tree>
-        </field>
-    </record>
-
-    <record model="ir.actions.act_window" id="hr_attendance_holiday_action">
-        <field name="name">法定节假日表</field>
-        <field name="res_model">hr.attendance.holiday</field>
-        <field name="view_mode">tree,form</field>
-    </record>
-
-    <menuitem id="hr_attendance_holiday_menu" name="节假日" parent="attendance_count_setting_menu" sequence="5" action="hr_attendance_holiday_action"/>
-
     <record id="hr_attendance_total_tree_view" model="ir.ui.view">
         <field name="name">员工考勤统计</field>
         <field name="model">hr.attendance.total</field>

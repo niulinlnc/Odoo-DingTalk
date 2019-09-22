@@ -40,10 +40,10 @@
         'views/hr_attendance_plan.xml',
         # 'views/hr_leaves_list.xml',
         'views/hr_attendance_info.xml',
-        # 'views/hr_attendance_record.xml',
         # 'views/user_sign_list.xml',
+        'views/hr_attendance_holiday.xml',
         'views/hr_attendance_rules.xml',
-        'wizard/hr_attendance_total.xml',
+        'views/hr_attendance_total.xml',
     ],
     'qweb': [
         'static/xml/*.xml'

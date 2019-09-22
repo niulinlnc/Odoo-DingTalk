@@ -50,6 +50,7 @@ class HrAttendanceInfo(models.Model):
         ('SeriousLate', '严重迟到'),
         ('Absenteeism', '旷工迟到'),
         ('NotSigned', '未打卡'),
+        ('Leave', '事假缺卡'),
     ]
     LocationResult = [
         ('Normal', '范围内'), ('Outside', '范围外'), ('NotSigned', '未打卡'),
@@ -64,6 +65,13 @@ class HrAttendanceInfo(models.Model):
         ('SYSTEM', '考勤系统'),
         ('AUTO_CHECK', '自动打卡')
     ]
+    DATESTATUS = [
+        ('00', '工作日'),
+        ('01', '休息日'),
+        ('02', '节假日'),
+        ('06', '其他')
+    ]
+
     emp_id = fields.Many2one(comodel_name='hr.employee', string=u'员工', required=True, index=True)
     attendance_group_id = fields.Many2one(comodel_name='hr.attendance.group', string=u'考勤组')
     attendance_plan_id = fields.Many2one(comodel_name='hr.attendance.plan', string=u'排班ID')
@@ -80,7 +88,7 @@ class HrAttendanceInfo(models.Model):
     check_time = fields.Datetime(string="实际打卡时间", required=True, help="实际打卡时间,  用户打卡时间的毫秒数")
     timeResult = fields.Selection(string=u'时间结果', selection=TimeResult, index=True)
     sourceType = fields.Selection(string=u'数据来源', selection=SourceType)
-    attendance_date_status = 
+    attendance_date_status = fields.Selection(string=u'日期性质', selection=DATESTATUS)
 
     # @api.model
     # def create(self, values):
@@ -134,13 +142,19 @@ class HrAttendanceInfoTransient(models.TransientModel):
             for rec in attendance_list:
                 data = self.compute_attendance_result(rec.userId, rec.userCheckTime)
                 if data:
+                    date_status = self.compute_date_status(rec.userCheckTime)
                     data.update({
                         'locationResult': rec.locationResult,
                         'sourceType': rec.sourceType,
+                        'procInstId': rec.procInstId if rec.procInstId else False,
+                        'procInst_title': self.get_procInst_title(rec.procInstId) if rec.procInstId else False,
+                        'attendance_date_status': date_status,
                     })
                     data_list.append(data)
             # 批量存储记录
             self.env['hr.attendance.info'].sudo().create(data_list)
+            # 生成漏打卡
+            self.get_not_signed_list(emp, start_date, stop_date)
 
         action = self.env.ref('og_attendance_count.hr_attendance_info_action')
         action_dict = action.read()[0]
@@ -190,10 +204,8 @@ class HrAttendanceInfoTransient(models.TransientModel):
         根据check_time获取工作日与工作时段区间
         """
         work_date = fields.Datetime.context_timestamp(self, fields.Datetime.from_string(check_time)).date()
-        # begin_time = datetime.strptime(str(check_time.date()) + '00:00:00', '%Y-%m-%d %H:%M:%S')
-        # end_time = datetime.strptime(str(check_time.date()) + '23:59:59', '%Y-%m-%d %H:%M:%S')
-        begin_time = work_date
-        end_time = work_date + timedelta(days=1)
+        begin_time = self.date_to_datetime(check_time)
+        end_time = begin_time + timedelta(days=1)
 
         return work_date, begin_time, end_time
 
@@ -220,6 +232,80 @@ class HrAttendanceInfoTransient(models.TransientModel):
             elif self.compare_time(check_time, c.plan_check_time, c.end_check_time):
                 result = 'Normal'
         return result
+
+    @api.multi
+    def compute_date_status(self, check_time):
+        """
+        计算日期性质
+        :param emp_id: 员工
+        :param check_time:  打卡时间
+        :return data
+        """
+        work_date = fields.Datetime.context_timestamp(self, fields.Datetime.from_string(check_time)).date()
+        if datetime.isoweekday(work_date) in (6, 7):
+            date_status = '01'
+        elif self.env['hr.attendance.holiday'].sudo().search([('holiday_date', '=', work_date)], limit=1):
+            date_status = '02'
+        else:
+            date_status = '00'
+        return date_status
+
+    def get_procInst_title(self, procInstId):
+        """
+        获取审批标题
+        """
+        if procInstId:
+            din_client = self.env['dingding.api.tools'].get_client()
+            result = din_client.bpms.processinstance_get(procInstId)
+            return result.get('title')
+
+    def get_not_signed_list(self, emp, start_date, stop_date):
+        """
+        统计并标记缺卡
+        """
+        # 获取打卡记录
+        attendance_list = self.env['hr.attendance.info'].sudo().search(
+            [('emp_id', '=', emp.id), ('work_date', '>=', start_date), ('work_date', '<=', stop_date)], order='check_time').mapped('attendance_plan_id')
+        # 获取排班表
+        domain = [('emp_id', '=', emp.id), ('work_date', '>=', start_date), ('work_date', '<=', stop_date)]
+        plan_list = self.env['hr.attendance.plan'].sudo().search(domain, order='plan_check_time')
+        not_singned_list = list()
+        for plan in plan_list:
+            if plan not in attendance_list:
+                data = {
+                    'emp_id': emp.id,
+                    'check_type': plan.check_type,
+                    'work_date': plan.work_date,
+                    'check_time': plan.plan_check_time,
+                    'attendance_group_id': plan.group_id.id,
+                    'attendance_plan_id': plan.id,
+                    'baseCheckTime': plan.plan_check_time,
+                    'timeResult': 'NotSigned',
+                }
+                not_singned_list.append(data)
+        # 标记事假缺卡
+        not_singned_list = self.not_signed_because_leave(not_singned_list)
+        self.env['hr.attendance.info'].sudo().create(not_singned_list)
+
+    @api.model
+    def not_signed_because_leave(self, not_singned_list):
+        """
+        筛选出因请假而缺卡的并标记为事假缺卡
+        :param timeNum:
+        :return:
+        """
+        # 判断是否在请假期间
+        data_list = list()
+        for data in not_singned_list:
+            domain = [('user_id', '=', data['emp_id']), ('start_time', '<=', data['check_time']),
+                      ('end_time', '>=', data['check_time'])]
+            leave_info = self.env['hr.leaves.list'].sudo().search(domain, limit=1)
+            # 缺卡且基准时间在请假时间段内
+            if len(leave_info) > 0:
+                data.update({'timeResult': 'Leave'})
+                data_list.append(data)
+            data_list.append(data)
+        return data_list
 
     @api.model
     def date_range(self, start_date, end_date):
@@ -261,6 +347,20 @@ class HrAttendanceInfoTransient(models.TransientModel):
         to_local_datetime = fields.Datetime.context_timestamp(self, to_datetime)  # 将原生的datetime值(无时区)转换为具体时区的datetime
         to_str_datetime = fields.Datetime.to_string(to_local_datetime)  # datetime 转成 字符串
         return to_str_datetime
+
+    @api.model
+    def date_to_datetime(self, check_time):
+        """
+        将日期格式转换为时间格式utc=0
+        :param timeNum:
+        :return:
+        """
+        work_date = fields.Datetime.context_timestamp(self, fields.Datetime.from_string(check_time)).date()
+        work_timestamp = time.mktime(work_date.timetuple())
+        timearray = time.gmtime(work_timestamp)
+        str_utc_datetime = time.strftime("%Y-%m-%d %H:%M:%S", timearray)
+        to_datetime = fields.Datetime.from_string(str_utc_datetime)
+        return to_datetime
 
     @api.model
     def list_cut(self, mylist, limit):

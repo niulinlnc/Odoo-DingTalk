@@ -23,16 +23,6 @@ from odoo.exceptions import UserError
 _logger = logging.getLogger(__name__)
 
 
-class HrAttendanceHoliday(models.Model):
-    _description = '法定节假日'
-    _name = 'hr.attendance.holiday'
-    _rec_name = 'holiday_name'
-
-    holiday_name = fields.Char('法定节假日名称')
-    holiday_date = fields.Date('法定节假日')
-    status = fields.Char('法定节假日状态', selection=[('0', '未使用'), ('1', '使用中'), ('2', '已失效')])
-
-
 class HrAttendanceTotal(models.Model):
     _description = '员工考勤统计'
     _name = 'hr.attendance.total'

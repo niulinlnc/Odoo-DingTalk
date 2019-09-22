@@ -49,6 +49,7 @@
                 <field name="sourceType"/>
                 <field name="procInstId"/>
                 <field name="procInst_title"/>
+                <field name="attendance_date_status"/>
             </tree>
         </field>
     </record>

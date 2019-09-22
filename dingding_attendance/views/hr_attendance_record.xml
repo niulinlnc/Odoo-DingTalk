@@ -30,6 +30,7 @@
                 <field name="timeResult"/>
                 <field name="locationResult"/>
                 <field name="userAddress"/>
+                <field name="procInstId"/>
             </tree>
         </field>
     </record>
