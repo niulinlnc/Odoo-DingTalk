@@ -97,13 +97,6 @@ class HrAttendanceTotalTransient(models.TransientModel):
     _description = '汇总考勤结果'
     _name = 'hr.attendance.total.tran'
 
-    SourceType = [
-        ('attendance', '钉钉考勤结果'),
-        ('odoo', 'Odoo出勤记录'),
-        ('and', '两者同时获取')
-    ]
-
-    soure_type = fields.Selection(string=u'考勤结果来源', selection=SourceType, default='attendance', required=True)
     start_date = fields.Date(string=u'考勤开始日期', required=True)
     end_date = fields.Date(string=u'考勤结束日期', required=True)
     emp_ids = fields.Many2many(comodel_name='hr.employee', relation='hr_attendance_total_and_employee_rel',

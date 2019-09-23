@@ -104,17 +104,14 @@
                     <t t-name="kanban-box">
                         <div t-attf-class="oe_kanban_global_click">
                             <div>
-                                <img t-att-src="kanban_image('hr.employee', 'image_small', record.emp_id.raw_value)"
-                                     t-att-title="record.emp_id.value" t-att-alt="record.emp_id.value" width="24"
-                                     height="24" class="oe_kanban_avatar mr4"/>
+                                <img t-att-src="kanban_image('hr.employee', 'image_small', record.emp_id.raw_value)" t-att-title="record.emp_id.value" t-att-alt="record.emp_id.value" width="24" height="24" class="oe_kanban_avatar mr4"/>
                                 <span class="o_kanban_record_title">
                                     <strong>
                                         <field name="emp_id"/>
                                     </strong>
                                 </span>
                                 <strong>
-                                    <field name="timeResult" widget="label_selection"
-                                           options="{'classes': {'NotSigned': 'default', 'Normal': 'success', 'Early': 'warning', 'Late': 'warning', 'SeriousLate': 'warning', 'Absenteeism': 'warning'}}"/>
+                                    <field name="timeResult" widget="label_selection" options="{'classes': {'NotSigned': 'default', 'Normal': 'success', 'Early': 'warning', 'Late': 'warning', 'SeriousLate': 'warning', 'Absenteeism': 'warning'}}"/>
                                 </strong>
                             </div>
                             <hr class="mt4 mb8"/>
@@ -200,8 +197,7 @@
         </field>
     </record>
 
-    <menuitem id="hr_attendance_info_menu" name="员工考勤日报" parent="attendance_count_record_menu" sequence="2"
-              action="hr_attendance_info_action"/>
+    <menuitem id="hr_attendance_info_menu" name="员工考勤日报" parent="attendance_count_record_menu" sequence="2" action="hr_attendance_info_action"/>
 
 
     <record id="og_attendance_count.view_employee_form_inherit_hr_attendance" model="ir.ui.view">
@@ -211,8 +207,7 @@
         <field name="priority">11</field>
         <field name="arch" type="xml">
             <xpath expr="//button[@name='toggle_active']" position="before">
-                <button type="object" name="og_attendance_count_action_employee" class="oe_stat_button" string="其他出勤"
-                        icon="fa-calendar-check-o">
+                <button type="object" name="og_attendance_count_action_employee" class="oe_stat_button" string="其他出勤" icon="fa-calendar-check-o">
                 </button>
             </xpath>
         </field>
@@ -225,9 +220,10 @@
             <form>
                 <group>
                     <group>
-                        <field name="start_date"/>
+                        <field name="soure_type"/>
                     </group>
                     <group>
+                        <field name="start_date"/>
                         <field name="stop_date"/>
                     </group>
                 </group>

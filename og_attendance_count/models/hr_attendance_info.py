@@ -118,6 +118,15 @@ class HrAttendanceInfoTransient(models.TransientModel):
     _name = 'hr.attendance.info.tran'
     _description = '获取考勤结果'
 
+    SourceType = [
+        ('ding_record', '钉钉考勤详情'),
+        ('ding_result', '钉钉考勤结果'),
+        ('zk_record', '中控考勤机'),
+        ('odoo', 'Odoo出勤记录'),
+        ('and', '综合获取')
+    ]
+
+    soure_type = fields.Selection(string=u'考勤数据来源', selection=SourceType, default='ding_record', required=True)
     start_date = fields.Date(string=u'开始日期', required=True)
     stop_date = fields.Date(string=u'结束日期', required=True, default=str(fields.datetime.now()))
     emp_ids = fields.Many2many(comodel_name='hr.employee', relation='hr_attendance_attendance_and_hr_employee_rel',
@@ -135,12 +144,13 @@ class HrAttendanceInfoTransient(models.TransientModel):
     @api.multi
     def get_attendance_info_list(self):
         """
-        从钉钉考勤详情获取考勤数据并生成考勤日报表
+        获取考勤数据并生成考勤日报表
         :param start_date:
         :param end_date:
         :param user:
         :return:
         """
+        soure_type = self.soure_type
         emp_list = self.emp_ids
         start_date = self.start_date
         stop_date = self.stop_date
@@ -148,25 +158,26 @@ class HrAttendanceInfoTransient(models.TransientModel):
             # 删除数据
             self.env['hr.attendance.info'].sudo().search(
                 [('emp_id', '=', emp.id), ('work_date', '>=', start_date), ('work_date', '<=', stop_date)]).unlink()
-            attendance_list = self.env['hr.attendance.record'].sudo().search(
-                [('userId', '=', emp.id), ('workDate', '>=', start_date), ('workDate', '<=', stop_date)], order='workDate')
-            data_list = list()
-            for rec in attendance_list:
-                data = self.compute_attendance_result(rec.userId, rec.userCheckTime)
-                if data:
-                    date_status = self.compute_date_status(rec.userCheckTime)
-                    data.update({
-                        'locationResult': rec.locationResult,
-                        'sourceType': rec.sourceType,
-                        # 'procInstId': rec.procInstId if rec.procInstId else False,
-                        # 'procInst_title': self.get_procInst_title(rec.procInstId) if rec.procInstId else False,
-                        'attendance_date_status': date_status,
-                    })
-                    data_list.append(data)
-            # 批量存储记录
-            self.env['hr.attendance.info'].sudo().create(data_list)
-            # 生成漏打卡
-            self.get_not_signed_list(emp, start_date, stop_date)
+            if soure_type == 'ding_record':
+                attendance_list = self.env['hr.attendance.record'].sudo().search(
+                    [('userId', '=', emp.id), ('workDate', '>=', start_date), ('workDate', '<=', stop_date)], order='workDate')
+                data_list = list()
+                for rec in attendance_list:
+                    data = self.compute_attendance_result(rec.userId, rec.userCheckTime)
+                    if data:
+                        date_status = self.compute_date_status(rec.userCheckTime)
+                        data.update({
+                            'locationResult': rec.locationResult,
+                            'sourceType': rec.sourceType,
+                            # 'procInstId': rec.procInstId if rec.procInstId else False,
+                            # 'procInst_title': self.get_procInst_title(rec.procInstId) if rec.procInstId else False,
+                            'attendance_date_status': date_status,
+                        })
+                        data_list.append(data)
+                # 批量存储记录
+                self.env['hr.attendance.info'].sudo().create(data_list)
+                # 生成漏打卡
+                self.get_not_signed_list(emp, start_date, stop_date)
 
         action = self.env.ref('og_attendance_count.hr_attendance_info_action')
         action_dict = action.read()[0]

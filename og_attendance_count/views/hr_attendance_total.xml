@@ -116,10 +116,9 @@ limitations under the License.
             <form>
                 <group>
                     <group>
-                        <field name="soure_type"/>
+                        <field name="start_date"/>
                     </group>
                     <group>
-                        <field name="start_date"/>
                         <field name="end_date"/>
                     </group>
                 </group>
