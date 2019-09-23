@@ -140,7 +140,7 @@ class HrAttendanceTotalTransient(models.TransientModel):
             raise UserError("暂未实现！！！")
 
         # 计算后重载考勤统计列表
-        action = self.env.ref('attendance_attendance.hr_attendance_total_action')
+        action = self.env.ref('og_attendance_count.hr_attendance_total_action')
         action_dict = action.read()[0]
         return action_dict
 
