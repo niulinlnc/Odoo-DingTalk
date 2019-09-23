@@ -36,5 +36,5 @@ class HrAttendanceHoliday(models.Model):
 
     holiday_name = fields.Char('法定节假日名称')
     holiday_date = fields.Date('法定节假日')
-    holiday_status = fields.Selection(string=u'使用状态', selection=HOLIDAYSTATUS)
+    is_active = fields.Boolean(string=u'启用')
     

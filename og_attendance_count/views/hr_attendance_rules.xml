@@ -23,7 +23,7 @@ limitations under the License.
                 <field name="name"/>
                 <field name="attendance_information"/>
                 <field name="work_time"/>
-                <field name="simple_ids"/>
+                <field name="group_ids"/>
                 <field name="work_overtime_deduction"/>
             </tree>
         </field>
@@ -43,7 +43,7 @@ limitations under the License.
                 <group col="2">
                     <group>
                         <field name="attendance_information" required="1"/>
-                        <field name="simple_ids" required="1" widget="many2many_tags"/>
+                        <field name="group_ids" widget="many2many_tags"/>
                         <field name="work_time" required="1"/>
                     </group>
                 </group>
@@ -51,7 +51,7 @@ limitations under the License.
                     <group string="请假规则">
                         <field name="leave_minimum_unit" required="1"/>
                         <field name="leave_time_accounting" required="1"/>
-                        <field name="leave_oa_madel" required="1"/>
+                        <field name="leave_oa_madel"/>
                     </group>
                     <group string="加班规则">
                         <field name="is_allow_overtime" required="1"/>

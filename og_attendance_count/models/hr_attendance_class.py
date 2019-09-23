@@ -32,6 +32,7 @@ class HrAttendanceClass(models.Model):
 
     class_name = fields.Char(string='班次名称', index=True)
     work_time = fields.Char(string='工作时长', help="单位分钟，-1表示关闭该功能")
+    is_default = fields.Boolean(string=u'是否默认班次')
 
     # 人性化班次设置
     permit_late_minutes = fields.Char(string='允许迟到分钟', default='0', help="允许迟到时长，单位分钟")

@@ -47,7 +47,9 @@ class HrAttendanceGroup(models.Model):
     manager_list = fields.Many2many('hr.employee', string=u'考勤组负责人', index=True)
     week_classes_list = fields.Char(string='班次时间展示')
     is_default = fields.Boolean(string=u'是否默认考勤组')
-    default_class_id = fields.Char(string='默认班次ID')
+    default_class_id = fields.Many2one(comodel_name='hr.attendance.class', string=u'默认班次', index=True)
+    is_active = fields.Boolean(string=u'是否启用')
+    rule_id = fields.Many2one(string=u'加班规则', comodel_name='hr.attendance.rules')
 
     # 固定班制
 
@@ -62,6 +64,8 @@ class HrAttendanceGroup(models.Model):
     # class_run_days = fields.Char(string='排班周期')
 
     # 自由排班
+
+    # 加班规则
 
     @api.multi
     @api.onchange('dept_name_list')
@@ -93,6 +97,25 @@ class HrAttendanceGroup(models.Model):
                 dept_list.append(dep.id)
             i += 1
         return dept_list
+
+    @api.multi
+    @api.onchange('attendance_type')
+    def onchange_attendance_type(self):
+        """
+        (0, 0,{ values })根据values里面的信息新建一个记录。
+        (1,ID,{values}) 更新id=ID的记录（对id=ID的执行write 写入values里面的数据）
+        (2,ID) 删除id=ID的数据（调用unlink方法，删除数据以及整个主从数据链接关系）
+        """
+        if self.attendance_type == 'FIXED':
+            self.class_list_ids = [(2, self.id)]
+            for w in ['1', '2', '3', '4', '5', '6']:
+                data = {
+                    'attendance_group_id': self.id,
+                    'week_name': w,
+                    'class_id': self.env['hr.attendance.class'].search([('is_default', '=', True)], limit=1).id,
+                }
+
+                self.class_list_ids = [(0, 0, data)]
 
 
 class HrAttendanceGroupClassList(models.Model):

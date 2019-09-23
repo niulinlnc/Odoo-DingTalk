@@ -36,10 +36,11 @@ class HrAttendanceRules(models.Model):
                     ]
     attendance_information = fields.Selection(string=u'考勤信息', selection=ATTSELECTION, default='ding_att_result')
     # -----考勤组-----
-    simple_ids = fields.Many2many(
-        'hr.attendance.group', 'att_rules_group_rel',
-        'rule_id', 'simple_id',
-        string='考勤组')
+    # group_ids = fields.One2many(
+    #     'hr.attendance.group', 'hr_attendance_rules_and_attendance_group_rel',
+    #     'rule_id', 'group_id',
+    #     string='考勤组')
+    group_ids = fields.One2many(comodel_name='hr.attendance.group', inverse_name='rule_id', string=u'考勤组')
     # -----班次-----
     list_time_selection = [
         ('00', '关联钉钉班次'),

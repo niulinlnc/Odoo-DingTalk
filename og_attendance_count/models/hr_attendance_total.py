@@ -55,6 +55,7 @@ class HrAttendanceTotal(models.Model):
     sick_absence_hour = fields.Float(string=u'病假缺勤(小时)', digits=(10, 1))
     # 打卡
     late_attendance_num = fields.Integer(string=u'迟到次数')
+    serious_late_attendance_num = fields.Integer(string=u'严重迟到次数')
     notsigned_attendance_num = fields.Integer(string=u'忘记打卡次数')
     early_attendance_num = fields.Integer(string=u'早退次数')
 
@@ -354,7 +355,7 @@ class HrAttendanceTotalTransient(models.TransientModel):
         统计月应出勤及请假天数
         :retur
         """
-        notsigned_attendance_num = late_attendance_num = early_attendance_num = 0
+        notsigned_attendance_num = late_attendance_num = serious_late_attendance_num = early_attendance_num = 0
         work_overtime_hour = weekend_overtime_hour = holiday_overtime_hour = 0
         arrive_total = real_arrive_total = 0
         leave_absence_hour = sick_absence_hour = 0
@@ -362,24 +363,24 @@ class HrAttendanceTotalTransient(models.TransientModel):
                       '其他假': 0}
         for one in attendance_info_dict_list:
             # 统计平时加班、周末加班、节假日加班时数
-            if one.attendance_date_status == '00' and one.worked_hours > one.base_work_hours:
-                work_overtime_hour = work_overtime_hour + one.worked_hours - one.base_work_hours
-            elif one.attendance_date_status == '01':
-                weekend_overtime_hour = weekend_overtime_hour + one.worked_hours
-            elif one.attendance_date_status == '02':
-                holiday_overtime_hour = holiday_overtime_hour + one.worked_hours
+            # if one.attendance_date_status == '00' and one.worked_hours > one.base_work_hours:
+            #     work_overtime_hour = work_overtime_hour + one.worked_hours - one.base_work_hours
+            # elif one.attendance_date_status == '01':
+            #     weekend_overtime_hour = weekend_overtime_hour + one.worked_hours
+            # elif one.attendance_date_status == '02':
+            #     holiday_overtime_hour = holiday_overtime_hour + one.worked_hours
             # 统计迟到早退缺卡次数
-            if one.on_timeResult == 'NotSigned' and one.attendance_date_status != '03':
+            if one.timeResult == 'NotSigned' and one.not_signed_origin == 'Forget':
                 notsigned_attendance_num = notsigned_attendance_num + 1
-            elif one.on_timeResult == 'Late':
+            elif one.timeResult == 'Late':
                 late_attendance_num = late_attendance_num + 1
-            if one.off_timeResult == 'NotSigned' and one.attendance_date_status != '03':
-                notsigned_attendance_num = notsigned_attendance_num + 1
-            elif one.off_timeResult == 'Early':
+            elif one.timeResult == 'Early':
                 early_attendance_num = early_attendance_num + 1
+            elif one.timeResult == 'SeriousLate':
+                serious_late_attendance_num = serious_late_attendance_num + 1
             # 统计请假小时（暂时都当成事假）
-            if one.leave_hours:
-                leave_absence_hour = leave_absence_hour + one.leave_hours
+            # if one.leave_hours:
+            #     leave_absence_hour = leave_absence_hour + one.leave_hours
             # # 统计假期
             # if leave_dict.get(one.check_in_type_id) is not None:
             #     leave_dict[one.check_in_type_id] += 1
@@ -396,26 +397,27 @@ class HrAttendanceTotalTransient(models.TransientModel):
 
         attendance_total_ins = {'employee_id': emp.id,
                                 'attendance_month': start_date,
-                                'arrive_total': arrive_total,
-                                'real_arrive_total': real_arrive_total,
-                                'work_overtime_hour': work_overtime_hour,
-                                'weekend_overtime_hour': weekend_overtime_hour,
-                                'holiday_overtime_hour': holiday_overtime_hour,
+                                # 'arrive_total': arrive_total,
+                                # 'real_arrive_total': real_arrive_total,
+                                # 'work_overtime_hour': work_overtime_hour,
+                                # 'weekend_overtime_hour': weekend_overtime_hour,
+                                # 'holiday_overtime_hour': holiday_overtime_hour,
                                 'notsigned_attendance_num': notsigned_attendance_num,
                                 'late_attendance_num': late_attendance_num,
+                                'serious_late_attendance_num': serious_late_attendance_num,
                                 'early_attendance_num': early_attendance_num,
                                 'leave_absence_hour': leave_absence_hour,
-                                'sick_leave_total': leave_dict['病假'],
-                                'personal_leave_total': leave_dict['事假'],
-                                'annual_leave_total': leave_dict['年假'],
-                                'marriage_leave_total': leave_dict['婚假'],
-                                'bereavement_leave_total': leave_dict['丧假'],
-                                'paternity_leave_total': leave_dict['陪产假'],
-                                'maternity_leave_total': leave_dict['产假'],
-                                'work_related_injury_leave_total': leave_dict['工伤假'],
-                                'home_leave_total': leave_dict['探亲假'],
-                                'travelling_total': leave_dict['出差（请假）'],
-                                'other_leave_total': leave_dict['其他假'],
+                                # 'sick_leave_total': leave_dict['病假'],
+                                # 'personal_leave_total': leave_dict['事假'],
+                                # 'annual_leave_total': leave_dict['年假'],
+                                # 'marriage_leave_total': leave_dict['婚假'],
+                                # 'bereavement_leave_total': leave_dict['丧假'],
+                                # 'paternity_leave_total': leave_dict['陪产假'],
+                                # 'maternity_leave_total': leave_dict['产假'],
+                                # 'work_related_injury_leave_total': leave_dict['工伤假'],
+                                # 'home_leave_total': leave_dict['探亲假'],
+                                # 'travelling_total': leave_dict['出差（请假）'],
+                                # 'other_leave_total': leave_dict['其他假'],
                                 }
         return attendance_total_ins
 

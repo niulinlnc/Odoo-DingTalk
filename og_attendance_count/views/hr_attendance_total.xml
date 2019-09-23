@@ -131,7 +131,7 @@ limitations under the License.
                     请注意: 当选择为"从钉钉考勤计算"时，请确保你已经安装了钉钉模块并启用考勤功能！Odoo考勤也是一样；否则系统将会提示错误！！
                 </p>
                 <footer>
-                    <button string="立即计算" name="compute_attendance_result" type="object" class="oe_highlight"/>
+                    <button string="立即计算" name="compute_attendance_total" type="object" class="oe_highlight"/>
                     <button string="取消" class="btn btn-default" special="cancel"/>
                 </footer>
             </form>

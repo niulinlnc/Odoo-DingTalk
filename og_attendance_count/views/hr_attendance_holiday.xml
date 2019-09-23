@@ -20,7 +20,7 @@ limitations under the License.
             <tree default_order="id desc" editable="top">
                 <field name="holiday_name" required="1"/>
                 <field name="holiday_date" required="1"/>
-                <field name="holiday_status" required="1"/>
+                <field name="is_active" widget="boolean_toggle"/>
             </tree>
         </field>
     </record>

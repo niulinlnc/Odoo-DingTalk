@@ -24,6 +24,7 @@
                 <field name="manager_list"/>
                 <field name="dept_name_list"/>
                 <field name="emp_ids"/>
+                <field name="is_active" widget="boolean_toggle"/>
             </tree>
         </field>
     </record>
@@ -41,7 +42,9 @@
                             <field name="manager_list" widget="many2many_tags"/>
                         </group>
                         <group>
+                            <field name="is_active" widget="boolean_toggle"/>
                             <field name="member_count"/>
+                            <field name="rule_id"/>
                         </group>
                     </group>
                     <notebook>
@@ -54,7 +57,7 @@
                         <page string="不参与考勤成员">
                             <field name="no_attendance_emp_ids" widget="many2many_tags"/>
                         </page>
-                        <page string="周考勤班次">
+                        <page string="周考勤班次" attrs="{'invisible': [('attendance_type', '!=', 'FIXED')]}">
                             <field name="class_list_ids">
                                 <tree editable="bottom">
                                     <field name="week_name"/>
