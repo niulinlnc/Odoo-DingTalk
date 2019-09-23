@@ -67,7 +67,7 @@ class HrAttendanceGroup(models.Model):
     @api.onchange('dept_name_list')
     def onchange_dept_name_list(self):
         if self.dept_name_list:
-            deps = self.get_list_children_dept(self.dept_name_list)
+            deps = self.get_dept_total(self.dept_name_list)
             emps = self.env['hr.employee'].search([('department_id', 'in', deps)])
             if len(emps) > 0:
                 self.emp_ids = [(6, 0, emps.ids)]
@@ -77,19 +77,20 @@ class HrAttendanceGroup(models.Model):
             self.member_count = False
 
     @api.model
-    def get_list_children_dept(self, deps):
+    def get_dept_total(self, dept_name_list):
         """
         获取部门下的子孙部门列表
         :param timeNum:
         :return:
         """
-        deps = self.env['hr.department'].sudo().search([('parent_id', 'in', deps.ids)])
         dept_list = list()
-        i = 1
-        while i < 5:
+        for dep in dept_name_list:
+            dept_list.append(dep.id)
+        i = 0
+        while i <= 5:
+            deps = self.env['hr.department'].sudo().search([('parent_id', 'in', dept_list)])
             for dep in deps:
                 dept_list.append(dep.id)
-            deps = self.env['hr.department'].sudo().search([('parent_id', 'in', dept_list)])
             i += 1
         return dept_list
 
