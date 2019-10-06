@@ -14,17 +14,30 @@
 -->
 <odoo>
     <data>
-    
-        <menuitem name="考勤计算" id="attendance_count_main_menu" web_icon="og_attendance_count,static/description/icon.png"
-                  groups="og_attendance_count.user_groups" sequence="15"/>
+
+        <menuitem name="考勤计算" id="attendance_count_main_menu" web_icon="og_attendance_count,static/description/icon.png" groups="og_attendance_count.user_groups" sequence="15"/>
 
         <menuitem name="考勤设置" id="attendance_count_setting_menu" parent="attendance_count_main_menu" sequence="1"/>
 
         <menuitem name="排班表" id="attendance_count_plan_menu" parent="attendance_count_main_menu" sequence="2"/>
-        
+
         <menuitem name="考勤记录" id="attendance_count_record_menu" parent="attendance_count_main_menu" sequence="3"/>
 
         <menuitem name="考勤统计" id="attendance_count_total_menu" parent="attendance_count_main_menu" sequence="4"/>
+
+        <!-- 在智能人事增加相应菜单 -->
+        <menuitem name="通用考勤" id="hrm_og_attendance_menu" parent="dingding_hrm.zhineng_hrm_menu"/>
+        <!-- 考勤设置 -->
+        <menuitem name="考勤设置" id="hrm_og_attendance_setting_menu" parent="hrm_og_attendance_menu"/>
+        <menuitem id="hrm_og_attendance_groups_menu" name="考勤组" parent="hrm_og_attendance_setting_menu" sequence="1" action="og_attendance_count.hr_attendance_group_action"/>
+        <menuitem id="hrm_og_attendance_class_menu" name="班次" parent="hrm_og_attendance_setting_menu" sequence="2" action="og_attendance_count.hr_attendance_class_action"/>
+        <menuitem id="hrm_og_attendance_rules_menu" name="考勤规则" parent="hrm_og_attendance_setting_menu" sequence="3" action="og_attendance_count.hr_attendance_rules_action"/>
+        <menuitem id="hrm_og_attendance_plan_menu" name="排班列表" parent="hrm_og_attendance_setting_menu" sequence="4" action="og_attendance_count.hr_attendance_plan_action"/>
+        <menuitem id="hrm_og_attendance_holiday_menu" name="节假日" parent="hrm_og_attendance_setting_menu" sequence="5" action="og_attendance_count.hr_attendance_holiday_action"/>
+        <!-- 考勤报表 -->
+        <menuitem name="考勤统计" id="hrm_og_attendance_count_menu" parent="hrm_og_attendance_menu"/>
+        <menuitem id="hrm_og_attendance_info_menu" name="考勤日报表" parent="hrm_og_attendance_count_menu" sequence="1" action="og_attendance_count.hr_attendance_info_action"/>
+        <menuitem id="hrm_og_attendance_total_menu" name="考勤月报表" parent="hrm_og_attendance_count_menu" sequence="2" action="og_attendance_count.hr_attendance_total_action"/>
 
     </data>
 </odoo>
