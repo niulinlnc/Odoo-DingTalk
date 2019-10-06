@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Copyright (C) 2019 SuXueFeng
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<template id="template" xml:space="preserve">
+
+    <t t-name="OdooHrManageListView.hr_attendance_plan_but">
+        <button type="button" class="btn btn-secondary compute_attendance_plan_buttons_but_class" groups="og_attendance_count.manage_groups">
+            生成排班表
+        </button>
+    </t>
+    <t t-extend="ListView.buttons" t-name="OdooHrManageListView.hr_attendance_plan_buttons">
+        <t t-jquery="button.o_list_button_add" t-operation="after">
+            <t t-js="ctx">
+                if (window.odoo._modules.indexOf("base_import") >= 0) {
+                    r.push(context.engine.tools.call(context, 'ImportView.import_button', dict));
+                };
+            </t>
+            <t t-call="OdooHrManageListView.hr_attendance_plan_but"/>
+        </t>
+    </t>
+
+    <t t-name="OdooHrManageListView.hr_attendance_info_but">
+        <button type="button" class="btn btn-secondary compute_attendance_info_buttons_but_class" groups="og_attendance_count.manage_groups">
+            计算考勤结果
+        </button>
+    </t>
+    <t t-extend="ListView.buttons" t-name="OdooHrManageListView.hr_attendance_info_buttons">
+        <t t-jquery="button.o_list_button_add" t-operation="after">
+            <t t-js="ctx">
+                if (window.odoo._modules.indexOf("base_import") >= 0) {
+                    r.push(context.engine.tools.call(context, 'ImportView.import_button', dict));
+                };
+            </t>
+            <t t-call="OdooHrManageListView.hr_attendance_info_but"/>
+        </t>
+    </t>
+
+    <t t-name="OdooHrManageListView.hr_attendance_total_but">
+        <button type="button" class="btn btn-secondary compute_attendance_total_buttons_but_class" groups="og_attendance_count.manage_groups">
+            汇总考勤结果
+        </button>
+    </t>
+    <t t-extend="ListView.buttons" t-name="OdooHrManageListView.hr_attendance_total_buttons">
+        <t t-jquery="button.o_list_button_add" t-operation="after">
+            <t t-js="ctx">
+                if (window.odoo._modules.indexOf("base_import") >= 0) {
+                    r.push(context.engine.tools.call(context, 'ImportView.import_button', dict));
+                };
+            </t>
+            <t t-call="OdooHrManageListView.hr_attendance_total_but"/>
+        </t>
+    </t>
+
+</template>
+
+

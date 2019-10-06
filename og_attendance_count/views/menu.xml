@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Copyright (C) 2019 SuXueFeng
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<odoo>
+    <data>
+    
+        <menuitem name="考勤计算" id="attendance_count_main_menu" web_icon="og_attendance_count,static/description/icon.png"
+                  groups="og_attendance_count.user_groups" sequence="15"/>
+
+        <menuitem name="考勤设置" id="attendance_count_setting_menu" parent="attendance_count_main_menu" sequence="1"/>
+
+        <menuitem name="排班表" id="attendance_count_plan_menu" parent="attendance_count_main_menu" sequence="2"/>
+        
+        <menuitem name="考勤记录" id="attendance_count_record_menu" parent="attendance_count_main_menu" sequence="3"/>
+
+        <menuitem name="考勤统计" id="attendance_count_total_menu" parent="attendance_count_main_menu" sequence="4"/>
+
+    </data>
+</odoo>
