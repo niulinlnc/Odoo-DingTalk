@@ -44,6 +44,7 @@
         'views/hr_attendance_holiday.xml',
         'views/hr_attendance_rules.xml',
         'views/hr_attendance_total.xml',
+        'views/hrm_menu_ux.xml',
     ],
     'qweb': [
         'static/xml/*.xml'
