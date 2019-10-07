@@ -19,8 +19,8 @@
         <menuitem name="通用考勤" id="hrm_og_attendance_menu" parent="dingding_hrm.zhineng_hrm_menu"/>
         <!-- 考勤设置 -->
         <menuitem name="考勤设置" id="hrm_og_attendance_setting_menu" parent="hrm_og_attendance_menu"/>
-        <menuitem id="hrm_og_attendance_groups_menu" name="考勤组" parent="hrm_og_attendance_setting_menu" sequence="1" action="og_attendance_count.hr_attendance_group_action"/>
-        <menuitem id="hrm_og_attendance_class_menu" name="班次" parent="hrm_og_attendance_setting_menu" sequence="2" action="og_attendance_count.hr_attendance_class_action"/>
+        <menuitem id="hrm_og_attendance_class_menu" name="班次" parent="hrm_og_attendance_setting_menu" sequence="1" action="og_attendance_count.hr_attendance_class_action"/>
+        <menuitem id="hrm_og_attendance_groups_menu" name="考勤组" parent="hrm_og_attendance_setting_menu" sequence="2" action="og_attendance_count.hr_attendance_group_action"/>
         <menuitem id="hrm_og_attendance_rules_menu" name="考勤规则" parent="hrm_og_attendance_setting_menu" sequence="3" action="og_attendance_count.hr_attendance_rules_action"/>
         <menuitem id="hrm_og_attendance_plan_menu" name="排班列表" parent="hrm_og_attendance_setting_menu" sequence="4" action="og_attendance_count.hr_attendance_plan_action"/>
         <menuitem id="hrm_og_attendance_holiday_menu" name="节假日" parent="hrm_og_attendance_setting_menu" sequence="5" action="og_attendance_count.hr_attendance_holiday_action"/>

@@ -170,7 +170,7 @@ class EmployeeRosterSynchronous(models.TransientModel):
                 # logging.info(">>>获取花名册返回结果%s", result)
                 if result.get('emp_field_info_v_o'):
                     for rec in result.get('emp_field_info_v_o'):
-                        logging.info(">>>当前离职员工%s", rec)
+                        # logging.info(">>>当前离职员工%s", rec)
                         roster_data = {
                             'emp_id': emp_data[rec['userid']] if rec['userid'] in emp_data else False,
                             'ding_userid': rec['userid']
