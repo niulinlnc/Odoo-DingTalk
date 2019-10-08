@@ -83,6 +83,6 @@
         </field>
     </record> -->
 
-    <menuitem id="hr_attendance_class_menu" name="班次" parent="attendance_count_setting_menu" sequence="2" action="hr_attendance_class_action"/>
+    <menuitem id="hr_attendance_class_menu" name="班次" parent="attendance_count_setting_menu" sequence="1" action="hr_attendance_class_action"/>
 
 </odoo>
