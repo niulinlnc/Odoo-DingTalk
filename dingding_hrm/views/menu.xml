@@ -39,4 +39,6 @@
     <!-- 考勤统计 -->
     <menuitem name="考勤统计" id="hrm_employee_attendance_analysis_menu" parent="hrm_employee_analysis_menu" action="dingding_attendance.hr_attendance_total_action"/>
 
+    <menuitem name="考勤统计" id="hrm_employee_attendance_analysis_menu" parent="hrm_employee_analysis_menu" action="odoo_wage_manage.wage_employee_attendance_annal_action"/>
+
 </odoo>
