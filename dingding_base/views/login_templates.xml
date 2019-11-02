@@ -27,7 +27,8 @@
                     <t t-esc="message"/>
                 </p>
                 <t t-call="web.layout">
-                    <script src="//g.alicdn.com/dingding/dinglogin/0.0.5/ddLogin.js"></script>
+                    <script src="https://g.alicdn.com/dingding/dinglogin/0.0.5/ddLogin.js"></script>
+                    <script type="text/javascript" src="/web/static/lib/jquery/jquery.js"></script>
                     <script type="text/javascript" src="/dingding_base/static/src/js/dingding_login.js"></script>
                 </t>
                 <div class="text-center oe_login_buttons pt-3">
@@ -36,7 +37,6 @@
             </form>
         </t>
     </template>
-
 
     <template id="dingding_base.auto_login_signup">
         <style>
