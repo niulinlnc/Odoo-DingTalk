@@ -139,7 +139,7 @@ class ChangeMobile(models.TransientModel):
                             employee.sudo().write(
                                 {'mobile_phone': self.new_mobile})
                             employee.update_ding_employee()  # 换号码后把员工其他信息同步到钉钉
-                            employee.update_employee_from_dingding()  # 换号码后从钉钉获取新手机的激活状态
+                            employee.update_employee_from_dingtalk()  # 换号码后从钉钉获取新手机的激活状态
                             employee.message_post(body=_("通过删除后重建更换手机号为:{}").format(
                                 self.new_mobile), message_type='notification')
                             logging.info(">>>重新建立钉钉号成功，手机号已成功更改！")

@@ -153,62 +153,54 @@ class HrEmployee(models.Model):
                 self._delete_dingtalk_employee_by_id(res.ding_id)
             return super(HrEmployee, self).unlink()
 
-    # TODO 从钉钉手动获取用户详情
-    def update_employee_from_dingding(self):
+    # 从钉钉手动获取用户详情
+    def update_employee_from_dingtalk(self):
         """
         从钉钉获取用户详情
         :return:
         """
-        raise UserError(_("未维护功能！"))
-        url = self.env['dingding.parameter'].search([('key', '=', 'user_get')]).value
-        token = self.env['dingding.parameter'].search([('key', '=', 'token')]).value
+        client = dingtalk_api.get_client(self)
         for employee in self:
-            data = {'userid': employee.ding_id}
             try:
-                result = requests.get(url="{}{}".format(url, token), params=data, timeout=20)
-                result = json.loads(result.text)
-                if result.get('errcode') == 0:
-                    data = {
-                        'name': result.get('name'),  # 员工名称
-                        'ding_id': result.get('userid'),  # 钉钉用户Id
-                        'din_unionid': result.get('unionid'),  # 钉钉唯一标识
-                        'mobile_phone': result.get('mobile'),  # 手机号
-                        'work_phone': result.get('tel'),  # 分机号
-                        'work_location': result.get('workPlace'),  # 办公地址
-                        'notes': result.get('remark'),  # 备注
-                        'job_title': result.get('position'),  # 职位
-                        'work_email': result.get('email'),  # email
-                        'din_jobnumber': result.get('jobnumber'),  # 工号
-                        'din_avatar': result.get('avatar') if result.get('avatar') else '',  # 钉钉头像url
-                        'din_isSenior': result.get('isSenior'),  # 高管模式
-                        'din_isAdmin': result.get('isAdmin'),  # 是管理员
-                        'din_isBoss': result.get('isBoss'),  # 是老板
-                        'din_isHide': result.get('isHide'),  # 隐藏手机号
-                        'din_active': result.get('active'),  # 是否激活
-                        'din_isLeaderInDepts': result.get('isLeaderInDepts'),  # 是否为部门主管
-                        'din_orderInDepts': result.get('orderInDepts'),  # 所在部门序位
-                    }
-                    # 支持显示国际手机号
-                    if result.get('stateCode') != '86':
-                        data.update({
-                            'mobile_phone': '+{}-{}'.format(result.get('stateCode'), result.get('mobile')),
-                        })
-                    if result.get('hiredDate'):
-                        date_str = self.timestamp_to_local_date(result.get('hiredDate'))
-                        data.update({
-                            'din_hiredDate': date_str,
-                        })
-                    if result.get('department'):
-                        dep_ding_ids = result.get('department')
-                        dep_list = self.env['hr.department'].sudo().search([('ding_id', 'in', dep_ding_ids)])
-                        data.update({'department_ids': [(6, 0, dep_list.ids)]})
-                    employee.sudo().write(data)
-                else:
-                    _logger.info("从钉钉同步员工时发生意外，原因为:{}".format(result.get('errmsg')))
-                    employee.message_post(body="从钉钉同步员工失败:{}".format(result.get('errmsg')), message_type='notification')
+                result = client.user.get(employee.ding_id)
+                data = {
+                    'name': result.get('name'),  # 员工名称
+                    'ding_id': result.get('userid'),  # 钉钉用户Id
+                    'din_unionid': result.get('unionid'),  # 钉钉唯一标识
+                    'mobile_phone': result.get('mobile'),  # 手机号
+                    'work_phone': result.get('tel'),  # 分机号
+                    'work_location': result.get('workPlace'),  # 办公地址
+                    'notes': result.get('remark'),  # 备注
+                    'job_title': result.get('position'),  # 职位
+                    'work_email': result.get('email'),  # email
+                    'din_jobnumber': result.get('jobnumber'),  # 工号
+                    'ding_avatar': result.get('avatar') if result.get('avatar') else '',  # 钉钉头像url
+                    'din_isSenior': result.get('isSenior'),  # 高管模式
+                    'din_isAdmin': result.get('isAdmin'),  # 是管理员
+                    'din_isBoss': result.get('isBoss'),  # 是老板
+                    'din_isHide': result.get('isHide'),  # 隐藏手机号
+                    'din_active': result.get('active'),  # 是否激活
+                    'din_isLeaderInDepts': result.get('isLeaderInDepts'),  # 是否为部门主管
+                    'din_orderInDepts': result.get('orderInDepts'),  # 所在部门序位
+                }
+                # 支持显示国际手机号
+                if result.get('stateCode') != '86':
+                    data.update({
+                        'mobile_phone': '+{}-{}'.format(result.get('stateCode'), result.get('mobile')),
+                    })
+                if result.get('hiredDate'):
+                    date_str = dingtalk_api.timestamp_to_local_date(self, result.get('hiredDate'))
+                    data.update({
+                        'din_hiredDate': date_str,
+                    })
+                if result.get('department'):
+                    dep_ding_ids = result.get('department')
+                    dep_list = self.env['hr.department'].sudo().search([('ding_id', 'in', dep_ding_ids)])
+                    data.update({'department_ids': [(6, 0, dep_list.ids)]})
+                employee.sudo().write(data)
 
-            except ReadTimeout:
-                raise UserError("从钉钉同步员工详情超时！")
+            except Exception as e:
+                raise UserError(e)
 
     def using_dingding_avatar(self):
         """
