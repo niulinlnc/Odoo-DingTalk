@@ -10,7 +10,7 @@
     'website': "https://www.sxfblog.com",
     'category': 'dingtalk',
     'version': '13.0',
-    'depends': ['base', 'web_progress'],
+    'depends': ['base'],
     'installable': True,
     'application': False,
     'auto_install': False,
