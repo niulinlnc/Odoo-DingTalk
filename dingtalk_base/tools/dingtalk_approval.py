@@ -138,10 +138,12 @@ def get_form_values(self, approval):
                         fcv_line_list.append({'name': list_id.dd_field, 'value': field_list})
                     # date类型
                     elif list_id.field_id.ttype == 'date':
-                        fcv_line_list.append({'name': list_id.dd_field, 'value': model_line[list_id.field_id.name].strftime('%Y-%m-%d')})
+                        fcv_line_list.append(
+                            {'name': list_id.dd_field, 'value': model_line[list_id.field_id.name].strftime('%Y-%m-%d')})
                     # datetime类型
                     elif list_id.field_id.ttype == 'datetime':
-                        fcv_line_list.append({'name': list_id.dd_field, 'value': model_line[list_id.field_id.name].strftime('%Y-%m-%d %H:%M')})
+                        fcv_line_list.append(
+                            {'name': list_id.dd_field, 'value': model_line[list_id.field_id.name].strftime('%Y-%m-%d %H:%M')})
                     # char、text、integer、float、monetary、selection类型
                     elif list_id.field_id.ttype in ['char', 'text', 'integer', 'float', 'monetary', 'selection']:
                         fcv_line_list.append({'name': list_id.dd_field, 'value': model_line[list_id.field_id.name]})
@@ -193,5 +195,4 @@ def _restart_commit_approval(self):
 
 
 setattr(Model, 'restart_commit_approval', _restart_commit_approval)
-
 
