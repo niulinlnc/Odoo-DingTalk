@@ -16,6 +16,8 @@ class DingTalkReportListTran(models.TransientModel):
     _name = 'dingtalk.report.list.tran'
     _description = "获取钉钉日志"
 
+    HISTORY_KEY = []
+
     category_id = fields.Many2one(comodel_name='dingtalk.report.category', string=u'系统日志类型')
     report_id = fields.Many2one(comodel_name='dingtalk.report.template', string=u'钉钉日志模板', required=True)
     start_time = fields.Date(string=u'开始时间', required=True)
@@ -61,7 +63,12 @@ class DingTalkReportListTran(models.TransientModel):
                             # 封装字段数据
                             report_data = dict()
                             for contents in data.get('contents'):
-                                report_data.update({report_dict.get(contents.get('key')): contents.get('value')})
+                                # 修复日志字段历史曾用名称造成的报错与记录丢失
+                                if report_dict.get(contents.get('key')):
+                                    report_data.update({report_dict.get(contents.get('key')): contents.get('value')})
+                                for key in self.HISTORY_KEY:
+                                    if contents.get('key') == key[0]:
+                                        report_data.update({report_dict.get(key[1]): contents.get('value')})
                             # 读取创建人
                             employee = self.env['hr.employee'].search(
                                 [('ding_id', '=', data.get('creator_id'))], limit=1)

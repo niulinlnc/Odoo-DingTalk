@@ -67,7 +67,7 @@ def _commit_dingtalk_approval(self):
                 getattr(self, method)()
             except Exception as e:
                 _logger.info(e)
-    self.message_post(body=u"提交钉钉成功，请等待审批人进行审批！", message_type='notification')
+    # self.message_post(body=u"提交钉钉成功，请等待审批人进行审批！", message_type='notification')
     return True
 
 
