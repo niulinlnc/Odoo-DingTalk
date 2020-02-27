@@ -98,6 +98,7 @@ class DingTalkReportListTran(models.TransientModel):
                                 [('report_id', '=', data.get('report_id'))])
                             if not reports:
                                 self.env['dingtalk.report.report'].create(report_data)
+                            self.env['dingtalk.report.report'].update(report_data)
                         # 是否还有下一页
                         if result.get('has_more'):
                             cursor = result.get('next_cursor')
