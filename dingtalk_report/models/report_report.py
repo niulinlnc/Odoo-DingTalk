@@ -16,7 +16,7 @@ class DingTalkReport(models.Model):
 
     name = fields.Char(string='主题')
     category_id = fields.Many2one('dingtalk.report.category', string="日志类型", required=True)
-    date = fields.Date(string="日期", default=fields.Date.today())
+    date = fields.Date(string="日期", default=str(fields.datetime.now()))
     attachment_number = fields.Integer('附件数', compute='_compute_attachment_number')
     today_work = fields.Text(string=u'今日完成工作')
     no_compute_work = fields.Text(string=u'未完成工作')
