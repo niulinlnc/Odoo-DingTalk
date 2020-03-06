@@ -100,6 +100,10 @@ class DingTalkHrSynchronous(models.TransientModel):
                         'manager_user_ids': [(6, 0, manage_users.ids)],
                         'manager_id': manage_users[0].id
                     })
+            if result.get('deptHiding') == 'true':
+                dept_date.update({'is_hiding': True})
+            if result.get('order'):
+                dept_date.update({'ding_order': result.get('order')})
             if dept_date:
                 department.write(dept_date)
         self.env.cr.commit()
