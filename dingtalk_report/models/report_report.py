@@ -16,7 +16,7 @@ class DingTalkReport(models.Model):
 
     name = fields.Char(string='主题')
     category_id = fields.Many2one('dingtalk.report.category', string="日志类型", required=True)
-    date = fields.Date(string="日期", default=fields.Date.today())
+    date = fields.Date(string="日期", default=str(fields.datetime.now()))
     attachment_number = fields.Integer('附件数', compute='_compute_attachment_number')
     today_work = fields.Text(string=u'今日完成工作')
     no_compute_work = fields.Text(string=u'未完成工作')
@@ -59,6 +59,7 @@ class DingTalkReport(models.Model):
 
     report_id = fields.Char(string='钉钉日志ID')
     employee_id = fields.Many2one(comodel_name='hr.employee', string=u'填报人', default=lambda self: self.env.user.employee_id)
+    department_id = fields.Many2one(comodel_name='hr.department', string=u'所在部门')
     report_time = fields.Datetime(string=u'填报时间', default=fields.Datetime.now())
     image_ids = fields.One2many(comodel_name='dingtalk.report.image', inverse_name='report_id', string=u'图片列表', ondelete='cascade')
     image1_url = fields.Char(string='图片1链接')
