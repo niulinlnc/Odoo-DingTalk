@@ -59,6 +59,7 @@ class DingTalkReport(models.Model):
 
     report_id = fields.Char(string='钉钉日志ID')
     employee_id = fields.Many2one(comodel_name='hr.employee', string=u'填报人', default=lambda self: self.env.user.employee_id)
+    department_id = fields.Many2one(comodel_name='hr.department', string=u'所在部门')
     report_time = fields.Datetime(string=u'填报时间', default=fields.Datetime.now())
     image_ids = fields.One2many(comodel_name='dingtalk.report.image', inverse_name='report_id', string=u'图片列表', ondelete='cascade')
     image1_url = fields.Char(string='图片1链接')

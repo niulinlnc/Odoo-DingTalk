@@ -76,6 +76,7 @@ class DingTalkReportListTran(models.TransientModel):
                                 'name': data.get('template_name'),
                                 'category_id': self.report_id.category_id.id or False,
                                 'employee_id': employee.id or False,
+                                'department_id': employee.department_id or False,
                                 'report_time': dingtalk_api.timestamp_to_utc_date(data.get('create_time')) or fields.datetime.now(),
                                 'report_id': data.get('report_id'),
                             })
