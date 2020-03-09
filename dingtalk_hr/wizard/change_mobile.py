@@ -113,7 +113,7 @@ class ChangeMobile(models.TransientModel):
                 if employee:
                     if result.get('errcode') == 0:
                         employee.message_post(
-                            body=_("原号码已经在钉钉上删除，等待新建钉钉号"), message_type='notification')
+                            body=_("原号码{}已经在钉钉上删除，等待新建钉钉号").format(self.old_mobile), message_type='notification')
                         logging.info(">>>原号码已经在钉钉上删除，等待新建钉钉号")
                     else:
                         employee.message_post(
