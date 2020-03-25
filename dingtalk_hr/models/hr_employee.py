@@ -67,6 +67,7 @@ class HrEmployee(models.Model):
             else:
                 department_list.append(res.department_id.ding_id)
             data = {
+                'userid': res.ding_id if res.ding_id else '',  # 钉钉ID
                 'name': res.name,  # 名称
                 'department': department_list,  # 部门
                 'position': res.job_title if res.job_title else '',  # 职位
