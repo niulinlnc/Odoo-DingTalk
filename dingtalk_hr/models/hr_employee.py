@@ -77,7 +77,7 @@ class HrEmployee(models.Model):
                 'remark': res.notes if res.notes else '',  # 备注
                 'email': res.work_email if res.work_email else '',  # 邮箱
                 'jobnumber': res.din_jobnumber if res.din_jobnumber else '',  # 工号
-                'hiredDate': dingtalk_api.datetime_to_local_stamp(res.din_hiredDate) if res.din_hiredDate else '',  # 入职日期
+                'hiredDate': dingtalk_api.datetime_to_stamp(res.din_hiredDate) if res.din_hiredDate else '',  # 入职日期
             }
             try:
                 result = client.user.create(data)
