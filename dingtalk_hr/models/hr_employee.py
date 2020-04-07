@@ -127,6 +127,10 @@ class HrEmployee(models.Model):
             _logger.info(_("已在钉钉上更新Id:{}的员工".format(self.ding_id)))
         except Exception as e:
             raise UserError(e)
+        finally:
+            if result.get('errcode') == 60121:
+                self.message_post(body=u"找不到该用户，将进行恢复", message_type='notification')
+                self.create_ding_employee()
         return {'type': 'ir.actions.act_window_close'}
 
     def delete_ding_employee(self):
