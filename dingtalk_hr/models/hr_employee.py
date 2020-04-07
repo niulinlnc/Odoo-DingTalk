@@ -128,6 +128,7 @@ class HrEmployee(models.Model):
         except Exception as e:
             raise UserError(e)
         finally:
+            result = client.user.update(data)
             if result.get('errcode') == 60121:
                 self.message_post(body=u"找不到该用户，将进行恢复", message_type='notification')
                 self.create_ding_employee()
