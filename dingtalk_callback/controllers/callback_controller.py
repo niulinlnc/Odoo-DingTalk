@@ -178,7 +178,7 @@ class DingTalkCallBackManage(http.Controller):
 
     def get_employee_info(self, user_id, event_type):
         try:
-            result = dingtalk_api.get_client(self).user.get(user_id)
+            result = dingtalk_api.get_client(request).user.get(user_id)
         except Exception as e:
             _logger.info("获取用户详情失败：{}".format(e))
             return
