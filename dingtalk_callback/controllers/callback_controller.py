@@ -233,7 +233,7 @@ class DingTalkCallBackManage(http.Controller):
         :return:
         """
         try:
-            result = dingtalk_api.get_client(self).department.get(dept_id)
+            result = dingtalk_api.get_client(request).department.get(dept_id)
         except Exception as e:
             _logger.info("获取用户详情失败：{}".format(e))
             return
