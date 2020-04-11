@@ -209,7 +209,7 @@ class DingTalkCallBackManage(http.Controller):
                     'mobile_phone': '+{}-{}'.format(result.get('stateCode'), result.get('mobile')),
                 })
             if result.get('hiredDate'):
-                date_str = dingtalk_api.timestamp_to_local_date(self, result.get('hiredDate'))
+                date_str = dingtalk_api.timestamp_to_local_date(request, result.get('hiredDate'))
                 data.update({'din_hiredDate': date_str})
             if result.get('department'):
                 dep_ding_ids = result.get('department')
