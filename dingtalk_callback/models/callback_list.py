@@ -18,6 +18,7 @@ class DingTalkCallbackList(models.Model):
         ('01', '群会话事件'),
         ('02', '签到事件'),
         ('03', '审批事件'),
+        ('04', '考勤事件'),
     ]
 
     name = fields.Char(string='类型名')

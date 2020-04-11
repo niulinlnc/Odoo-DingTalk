@@ -154,5 +154,13 @@
             <field name="call_back_url">web/dingtalk/callback/do</field>
         </record>
 
+        <!--考勤事件-->
+        <record id="dingtalk_users_callback_attendance_check" model="dingtalk.callback.list">
+            <field name="name">打卡</field>
+            <field name="value">attendance_check_record</field>
+            <field name="value_type">04</field>
+            <field name="call_back_url">web/dingtalk/callback/do</field>
+        </record>
+
     </data>
 </odoo>

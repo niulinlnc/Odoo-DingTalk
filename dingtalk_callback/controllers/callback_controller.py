@@ -59,6 +59,12 @@ class DingTalkCallBackManage(http.Controller):
                 # 部门增加和变更时获取该部门详情
                 for dept_id in dept_ids:
                     self.get_department_info(dept_id, event_type)
+        
+        # -----打卡-----------
+        elif event_type == 'attendance_check_record':
+            dataList = result_msg.get('DataList')
+            print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',dataList)
+            # request.env['dingding.signs.list'].sudo().get_signs_by_user(result_msg.get('StaffId'), result_msg.get('TimeStamp'))
         # # -----审批-----------
         # elif event_type == 'bpms_task_change':
         #     self.bpms_task_change(result_msg)

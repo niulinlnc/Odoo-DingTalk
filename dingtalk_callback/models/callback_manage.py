@@ -38,6 +38,7 @@ class DingTalkCallback(models.Model):
         ('01', '群会话事件'),
         ('02', '签到事件'),
         ('03', '审批事件'),
+        ('04', '考勤事件'),
     ]
 
     value_type = fields.Selection(string=u'注册事件类型', selection=ValueType, default='all', copy=False, required=True)
