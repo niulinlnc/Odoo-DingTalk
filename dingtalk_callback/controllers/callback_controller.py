@@ -33,6 +33,7 @@ class DingTalkCallBackManage(http.Controller):
         logging.info(">>>encrypt_result:{}".format(encrypt_result))
         result_msg = json.loads(encrypt_result)
         event_type = result_msg.get('EventType')
+        logging.info(">>>>>>>>>>>>>>>>>>>>>>>result_msg:{}".format(result_msg))
         # --------通讯录------
         if event_type == 'user_add_org' or event_type == 'user_modify_org' or event_type == 'user_leave_org':
             if event_type == 'user_leave_org':
