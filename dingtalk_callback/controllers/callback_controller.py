@@ -253,7 +253,7 @@ class DingTalkCallBackManage(http.Controller):
             manage_users = request.env['hr.employee'].sudo().search([('ding_id', 'in', depts)])
             data.update({
                 'manager_user_ids': [(6, 0, manage_users.ids)],
-                'manager_id': manage_users[0].id
+                'manager_id': manage_users[0].id if manage_users else ''
             })
             if event_type == 'org_dept_create':
                 request.env['hr.department'].sudo().create(data)
