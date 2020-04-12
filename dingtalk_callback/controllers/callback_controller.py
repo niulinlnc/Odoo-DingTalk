@@ -62,6 +62,7 @@ class DingTalkCallBackManage(http.Controller):
         
         # -----打卡-----------
         elif event_type == 'attendance_check_record':
+            logging.info(">>>>>>>触发打卡事件")
             dataList = result_msg.get('DataList')
             print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',dataList)
             # request.env['dingding.signs.list'].sudo().get_signs_by_user(result_msg.get('StaffId'), result_msg.get('TimeStamp'))
