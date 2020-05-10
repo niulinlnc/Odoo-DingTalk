@@ -60,25 +60,19 @@ class DingTalkCallBackManage(http.Controller):
                 # 部门增加和变更时获取该部门详情
                 for dept_id in dept_ids:
                     self.get_department_info(dept_id, event_type)
-        
-        # -----打卡-----------
-        elif event_type == 'attendance_check_record':
-            logging.info(">>>>>>>触发打卡事件")
-            dataList = result_msg.get('DataList')
-            print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',dataList)
-            # request.env['dingding.signs.list'].sudo().get_signs_by_user(result_msg.get('StaffId'), result_msg.get('TimeStamp'))
         # # -----审批-----------
-        # elif event_type == 'bpms_task_change':
-        #     self.bpms_task_change(result_msg)
-        # elif event_type == 'bpms_instance_change':
-        #     self.bpms_instance_change(result_msg)
-        # # # -----用户签到-----------
-        # elif event_type == 'check_in':
-        #     request.env['dingding.signs.list'].sudo().get_signs_by_user(result_msg.get('StaffId'), result_msg.get('TimeStamp'))
-        # # # -------群会话事件----------
-        # elif event_type == 'chat_add_member' or event_type == 'chat_remove_member' or event_type == 'chat_quit' or \
-        #         event_type == 'chat_update_owner' or event_type == 'chat_update_title' or event_type == 'chat_disband':
+        elif event_type == 'bpms_task_change':
+            self.bpms_task_change(result_msg)
+        elif event_type == 'bpms_instance_change':
+            self.bpms_instance_change(result_msg)
+        # -----用户签到-----------
+        elif event_type == 'check_in':
+            self.user_check_in(result_msg.get('StaffId'), result_msg.get('TimeStamp'))
+        # -------群会话事件----------
+        elif event_type == 'chat_add_member' or event_type == 'chat_remove_member' or event_type == 'chat_quit' or \
+                event_type == 'chat_update_owner' or event_type == 'chat_update_title' or event_type == 'chat_disband':
         #     request.env['dingding.chat'].sudo().process_dingding_chat_onchange(result_msg)
+            self.chat_info_onchange(result_msg)
         # 返回加密结果
         return self.result_success(callback.aes_key, callback.token, corp_id)
 
@@ -125,28 +119,7 @@ class DingTalkCallBackManage(http.Controller):
         :param msg:
         :return:
         """
-        now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        temp = request.env['dingding.approval.template'].sudo().search([('process_code', '=', msg.get('processCode'))])
-        if temp:
-            approval = request.env['dingding.approval.control'].sudo().search([('template_id', '=', temp[0].id)])
-            if approval:
-                oa_model = request.env[approval.oa_model_id.model].sudo().search([('dd_process_instance', '=', msg.get('processInstanceId'))])
-                if oa_model:
-                    model_name = oa_model._name.replace('.', '_')
-                    if msg.get('type') == 'start':
-                        dobys = "审批流程开始-时间:{}".format(now_time)
-                        # request.env.cr.execute("UPDATE {} SET dd_doc_state='审批流程开始' WHERE id={}".format(model_name, oa_model[0].id))
-                        oa_model.sudo().message_post(body=dobys, message_type='notification')
-                    else:
-                        request.env.cr.execute("""
-                            UPDATE {} SET 
-                                dd_approval_state='stop', 
-                                dd_doc_state='审批结束',
-                                dd_approval_result='{}' 
-                            WHERE id={}""".format(model_name, msg.get('result'), oa_model[0].id))
-                        dobys = "审批流程结束-时间:{}".format(now_time)
-                        oa_model.sudo().message_post(body=dobys, message_type='notification')
-        return True
+        pass
 
     def bpms_task_change(self, msg):
         """
@@ -155,28 +128,7 @@ class DingTalkCallBackManage(http.Controller):
 
         :return:
         """
-        now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        temp = request.env['dingding.approval.template'].sudo().search([('process_code', '=', msg.get('processCode'))], limit=1)
-        if temp:
-            approval = request.env['dingding.approval.control'].sudo().search([('template_id', '=', temp.id)])
-            if approval:
-                oa_model = request.env[approval.oa_model_id.model].sudo().search([('dd_process_instance', '=', msg.get('processInstanceId'))])
-                emp = request.env['hr.employee'].sudo().search([('ding_id', '=', msg.get('staffId'))])
-                model_name = oa_model._name.replace('.', '_')
-                if msg.get('type') == 'start' and oa_model:
-                    if oa_model.sudo().dd_approval_state != 'stop':
-                        doc_text = '待<span style="color:red">{}</span>审批'.format(emp.name if emp else '')
-                        request.env.cr.execute(
-                            "UPDATE {} SET dd_doc_state='{}' WHERE id={}".format(model_name, doc_text, oa_model[0].id))
-                    dobys = "{}: 等待{}审批".format(now_time, emp.name)
-                    oa_model.sudo().message_post(body=dobys, message_type='notification')
-                elif msg.get('type') == 'comment' and oa_model:
-                    dobys = "{}: (评论消息)-评论人:{}; 评论内容:{}".format(now_time, emp.name, msg.get('content'))
-                    oa_model.sudo().message_post(body=dobys, message_type='notification')
-                elif msg.get('type') == 'finish' and oa_model:
-                    dobys = "{} {}：审批结果:{}，审批意见:{}".format(now_time, emp.name, OARESULT.get(msg.get('result')), msg.get('remark'))
-                    oa_model.sudo().message_post(body=dobys, message_type='notification')
-        return True
+        pass
 
     def get_employee_info(self, user_id, event_type):
         try:
