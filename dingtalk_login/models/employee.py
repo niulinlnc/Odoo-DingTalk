@@ -27,5 +27,3 @@ class HrEmployee(models.Model):
                 'ding_user_id': self.ding_id,
                 'ding_user_phone': self.mobile_phone,
             })
-
-

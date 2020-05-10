@@ -83,6 +83,7 @@
                             <field name="category_id" options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
                             <field name="date" widget="date" attrs="{'required': [('has_date','==','required')]}"/>
                         </group>
+
                     </group>
                     <notebook>
                         <page string="日志详情" name="info">
