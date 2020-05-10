@@ -44,7 +44,7 @@ def approval_result(self):
             'cc_position': cc_type     # 抄送时间
         })
     # ----提交至钉钉---
-    client = dingtalk_api.get_client()
+    client = dingtalk_api.get_client(self)
     try:
         url = 'topapi/processinstance/create'
         result = client.post(url, data)
