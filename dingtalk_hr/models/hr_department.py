@@ -14,9 +14,9 @@ _logger = logging.getLogger(__name__)
 class HrDepartment(models.Model):
     _inherit = 'hr.department'
     _name = 'hr.department'
-    _order = "sequence, is_root, ding_order, parent_id, display_name"
+    _order = "is_root, ding_order, parent_id, display_name"
 
-    sequence = fields.Integer('Sequence', default=10)
+    # sequence = fields.Integer('Sequence', default=10)
     ding_id = fields.Char(string='钉钉Id', index=True)
     ding_sy_state = fields.Boolean(string=u'钉钉同步标识', default=False, help="避免使用同步时,会执行创建、修改上传钉钉方法")
     manager_user_ids = fields.Many2many('hr.employee', 'hr_department_manage_user_employee_rel', string=u'主管')
