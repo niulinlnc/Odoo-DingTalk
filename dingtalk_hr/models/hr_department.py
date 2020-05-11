@@ -14,7 +14,7 @@ _logger = logging.getLogger(__name__)
 class HrDepartment(models.Model):
     _inherit = 'hr.department'
     _name = 'hr.department'
-    _order = "sequence, is_root, parent_id, ding_order, display_name"
+    _order = "sequence, is_root, ding_order, parent_id, display_name"
 
     sequence = fields.Integer('Sequence', default=10)
     ding_id = fields.Char(string='钉钉Id', index=True)
