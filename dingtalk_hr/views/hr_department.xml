@@ -25,12 +25,23 @@
                 </group>
             </xpath> -->
             <xpath expr="//field[@name='parent_id']" position='after'>
-                    <field name="manager_user_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create': True, 'no_edit': True, 'no_open': True}"/>
-                    <field name="is_root"/>
-                    <field name="is_hiding"/>
-                    <field name="ding_id" readonly="0" groups="dingtalk_hr.manage_group"/>
-                    <field name="ding_order" readonly="0" groups="dingtalk_hr.manage_group"/>
+                <field name="manager_user_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                <field name="is_root"/>
+                <field name="is_hiding"/>
+                <field name="ding_id" readonly="0" groups="dingtalk_hr.manage_group"/>
+                <field name="ding_order" readonly="0" groups="dingtalk_hr.manage_group"/>
             </xpath>
+        </field>
+    </record>
+
+    <record id="view_department_tree_interit" model="ir.ui.view">
+        <field name="name">hr.department.tree</field>
+        <field name="model">hr.department</field>
+        <field name="inherit_id" ref="hr.view_department_tree"/>
+        <field name="arch" type="xml">
+            <field name="display_name" position='before'>
+                <field name="sequence" widget="handle"/>
+            </field>
         </field>
     </record>
 
