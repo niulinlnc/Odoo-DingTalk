@@ -120,7 +120,7 @@ class DingTalkHrSynchronous(models.TransientModel):
         :param emp_repeat: 员工名称重复选择项
         :return:
         """
-        departments = self.env['hr.department'].sudo().search([('ding_id', '!=', ''), ('active', '!=', False)])
+        departments = self.env['hr.department'].sudo().search([('ding_id', '!=', ''), ('active', '!=', False), ('is_hiding', '!=', True)])
         client = dingtalk_api.get_client(self)
         # for department in departments.with_progress(msg="同步部门员工"):
         for department in departments:
