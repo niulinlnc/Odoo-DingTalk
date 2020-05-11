@@ -34,7 +34,7 @@
         </field>
     </record>
 
-    <record id="view_department_tree_interit" model="ir.ui.view">
+    <!-- <record id="view_department_tree_interit" model="ir.ui.view">
         <field name="name">hr.department.tree</field>
         <field name="model">hr.department</field>
         <field name="inherit_id" ref="hr.view_department_tree"/>
@@ -43,7 +43,7 @@
                 <field name="sequence" widget="handle"/>
             </field>
         </field>
-    </record>
+    </record> -->
 
 
     <!--修改部门菜单显示路径-->
