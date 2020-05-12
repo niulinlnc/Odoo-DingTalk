@@ -80,7 +80,7 @@
         <field name="model">create.res.user</field>
         <field name="arch" type="xml">
             <form>
-                <p>账号类型：即根据选择的类型作为该用户的登录用户名.</p>
+                <p>账号类型：即根据选择的类型作为该用户的登录用户名.（注：需先安装dingtalk_login模块）</p>
                 <group>
                     <group>
                         <field name="is_all"/>
