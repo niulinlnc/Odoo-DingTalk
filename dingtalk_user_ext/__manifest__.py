@@ -6,7 +6,7 @@
     'author': "XueFeng.Su",
     'website': "https://www.sxfblog.com",
     'category': 'dingtalk',
-    'version': '1.0',
+    'version': '14.0.1.0.1',
     'depends': ['dingtalk_mc'],
     'auto_install': True,
     'data': [

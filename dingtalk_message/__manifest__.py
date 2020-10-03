@@ -6,7 +6,7 @@
     'author': "XueFeng.Su",
     'website': "https://www.sxfblog.com",
     'category': 'dingtalk',
-    'version': '13.0.1.0.1',
+    'version': '14.0.1.0.1',
     'depends': ['dingtalk_mc'],
     'data': [
         'security/ir.model.access.csv',

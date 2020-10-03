@@ -18,3 +18,15 @@ access_dingtalk_mc_chat,dingtalk.mc.chat,model_dingtalk_mc_chat,,1,1,1,1
 access_dingtalk_chat_robot,dingtalk.chat.robot,model_dingtalk_chat_robot,,1,1,1,1
 access_dingtalk_message_log,dingtalk.message.log,model_dingtalk_message_log,,1,1,1,1
 access_dingtalk_miroapp_list,dingtalk.miroapp.list,model_dingtalk_miroapp_list,,1,1,1,1
+
+access_dingtalk_mc_synchronous,dingtalk.mc.synchronous.manage,model_dingtalk_mc_synchronous,dingtalk_mc.manage_groups,1,1,1,1
+access_dingtalk_mc_synchronous_partner,dingtalk.mc.synchronous.partner,model_dingtalk_mc_synchronous_partner,dingtalk_mc.manage_groups,1,1,1,1
+access_create_mc_res_user,create.mc.res.user,model_create_mc_res_user,dingtalk_mc.manage_groups,1,1,1,1
+access_hr_attendance_tran,hr.attendance.tran,model_hr_attendance_tran,dingtalk_mc.manage_groups,1,1,1,1
+access_calculate_month_attendance,calculate.month.attendance,model_calculate_month_attendance,dingtalk_mc.manage_groups,1,1,1,1
+access_dingtalk_users_duration,dingtalk.users.duration,model_dingtalk_users_duration,dingtalk_mc.manage_groups,1,1,1,1
+access_dingtalk_employee_roster_synchronous,dingtalk.employee.roster.synchronous,model_dingtalk_employee_roster_synchronous,dingtalk_mc.manage_groups,1,1,1,1
+access_dingtalk_miroapp_list_wizard,dingtalk.miroapp.list.wizard,model_dingtalk_miroapp_list_wizard,dingtalk_mc.manage_groups,1,1,1,1
+access_dingtalk_miroapp_set_visible_scopes,dingtalk.miroapp.set.visible.scopes,model_dingtalk_miroapp_set_visible_scopes,dingtalk_mc.manage_groups,1,1,1,1
+access_get_dingtalk_callback,get.dingtalk.callback,model_get_dingtalk_callback,dingtalk_mc.manage_groups,1,1,1,1
+access_dingtalk_approval_template_tran,dingtalk.approval.template.tran,model_dingtalk_approval_template_tran,dingtalk_mc.manage_groups,1,1,1,1
