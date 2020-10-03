@@ -40,7 +40,7 @@ class DingTalkApprovalTemplateTran(models.TransientModel):
                             'url': process.get('url'),
                             'company_id': company_id,
                         }
-                        domain = [('company_id', '=', company_id), ('process_code', '=', process.get('process_code'))]
+                        domain = [('company_id', '=', company_id), '|', ('process_code', '=', process.get('process_code')), ('name', '=', process.get('name'))]
                         template = self.env['dingtalk.approval.template'].search(domain)
                         if template:
                             template.write(data)
