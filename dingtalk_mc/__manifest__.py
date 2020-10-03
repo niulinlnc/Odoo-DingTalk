@@ -6,7 +6,7 @@
     'author': "XueFeng.Su",
     'website': "https://www.sxfblog.com",
     'category': 'dingtalk',
-    'version': '12.1.2',
+    'version': '14.0.1.0.1',
     'depends': ['base', 'hr', 'mail', 'auth_oauth', 'hr_attendance'],
     # 'external_dependencies': {
     #     'python': ['pypinyin', 'pycryptodome', 'dingtalk-sdk'],

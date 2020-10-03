@@ -12,8 +12,8 @@ import functools
 import time
 import odoo
 import dateutil.relativedelta as relativedelta
-from odoo.addons.mail.models.mail_template import format_date
-from odoo.addons.mail.models.mail_template import format_datetime
+from odoo.tools import format_date
+from odoo.tools import format_datetime
 from odoo.addons.web.controllers.main import DataSet
 from odoo.http import request
 
