@@ -20,6 +20,7 @@ class DingTalkConfig(models.Model):
     token = fields.Boolean(string="Token")
     delete_is_sy = fields.Boolean(string=u'删除基础数据自动同步?')
     cron_attendance = fields.Boolean(string=u'定时获取考勤数据?')
+    not_update_emp_in_hidden_dep = fields.Boolean(string=u'禁止同步隐藏部门的员工.')
 
     _sql_constraints = [
         ('name_uniq', 'UNIQUE (name)', '钉钉企业名称已存在，请更换！'),

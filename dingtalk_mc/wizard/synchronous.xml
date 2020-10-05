@@ -8,9 +8,12 @@
             <form>
                 <div class="alert alert-info" role="alert">
                     <p>选择需要同步的钉钉企业数据，同步数据量较大的话，等待时间取决于数据大小~</p>
+                    <p>同步员工时，如果未选择同步部门，默认会同步所有部门的员工~</p>
+                    <p>如果在钉钉配置页勾选了禁止同步隐藏部门员工，则忽略隐藏部门员工的同步！</p>
                 </div>
                 <group>
                     <field name="company_ids" widget="many2many_tags" options="{'no_create':1, 'no_open':1}"/>
+                    <field name="department_ids" widget="many2many_tags" options="{'no_create':1, 'no_open':1}"/>
                 </group>
                 <group>
                     <group string="同步内容">

@@ -12,6 +12,7 @@ import hmac
 import hashlib
 import base64
 from urllib.parse import quote
+import pytz
 
 mem_storage = MemoryStorage()
 _logger = logging.getLogger(__name__)
@@ -177,3 +178,80 @@ def user_info_by_dingtalk_code(self, code, company):
         'accessKey': login_id
     })
     return result.user_info
+
+
+# ux扩展
+def get_config_is_hiding(self, company):
+    """
+    返回对应公司钉钉配置项中是否"禁止同步隐藏部门的员工"字段
+    :return:
+    """
+    config = self.env['dingtalk.mc.config'].sudo().search([('company_id', '=', company.id)])
+    if not config:
+        raise UserError("没有为:(%s)配置钉钉参数！" % company.name)
+    return config.not_update_emp_in_hidden_dep
+
+
+def utc_datetime_to_local_timestamp(self, utc_date_time):
+    """
+    将utc=0的时间转成13位时间戳(本地时间戳：+8H)
+    :param utc_date_time:utc=0的时间格式
+    :return: local_timestamp:13位本地时间戳
+    """
+    to_datetime = fields.Datetime.from_string(utc_date_time)
+    to_local_datetime = fields.Datetime.context_timestamp(self, to_datetime)
+    date_str = fields.Datetime.to_string(to_local_datetime)
+    date_stamp = time.mktime(time.strptime(date_str, "%Y-%m-%d %H:%M:%S"))
+    date_stamp = date_stamp * 1000
+    return int(date_stamp)
+
+
+def utc_datetime_to_utc_timestamp(utc_date_time):
+    """
+    将utc=0的时间转成13位时间戳(utc=0)
+    :param utc_date_time:utc=0的时间格式
+    :return: utc_timestamp:13位utc=0时间戳
+    """
+    date_str = fields.Datetime.to_string(utc_date_time)
+    date_stamp = time.mktime(time.strptime(date_str, "%Y-%m-%d %H:%M:%S"))
+    date_stamp = date_stamp * 1000
+    return int(date_stamp)
+
+
+def utc_timestamp_to_utc_datetime(timeNum):
+    """
+    将13位时间戳utc=0转换为时间格式utc=0
+    :param timeNum:
+    :return:
+    """
+    timeStamp = float(timeNum / 1000)
+    timeArray = time.gmtime(timeStamp)
+    otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+    return otherStyleTime
+
+
+def utc_timestamp_to_local_datetime(self, utc_time_num):
+    """
+    将13位毫秒时间戳(utc=0)转换为本地时间字符串(+8h)
+    :param time_num:
+    :return: string datetime
+    """
+    to_second_timestamp = float(utc_time_num / 1000)  # 毫秒转秒
+    to_utc_date_time = time.gmtime(to_second_timestamp)  # 将时间戳转换为UTC时区（0时区）的时间元组struct_time
+    to_str_datetime = time.strftime("%Y-%m-%d %H:%M:%S", to_utc_date_time)  # 将时间元组转成指定格式日期字符串
+    to_datetime = fields.Datetime.from_string(to_str_datetime)  # 将字符串转成datetime对象
+    to_local_datetime = fields.Datetime.context_timestamp(self, to_datetime)  # 将原生的datetime值(无时区)转换为具体时区的datetime
+    to_str_datetime = fields.Datetime.to_string(to_local_datetime)  # datetime 转成 字符串
+    return to_str_datetime
+
+
+def to_utc_datetime(self, str_datetime):
+    """
+    将本地时间字符串转换为utc=0时间格式
+    :param time_num:
+    :return: string datetime
+    """
+    to_datetime = fields.Datetime.from_string(str_datetime)
+    timezone = self._context.get('tz') or self.env.user.tz
+    datetime_tz = timezone and pytz.timezone(timezone) or pytz.UTC
+    return datetime_tz.localize(to_datetime.replace(tzinfo=None), is_dst=False).astimezone(pytz.UTC).replace(tzinfo=None)

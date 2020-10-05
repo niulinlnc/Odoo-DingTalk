@@ -64,6 +64,7 @@
                             <group col="2">
                                 <group>
                                     <field name="delete_is_sy"/>
+                                    <field name="not_update_emp_in_hidden_dep"/>
                                 </group>
                                 <group>
                                     <field name="cron_attendance"/>

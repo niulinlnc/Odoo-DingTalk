@@ -10,10 +10,13 @@ _logger = logging.getLogger(__name__)
 class HrDepartment(models.Model):
     _inherit = 'hr.department'
     _name = 'hr.department'
+    _order = "dep_type, complete_name, ding_order, is_root desc"
 
     ding_id = fields.Char(string='钉钉Id', index=True)
     manager_user_ids = fields.Many2many('hr.employee', 'hr_dept_manage_user_emp_rel', string=u'部门主管')
     is_root = fields.Boolean(string=u'根部门?', default=False)
+    ding_order = fields.Integer(string='钉钉部门排序值')
+    dep_type = fields.Selection(string='部门类型', selection=[('01_main', '主部门'), ('02_secondary', '次要部门'), ('03_hidden', '隐藏部门')], default='01_main')
 
     def create_ding_department(self):
         if not self.user_has_groups('dingtalk_mc.manage_groups'):
@@ -145,6 +148,10 @@ class HrDepartment(models.Model):
                     'manager_id': manage_users[0].id
                 })
             domain = [('ding_id', '=', result.get('id')), ('company_id', '=', company.id)]
+            if result.get('deptHiding') == 'true':
+                data.update({'dep_type': '03_hidden'})
+            if result.get('order'):
+                data.update({'ding_order': result.get('order')})
             if event_type == 'org_dept_create':
                 h_department = self.env['hr.department'].sudo().search(domain)
                 if not h_department:

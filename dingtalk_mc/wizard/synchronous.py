@@ -18,9 +18,10 @@ class DingTalkMcSynchronous(models.TransientModel):
     company_ids = fields.Many2many('res.company', 'dingtalk_mc_companys_rel', string="要同步的公司",
                                    required=True, default=lambda self: self.env.ref('base.main_company'))
     department = fields.Boolean(string=u'钉钉部门', default=True)
-    synchronous_dept_detail = fields.Boolean(string=u'部门详情', default=False)
-    repeat_type = fields.Selection(string=u'判断唯一', selection=RepeatType, default='name')
+    synchronous_dept_detail = fields.Boolean(string=u'部门详情', default=True)
+    repeat_type = fields.Selection(string=u'判断唯一', selection=RepeatType, default='id')
     employee = fields.Boolean(string=u'钉钉员工', default=True)
+    department_ids = fields.Many2many('hr.department', 'dingtalk_mc_department_rel', string="要同步的部门")
 
     def start_synchronous_data(self):
         """
@@ -31,10 +32,10 @@ class DingTalkMcSynchronous(models.TransientModel):
         try:
             if self.department:
                 self.synchronous_dingtalk_department(self.repeat_type)
-            if self.employee:
-                self.synchronous_dingtalk_employee(self.repeat_type)
             if self.synchronous_dept_detail:
                 self.get_department_details()
+            if self.employee:
+                self.synchronous_dingtalk_employee(self.repeat_type)
         except Exception as e:
             raise UserError(e)
         return {'type': 'ir.actions.client', 'tag': 'reload'}
@@ -48,6 +49,7 @@ class DingTalkMcSynchronous(models.TransientModel):
             client = dt.get_client(self, dt.get_dingtalk_config(self, company))
             result = client.department.list(fetch_child=True)
             for res in result:
+                _logger.info(">>>开始获取%s部门", res.get('name'))
                 data = {
                     'company_id': company.id,
                     'name': res.get('name'),
@@ -72,9 +74,13 @@ class DingTalkMcSynchronous(models.TransientModel):
         """
         for company in self.company_ids:
             client = dt.get_client(self, dt.get_dingtalk_config(self, company))
-            departments = self.env['hr.department'].sudo().search(
-                [('company_id', '=', company.id), ('ding_id', '!=', '')])
+            if self.department_ids:
+                departments = self.department_ids
+            else:
+                departments = self.env['hr.department'].sudo().search(
+                    [('company_id', '=', company.id), ('ding_id', '!=', '')])
             for dept in departments:
+                _logger.info(">>>开始获取%s部门的详情", dept.name)
                 result = client.department.get(dept.ding_id)
                 dept_date = dict()
                 if result.get('errcode') == 0:
@@ -85,17 +91,22 @@ class DingTalkMcSynchronous(models.TransientModel):
                         partner_dept = self.env['hr.department'].sudo().search(doamin, limit=1)
                         if partner_dept:
                             dept_date['parent_id'] = partner_dept.id
+                if result.get('deptHiding') == True:
+                    dept_date.update({'dep_type': '03_hidden'})
+                if result.get('order'):
+                    dept_date.update({'ding_order': result.get('order')})
                 if result.get('deptManagerUseridList'):
                     depts = result.get('deptManagerUseridList').split("|")
                     manage_users = self.env['hr.employee'].sudo().search(
                         [('ding_id', 'in', depts), ('company_id', '=', company.id)])
-                    dept_date.update({
-                        'manager_user_ids': [(6, 0, manage_users.ids)],
-                        'manager_id': manage_users[0].id
-                    })
+                    if manage_users:
+                        dept_date.update({
+                            'manager_user_ids': [(6, 0, manage_users.ids)],
+                            'manager_id': manage_users[0].id
+                        })
                 if dept_date:
                     dept.sudo().write(dept_date)
-            self.env.cr.commit()
+                self.env.cr.commit()
         return True
 
     def synchronous_dingtalk_employee(self, repeat_type=None):
@@ -104,8 +115,13 @@ class DingTalkMcSynchronous(models.TransientModel):
         :return:
         """
         for company in self.company_ids:
-            departments = self.env['hr.department'].sudo().search(
-                [('ding_id', '!=', ''), ('company_id', '=', company.id)])
+            if self.department_ids:
+                departments = self.department_ids
+            else:
+                departments = self.env['hr.department'].sudo().search(
+                    [('ding_id', '!=', ''), ('company_id', '=', company.id)])
+            if dt.get_config_is_hiding(self, company):
+                departments = departments.filtered(lambda d: d.dep_type != '03_hidden')
             client = dt.get_client(self, dt.get_dingtalk_config(self, company))
             for dept in departments:
                 emp_offset = 0
@@ -117,7 +133,7 @@ class DingTalkMcSynchronous(models.TransientModel):
                         emp_offset += emp_size + 1
                     else:
                         break
-            self.env.cr.commit()
+                    self.env.cr.commit()
         return True
 
     def get_dingtalk_employees(self, client, dept, offset, size, company, repeat_type=None):
@@ -145,7 +161,7 @@ class DingTalkMcSynchronous(models.TransientModel):
                     'job_title': user.get('position'),  # 职位
                     'work_email': user.get('email'),  # email
                     'din_jobnumber': user.get('jobnumber'),  # 工号
-                    'department_id': dept.id,  # 部门
+                    # 'department_id': dept.id,  # 部门
                     'ding_avatar_url': user.get('avatar') if user.get('avatar') else '',  # 钉钉头像url
                     'din_isSenior': user.get('isSenior'),  # 高管模式
                     'din_isAdmin': user.get('isAdmin'),  # 是管理员
@@ -165,9 +181,14 @@ class DingTalkMcSynchronous(models.TransientModel):
                     data.update({'din_hiredDate': time_stamp})
                 if user.get('department'):
                     dep_din_ids = user.get('department')
-                    dep_list = self.env['hr.department'].sudo().search(
-                        [('ding_id', 'in', dep_din_ids), ('company_id', '=', company.id)])
+                    domain1 = [('ding_id', 'in', dep_din_ids), ('company_id', '=', company.id)]
+                    dep_list = self.env['hr.department'].sudo().search(domain1)
                     data.update({'department_ids': [(6, 0, dep_list.ids)]})
+                    # 主部们暂时用钉钉排序靠前的主部门，排除隐藏部门、次要部门
+                    domain2 = [('ding_id', 'in', dep_din_ids), ('company_id',
+                                                                '=', company.id), ('dep_type', '=', '01_main')]
+                    dept = self.env['hr.department'].sudo().search(domain2, order="ding_order asc", limit=1)
+                    data.update({'department_id': dept.id})
                 if repeat_type == 'name':
                     domain = [('name', '=', user.get('name')), ('company_id', '=', company.id)]
                 else:
