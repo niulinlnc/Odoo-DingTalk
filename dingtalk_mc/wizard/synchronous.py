@@ -134,6 +134,12 @@ class DingTalkMcSynchronous(models.TransientModel):
                     else:
                         break
                     self.env.cr.commit()
+
+            # 自动创建系统用户
+            config = self.env['dingtalk.mc.config'].sudo().search([('company_id', '=', company.id)], limit=1)
+            if config.is_auto_create_user:
+                threading.Thread(target=self.create_employee_user, args=company).start()
+        
         return True
 
     def get_dingtalk_employees(self, client, dept, offset, size, company, repeat_type=None):
@@ -201,6 +207,50 @@ class DingTalkMcSynchronous(models.TransientModel):
             return result.get('hasMore')
         except Exception as e:
             raise UserError(e)
+
+    @api.model
+    def create_employee_user(self, company):
+        """
+        :param company: 公司
+        :return:
+        """
+        with api.Environment.manage():
+            with self.pool.cursor() as new_cr:
+                new_cr.autocommit(True)
+                self = self.with_env(self.env(cr=new_cr))
+                domain = [('user_id', '=', False), ('ding_id', '!=', ''), ('company_id', '=', company.id)]
+                employees = self.env['hr.employee'].sudo().search(domain)
+                # 封装消息
+                message_list = list()
+                for employee in employees:
+                    values = {
+                        'active': True,
+                        'company_id': company.id,
+                        "name": employee.name,
+                        'email': employee.work_email,
+                        'ding_user_id': employee.ding_id,
+                        'ding_user_phone': employee.mobile_phone,
+                        'employee': True,
+                        'employee_ids': [(6, 0, [employee.id])],
+                    }
+                    if employee.work_email:
+                        values.update({'login': employee.work_email, "password": employee.work_email})
+                    elif employee.mobile_phone:
+                        values.update({'login': employee.mobile_phone, "password": employee.mobile_phone})
+                    else:
+                        continue
+                    domain = ['|', ('login', '=', employee.work_email), ('login', '=', employee.mobile_phone)]
+                    user = self.env['res.users'].sudo().search(domain, limit=1)
+                    if user:
+                        employee.write({'user_id': user.id})
+                    else:
+                        name_count = self.env['res.users'].sudo().search_count([('name', 'like', employee.name)])
+                        if name_count > 0:
+                            user_name = employee.name + str(name_count + 1)
+                            values['name'] = user_name
+                        user = self.env['res.users'].sudo().create(values)
+                        employee.write({'user_id': user.id})
+                    message_list.append({'ding_id': employee.ding_id, 'values': values})
 
 
 class DingTalkMCSynchronousPartner(models.TransientModel):

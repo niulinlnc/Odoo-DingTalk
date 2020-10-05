@@ -21,6 +21,8 @@ class DingTalkConfig(models.Model):
     delete_is_sy = fields.Boolean(string=u'删除基础数据自动同步?')
     cron_attendance = fields.Boolean(string=u'定时获取考勤数据?')
     not_update_emp_in_hidden_dep = fields.Boolean(string=u'禁止同步隐藏部门的员工.')
+    is_auto_create_user = fields.Boolean(string="自动创建系统用户？", default=False,
+                                         help='开启自动创建系统用户后，系统将会在收到钉钉回调通知后，立即创建一个属于该员工的系统用户！')
 
     _sql_constraints = [
         ('name_uniq', 'UNIQUE (name)', '钉钉企业名称已存在，请更换！'),
@@ -37,3 +39,13 @@ class DingTalkConfig(models.Model):
             config_count = self.search_count([('m_login', '=', True)])
             if config_count > 1:
                 raise UserError("由于钉钉api原因无法同时开启两个或两个以上的企业免登应用功能。")
+
+    def set_default_user_groups(self):
+        """
+        设置默认系统用户权限
+        :return:
+        """
+        action = self.env.ref('base.action_res_users').read()[0]
+        action['res_id'] = self.env.ref('base.default_user').id
+        action['views'] = [[self.env.ref('base.view_users_form').id, 'form']]
+        return action

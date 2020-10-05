@@ -23,10 +23,13 @@
         <field name="arch" type="xml">
             <form string="">
                 <header>
+                    <button name="set_default_user_groups" string="设置默认用户权限" class="oe_highlight" type="object" attrs="{'invisible': [('is_auto_create_user', '=', False)]}"/>
                 </header>
                 <sheet>
                     <div class="alert alert-success oe_edit_only" role="alert">
-                        <p><strong>温馨提示：</strong>您可以前往钉钉<strong>开发者管理后台</strong>得到这些信息！</p>
+                        <p>
+                            <strong>温馨提示：</strong>您可以前往钉钉<strong>开发者管理后台</strong>得到这些信息！
+                        </p>
                         <a href='https://open-dev.dingtalk.com' target='_blank'>
                             <span>钉钉开发者后台管理</span>
                         </a> - 或 -
@@ -57,17 +60,16 @@
                                     <field name="login_id"/>
                                     <field name="login_secret" password="password"/>
                                     <field name="m_login"/>
+                                    <field name="is_auto_create_user"/>
                                 </group>
                             </group>
                         </page>
                         <page string="其他">
-                            <group col="2">
+                            <group col="1">
                                 <group>
                                     <field name="delete_is_sy"/>
-                                    <field name="not_update_emp_in_hidden_dep"/>
-                                </group>
-                                <group>
                                     <field name="cron_attendance"/>
+                                    <field name="not_update_emp_in_hidden_dep"/>
                                 </group>
                             </group>
                         </page>

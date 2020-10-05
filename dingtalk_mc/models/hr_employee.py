@@ -3,6 +3,7 @@ import base64
 import json
 import logging
 import requests
+import threading
 from requests import ReadTimeout
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
@@ -234,6 +235,10 @@ class HrEmployee(models.Model):
         :param company:
         :return:
         """
+        config = self.env['dingtalk.mc.config'].sudo().search([('company_id', '=', company.id)], limit=1)
+        if config.is_auto_create_user:
+            synchronous = self.env['dingtalk.mc.synchronous']
+            threading.Thread(target=synchronous.create_employee_user, args=company).start()
         try:
             client = dt.get_client(self, dt.get_dingtalk_config(self, company))
             result = client.user.get(user_id)
@@ -288,3 +293,4 @@ class HrEmployee(models.Model):
         else:
             _logger.info("从钉钉同步员工时发生意外，原因为:{}".format(result.get('errmsg')))
         return True
+
