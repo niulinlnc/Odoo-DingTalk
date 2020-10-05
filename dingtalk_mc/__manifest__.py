@@ -3,10 +3,10 @@
     'name': "Odoo集成钉钉-多公司版本",
     'summary': """支持多个钉钉企业到Odoo进行信息管理""",
     'description': """支持多个钉钉企业到Odoo进行信息管理""",
-    'author': "XueFeng.Su",
+    'author': "OnGood, XueFeng.Su",
     'website': "https://www.sxfblog.com",
     'category': 'dingtalk',
-    'version': '14.0.1.0.1',
+    'version': '14.0.2.0.1',
     'depends': ['base', 'hr', 'mail', 'auth_oauth', 'hr_attendance'],
     # 'external_dependencies': {
     #     'python': ['pypinyin', 'pycryptodome', 'dingtalk-sdk'],

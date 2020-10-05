@@ -8,7 +8,7 @@
     'category': 'dingtalk',
     'version': '14.0.1.0.1',
     'depends': ['dingtalk_mc'],
-    'auto_install': True,
+    'auto_install': False,
     'data': [
         'views/dingtalk_config.xml',
     ],
